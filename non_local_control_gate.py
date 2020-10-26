@@ -1,9 +1,13 @@
 from qunetsim.components import Host, Network
 from qunetsim.objects import Qubit, Logger
+from qunetsim.backends import EQSNBackend
+from eqsn import EQSN
+import numpy as np
+
 Logger.DISABLED = True
 
 
-def protocol_alice(host, bob_id):
+def protocol_alice(host, bob_id, backend):
     # Here we write the protocol code for a host.
     epr_id, ack_arrived = host.send_epr(bob_id, await_ack=True)
     if not ack_arrived:
@@ -15,7 +19,7 @@ def protocol_alice(host, bob_id):
     print('\nAlice received an EPR pair')
     epr_alice = host.get_epr(bob_id, q_id=epr_id)
 
-    # Set up another qubit 
+    # Set up a qubit for the host
     q_alice = Qubit(host)
 
     # If Alice starts from |1> then uncomment the below line
@@ -31,14 +35,18 @@ def protocol_alice(host, bob_id):
         epr_alice.X()
 
     # Our controlled rotational gate will go here
-    # In this case, we apply a CNOT
-    epr_alice.cnot(q_alice)
+    # In this case, we apply a Control-H gate. This gate can be customised using
+    # custom_controlled_gate function
+    #epr_alice.cnot(q_alice)
+    h_gate = (1 / 2.0) ** 0.5 * np.array([[1, 1], [1, -1]])
+    epr_alice.custom_controlled_gate(q_alice, h_gate)
 
     epr_alice.H()
     epr_alice_measurement = epr_alice.measure()
 
     # Send measurement results to Bob
     host.send_classical(bob_id, ("%d" % epr_alice_measurement), await_ack=True)
+    print(dir(q_alice))
 
     print("\nResult of Measurement of Alice's qubit: ", q_alice.measure())
  
@@ -77,9 +85,10 @@ def protocol_bob(host, alice_id):
 def main():
    # initialize network
    network = Network.get_instance()
+   backend = EQSNBackend()
 
    nodes = ['Alice', 'Bob']
-   network.start(nodes)
+   network.start(nodes, backend)
    network.delay = 0.2
 
    host_alice = Host('Alice')
@@ -97,7 +106,7 @@ def main():
 
    print("We implement non-local CNOT gate here")
    print("Bob's qubit is the control qubit and Alice's qubit is the target qubit")
-   t1 = host_alice.run_protocol(protocol_alice, (host_bob.host_id,))
+   t1 = host_alice.run_protocol(protocol_alice, (host_bob.host_id, backend))
    t2 = host_bob.run_protocol(protocol_bob, (host_alice.host_id,))
 
    t1.join()
