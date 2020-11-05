@@ -1,6 +1,7 @@
 default_single_gate_time = 1
+default_single_operation_time = 1
 
-DefaultGateTime = {
+DefaultSingleGateTime = {
     "I": default_single_gate_time,
     "X": default_single_gate_time,
     "Y": default_single_gate_time,
@@ -17,4 +18,13 @@ DefaultGateTime = {
     "custom_controlled_gate": default_single_gate_time,
     "custom_two_qubit_control_gate": default_single_gate_time,
     "custom_two_qubit_gate": default_single_gate_time
+}
+
+DefaultOperationTime = {
+    "SINGLE": DefaultSingleGateTime,
+    "TWO_QUBIT": default_single_operation_time,
+    "SEND_ENT": default_single_operation_time,
+    "REC_ENT": default_single_operation_time,
+    "SEND_CLASSICAL": default_single_operation_time,
+    "REC_CLASSICAL": default_single_operation_time
 }

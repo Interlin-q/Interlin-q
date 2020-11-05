@@ -1,1 +1,1 @@
-from .default_gate_time import DefaultGateTime
+from .default_operation_time import DefaultOperationTime
