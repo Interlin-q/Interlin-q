@@ -1,6 +1,7 @@
 from qunetsim.components import Host
 from utils import DefaultOperationTime
 
+
 class ControllerHost(Host):
     """
     Controller host object which acts as a master node in a centralised
@@ -38,14 +39,14 @@ class ControllerHost(Host):
             gate_time (dict): A mapping of gate names to time the gate takes to
                execute for the computing host to be added
         """
-        
+
         self._computing_host_ids.append(computing_host_id)
         self.add_c_connection(computing_host_id)
 
         if gate_time is None:
             gate_time = DefaultOperationTime
 
-        self._gate_time[computing_host_id] = gate_time    
+        self._gate_time[computing_host_id] = gate_time
 
     def add_computing_hosts_to_network(self, computing_host_ids, gate_time=None):
         """
@@ -54,7 +55,7 @@ class ControllerHost(Host):
         Args:
             computing_host_id (List): The ID of the computing host
         """
-       
+
         for computing_host_id in computing_host_id:
             self._computing_host_ids.append(computing_host_id)
             self.add_c_connection(computing_host_id)
@@ -62,7 +63,7 @@ class ControllerHost(Host):
             if gate_time is None:
                 gate_time = default_gate_time
 
-            self._gate_time[computing_host_id] = gate_time    
+            self._gate_time[computing_host_id] = gate_time
 
     def create_distributed_schedule(self, circuit):
         """
@@ -87,7 +88,7 @@ class ControllerHost(Host):
                 op['layer_end'] = time_layer_end
                 gate_schedule.append(op)
 
-                if op['name'] = "SINGLE":
+                if op['name'] == "SINGLE":
                     # TODO: Fix a format for op, so that a gate can be obtained
                     # directly
                     execution_time = DefaultOperationTime[op['name'][op['gate']]]
