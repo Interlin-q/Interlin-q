@@ -88,7 +88,7 @@ class ControllerHost(Host):
                 op['layer_end'] = time_layer_end
                 gate_schedule.append(op)
 
-                if op['name'] == "SINGLE":
+                if op['name'] == "SINGLE" or op['name'] == "TWO_QUBIT":
                     # TODO: Fix a format for op, so that a gate can be obtained
                     # directly
                     execution_time = DefaultOperationTime[op['name'][op['gate']]]
