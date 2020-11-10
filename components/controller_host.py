@@ -70,7 +70,7 @@ class ControllerHost(Host):
         Creates a distributed schedule for each of the computing host
 
         Args:
-            circuit (object): The circuit object which contains information
+            circuit (object): The Circuit object which contains information
                 regarding a quantum circuit
         """
 
@@ -84,17 +84,17 @@ class ControllerHost(Host):
         for layer in layers:
             max_execution_time = 0
 
-            for op in layer:
+            for operation in layer.operations():
+                op = operation.get_dict()
                 op['layer_end'] = time_layer_end
-                gate_schedule.append(op)
 
-                if op['name'] == "SINGLE" or op['name'] == "TWO_QUBIT":
-                    # TODO: Fix a format for op, so that a gate can be obtained
-                    # directly
-                    execution_time = DefaultOperationTime[op['name'][op['gate']]]
-                else:
-                    execution_time = DefaultOperationTime[op['name']]
+                operation_schedule.append(op)
+
                 # Find the maximum time taken to execute this layer
+                execution_time = self.get_operation_execution_time(
+                    op['computing_host_ids'][0],
+                    operation.name(),
+                    operation.gate())
                 max_execution_time = max(max_execution_time, execution_time)
 
             time_layer_end += max_execution_time
@@ -110,3 +110,22 @@ class ControllerHost(Host):
             computing_host_schedules[computing_host_id] = computing_host_schedule
 
         return computing_host_schedules
+
+    def get_operation_execution_time(self, computing_host_id, op_name, gate):
+        """
+        Return the execution time for an operation for a specific computing host
+
+        Args:
+            computing_host_ids (list): The IDs of computing/slave hosts
+            op_name (str): Name of the operation
+            gate (str): Name of the gate being performed in the operation, if any
+        """
+
+        operation_time = self._gate_time[computing_host_id]
+        # TODO: Here change the DefaultOperationTime to gate_time for particular QPU
+        if op_name == "SINGLE" or op_name == "TWO_QUBIT":
+            execution_time = operation_time[op_name[gate]]
+        else:
+            execution_time = operation_time[op_name]
+
+        return execution_time

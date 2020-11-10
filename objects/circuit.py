@@ -10,8 +10,8 @@ class Circuit(object):
         Args:
             q_map (dict): A mapping of the qubits required for the circuit to the
                computing host ID where the qubit is located
-            layers (list): List of layers, where each layer contains a collection
-               of gates to be applied on the qubits in the system
+            layers (list): List of Layer objects, where each layer contains a
+               collection of operations to be applied on the qubits in the system
         """
 
         self._q_map = q_map
@@ -32,8 +32,8 @@ class Circuit(object):
         """
         Get the *layers* of the circuit
         Returns:
-            (list): List of layers, where each layer contains a collection of
-                gates to be applied on the qubits in the system
+            (list): List of layer objects, where each layer contains a collection
+                of gates to be applied on the qubits in the system
         """
         return self._layers
 
@@ -59,10 +59,10 @@ class Circuit(object):
 
     def add_layer_to_circuit(self, layer):
         """
-        Add a new layer for the circuit
+        Add a new Layer object to the circuit
 
         Args:
-            layer (list): List of collection of gates to be applied to the system
+            layer (object): List of operations to be applied to the system
         """
         
         self._layers.append(layer)
