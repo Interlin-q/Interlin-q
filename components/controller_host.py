@@ -30,6 +30,15 @@ class ControllerHost(Host):
 
         self._gate_time = gate_time
 
+    @property
+    def computing_host_ids(self):
+        """
+        Get the *computing_host_ids* associated to the controller host
+        Returns:
+            (list): The IDs of computing/slave hosts
+        """
+        return self._computing_host_ids
+
     def add_computing_host_to_network(self, computing_host_id, gate_time=None):
         """
         Adds a computing host to the distributed network
@@ -77,14 +86,14 @@ class ControllerHost(Host):
         time_layer_end = 0
         operation_schedule = []
 
-        layers = circuit.layers()
+        layers = circuit.layers
 
         # We form an intermediate schedule which is used before splitting the
         # schedules for each computing host
         for layer in layers:
             max_execution_time = 0
 
-            for operation in layer.operations():
+            for operation in layer.operations:
                 op = operation.get_dict()
                 op['layer_end'] = time_layer_end
 
@@ -93,8 +102,8 @@ class ControllerHost(Host):
                 # Find the maximum time taken to execute this layer
                 execution_time = self.get_operation_execution_time(
                     op['computing_host_ids'][0],
-                    operation.name(),
-                    operation.gate())
+                    operation.name,
+                    operation.gate)
                 max_execution_time = max(max_execution_time, execution_time)
 
             time_layer_end += max_execution_time
@@ -120,11 +129,10 @@ class ControllerHost(Host):
             op_name (str): Name of the operation
             gate (str): Name of the gate being performed in the operation, if any
         """
-
         operation_time = self._gate_time[computing_host_id]
-        # TODO: Here change the DefaultOperationTime to gate_time for particular QPU
-        if op_name == "SINGLE" or op_name == "TWO_QUBIT":
-            execution_time = operation_time[op_name[gate]]
+
+        if op_name == "SINGLE" or op_name == "TWO_QUBIT" or op_name == "CLASSICAL_CTRL_GATE":
+            execution_time = operation_time[op_name][gate]
         else:
             execution_time = operation_time[op_name]
 

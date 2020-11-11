@@ -23,10 +23,14 @@ DefaultTwoQubitGateTime = {
     "custom_two_qubit_gate": default_single_gate_time
 }
 
+DefaultGateTime = DefaultSingleGateTime.copy()
+DefaultGateTime.update(DefaultTwoQubitGateTime)
+
 DefaultOperationTime = {
     "SINGLE": DefaultSingleGateTime,
-    "MEASURE": DefaultSingleGateTime,
     "TWO_QUBIT": DefaultTwoQubitGateTime,
+    "CLASSICAL_CTRL_GATE": DefaultGateTime,
+    "MEASURE": default_single_operation_time,
     "SEND_ENT": default_single_operation_time,
     "REC_ENT": default_single_operation_time,
     "SEND_CLASSICAL": default_single_operation_time,

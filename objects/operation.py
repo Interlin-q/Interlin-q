@@ -77,7 +77,7 @@ class Operation(object):
             'qids': self._qids,
             'cids': self._cids,
             'gate': self._gate,
-            'gate_param': self._gate_param
+            'gate_param': self._gate_param,
             'computing_host_ids': self._computing_host_ids
         }
         return operation_info

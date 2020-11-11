@@ -25,7 +25,7 @@ class Layer(object):
         """
         return self._operations
 
-    def add_operation(operation):
+    def add_operation(self, operation):
         """
         Add a operation to the layer
         Args:
@@ -34,7 +34,7 @@ class Layer(object):
 
         self._operations.append(operation)
 
-    def add_operations(operations):
+    def add_operations(self, operations):
         """
         Add multiple operations to the layer
         Args:

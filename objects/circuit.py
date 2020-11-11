@@ -32,7 +32,7 @@ class Circuit(object):
         """
         Get the *layers* of the circuit
         Returns:
-            (list): List of layer objects, where each layer contains a collection
+            (list): List of Layer objects, where each layer contains a collection
                 of gates to be applied on the qubits in the system
         """
         return self._layers
@@ -46,7 +46,7 @@ class Circuit(object):
 
         return len(self._q_map)
 
-    def add_new_qubit(qubit_info):
+    def add_new_qubit(self, qubit_info):
         """
         Add a new qubit to the circuit
         Args:
