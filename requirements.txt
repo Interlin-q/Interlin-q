@@ -13,4 +13,3 @@ pyparsing==2.4.7
 python-dateutil==2.8.1
 qunetsim==0.1.1.post3
 six==1.15.0
-nose2
