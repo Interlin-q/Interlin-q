@@ -8,7 +8,7 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id, computing_host_ids, gate_time=None):
+    def __init__(self, host_id, computing_host_ids=[], gate_time=None):
         """
         Returns the important things for the controller hosts
 
@@ -39,7 +39,7 @@ class ControllerHost(Host):
         """
         return self._computing_host_ids
 
-    def add_computing_host_to_network(self, computing_host_id, gate_time=None):
+    def connect_host(self, computing_host_id, gate_time=None):
         """
         Adds a computing host to the distributed network
 
@@ -57,7 +57,7 @@ class ControllerHost(Host):
 
         self._gate_time[computing_host_id] = gate_time
 
-    def add_computing_hosts_to_network(self, computing_host_ids, gate_time=None):
+    def connect_hosts(self, computing_host_ids, gate_time=None):
         """
         Adds multiple computing hosts to the distributed network
 
@@ -74,7 +74,7 @@ class ControllerHost(Host):
 
             self._gate_time[computing_host_id] = gate_time
 
-    def create_distributed_schedule(self, circuit):
+    def _create_distributed_schedule(self, circuit):
         """
         Creates a distributed schedule for each of the computing host
 
@@ -100,7 +100,7 @@ class ControllerHost(Host):
                 operation_schedule.append(op)
 
                 # Find the maximum time taken to execute this layer
-                execution_time = self.get_operation_execution_time(
+                execution_time = self._get_operation_execution_time(
                     op['computing_host_ids'][0],
                     operation.name,
                     operation.gate)
@@ -120,7 +120,7 @@ class ControllerHost(Host):
 
         return computing_host_schedules
 
-    def get_operation_execution_time(self, computing_host_id, op_name, gate):
+    def _get_operation_execution_time(self, computing_host_id, op_name, gate):
         """
         Return the execution time for an operation for a specific computing host
 
@@ -137,3 +137,19 @@ class ControllerHost(Host):
             execution_time = operation_time[op_name]
 
         return execution_time
+
+    def generate_schedules(self, circuit):
+        """
+        Generate and send distributed schedules to all the computing hosts associated
+        to the circuit
+
+        Args:
+            circuit (object): The Circuit object which contains information
+                regarding a quantum circuit
+        """
+
+        # TODO: Implement sending schedule to the specific computing hosts.
+
+        computing_host_schedules = self._create_distributed_schedules(circuit)
+
+        return computing_host_schedules

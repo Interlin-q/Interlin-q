@@ -38,14 +38,14 @@ class TestControllerHost(unittest.TestCase):
     def test_instantiation(self):
         self.assertEqual(self.controller_host.host_id, "host_1")
         self.assertEqual(self.controller_host.computing_host_ids, ["QPU_1"])
-        self.assertEqual(self.controller_host.get_operation_execution_time("QPU_1", "SINGLE", "X"), 1)
+        self.assertEqual(self.controller_host._get_operation_execution_time("QPU_1", "SINGLE", "X"), 1)
 
-        self.controller_host.add_computing_host_to_network("QPU_2")
+        self.controller_host.connect_host("QPU_2")
         self.assertEqual(self.controller_host.computing_host_ids, ["QPU_1", "QPU_2"])
-        self.assertEqual(self.controller_host.get_operation_execution_time("QPU_1", "REC_ENT", None), 1)
+        self.assertEqual(self.controller_host._get_operation_execution_time("QPU_1", "REC_ENT", None), 1)
 
     def test_distributed_scheduler(self):
-        self.controller_host.add_computing_host_to_network("QPU_2")
+        self.controller_host.connect_host("QPU_2")
 
         q_map = {
             'qubit_1': 'QPU_1',
@@ -116,7 +116,7 @@ class TestControllerHost(unittest.TestCase):
         layers = [layer_1, layer_2, layer_3, layer_4, layer_5]
         circuit = Circuit(q_map, layers)
 
-        computing_host_schedules = self.controller_host.create_distributed_schedule(circuit)
+        computing_host_schedules = self.controller_host._create_distributed_schedule(circuit)
 
         self.assertEqual(len(computing_host_schedules), 2)
         self.assertEqual(len(computing_host_schedules['QPU_1']), 4)
