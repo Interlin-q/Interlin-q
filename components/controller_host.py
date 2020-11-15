@@ -1,5 +1,6 @@
 from qunetsim.components import Host
 from utils import DefaultOperationTime
+from objects import Operation, Layer
 
 
 class ControllerHost(Host):
@@ -120,6 +121,144 @@ class ControllerHost(Host):
 
         return computing_host_schedules
 
+    def _replace_cnot(self, layer_index, layer, circuit, op):
+        """
+        Replace cnot with a distributed control gate
+
+        Args:
+            layer (object): The layer object which is a collection of operations
+                to be applied to the qubits in the system
+        """
+
+        control_qubit, target_qubit = op.qids[0], op.qids[1]
+        control_host, target_host = op.computing_host_ids[0], op.computing_host_ids[1]
+
+        new_layers = []
+
+        # TODO: Discuss the IDs of these new qubits:
+        op_1 = Operation(
+            name="SEND_ENT",
+            qids=["qid1", "qid2"],
+            computing_host_ids=[control_host, target_host])
+
+        op_2 = Operation(
+            name="REC_ENT",
+            qids=["qid2", "qid1"],
+            computing_host_ids=[target_host, control_host])
+
+        layer.add_operations([op_1, op_2])
+
+        op_1 = Operation(
+            name="TWO_QUBIT",
+            qids=[control_qubit, "qid1"],
+            gate="cnot",
+            computing_host_ids=[control_host])
+
+        new_layers.append(Layer([op_1]))
+
+        op_1 = Operation(
+            name="MEASURE",
+            qids=["qid1"],
+            cids=["bit1"],
+            computing_host_ids=[control_host])
+
+        new_layers.append(Layer([op_1]))
+
+        op_1 = Operation(
+            name="SEND_CLASSICAL",
+            cids=["bit1"],
+            computing_host_ids=[control_host, target_host])
+
+        op_2 = Operation(
+            name="REC_CLASSICAL",
+            qids=["bit1"],
+            computing_host_ids=[target_host, control_host])
+
+        new_layers.append(Layer([op_1, op_2]))
+
+        op_1 = Operation(
+            name="CLASSICAL_CTRL_GATE",
+            qids=["qid2"],
+            cids=["bit1"],
+            gate="X",
+            computing_host_ids=[target_host])
+
+        new_layers.append(Layer([op_1]))
+
+        op_1 = Operation(
+            name="TWO_QUBIT",
+            qids=["qid2", target_qubit],
+            gate=op.gate,
+            gate_param=op.gate_param,
+            computing_host_ids=[target_host])
+
+        new_layers.append(Layer([op_1]))
+
+        op_1 = Operation(
+            name="SINGLE",
+            qids=["qid2"],
+            gate="H",
+            computing_host_ids=[target_host])
+
+        new_layers.append(Layer([op_1]))
+
+        op_1 = Operation(
+            name="MEASURE",
+            qids=["qid2"],
+            cids=["bit2"],
+            computing_host_ids=[target_host])
+
+        new_layers.append(Layer([op_1]))
+
+        op_1 = Operation(
+            name="SEND_CLASSICAL",
+            cids=["bit2"],
+            computing_host_ids=[target_host, control_host])
+
+        op_2 = Operation(
+            name="REC_CLASSICAL",
+            qids=["bit2"],
+            computing_host_ids=[control_host, target_host])
+
+        new_layers.append(Layer([op_1, op_2]))
+
+        op_1 = Operation(
+            name="SINGLE",
+            qids=[control_qubit],
+            gate="Z",
+            computing_host_ids=[control_host])
+
+        new_layers.append(Layer([op_1]))
+
+        itr = 0
+        for layer in new_layers:
+            circuit.insert_layer(index + itr, layer)
+            itr += 1
+
+    def _generate_distributed_circuit(self, circuit):
+        """
+        Takes the user input monolithic circuit and converts it to a distributed circuit
+        over the computing hosts connected to the controller host. Here, we replace the
+        normal two qubit control gates to distributed control gates.
+
+        Args:
+            circuit (object): The Circuit object which contains information
+                regarding a quantum circuit
+        """
+
+        layers = circuit.layers
+
+        for layer_index, layer in enumerate(layers):
+            if layer.cnot_present():
+                for op_index, op in enumerate(layer):
+                    if op.name == "cnot" and len(op.computing_host_ids) == 2:
+                        layer.remove_operation(op_index, op)
+                        # TODO: Further optimisation, instead of insert entire new layers
+                        # insert relevant operations in existing layers
+                        self._replace_cnot(self, layer_index, layer, circuit, op)
+
+        return circuit
+
     def _get_operation_execution_time(self, computing_host_id, op_name, gate):
         """
         Return the execution time for an operation for a specific computing host
@@ -150,6 +289,7 @@ class ControllerHost(Host):
 
         # TODO: Implement sending schedule to the specific computing hosts.
 
-        computing_host_schedules = self._create_distributed_schedules(circuit)
+        distributed_circuit = self._generate_distributed_circuit(circuit)
+        computing_host_schedules = self._create_distributed_schedules(distributed_circuit)
 
         return computing_host_schedules

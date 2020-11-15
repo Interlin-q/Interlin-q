@@ -55,6 +55,17 @@ class Operation(object):
         return self._gate
 
     @property
+    def gate_param(self):
+        """
+        Get the *gate_param* associated to the operation, if any
+
+        Returns:
+            (int): parameter for rotational gates
+        """
+
+        return self._gate_param
+
+    @property
     def computing_host_ids(self):
         """
         Get the *computing_host_ids* associated to the operation

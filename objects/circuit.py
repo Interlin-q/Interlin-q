@@ -66,3 +66,14 @@ class Circuit(object):
         """
         
         self._layers.append(layer)
+
+    def insert_layer(self, index, layer):
+        """
+        Insert a new layer object at a particular index in the circuit
+
+        Args:
+            layer (object): List of operations to be applied to the system
+            index (int): Index at which the new layer should be inserted at
+        """
+
+        self._layers.insert(index, layer)
