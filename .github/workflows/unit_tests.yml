@@ -25,10 +25,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt      
-      # Set environment
-      - name: Set Environment 
+      - name: Run Circuit Tests
         run: |
           export PYTHONPATH=$PWD
-      - name: Run Circuit tests
-        run: |
           nose2 -s tests test_circuit
+      - name: Run Controller Host Tests
+        run: |
+          export PYTHONPATH=$PWD
+          nose2 -s tests test_controller_host
+      - name: Run Layer Tests
+        run: |
+          export PYTHONPATH=$PWD
+          nose2 -s tests test_layer
+      - name: Run Layer Tests
+        run: |
+          export PYTHONPATH=$PWD
+          nose2 -s tests test_operation
