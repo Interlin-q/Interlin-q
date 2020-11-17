@@ -44,6 +44,79 @@ class TestControllerHost(unittest.TestCase):
         self.assertEqual(self.controller_host.computing_host_ids, ["QPU_1", "QPU_2"])
         self.assertEqual(self.controller_host._get_operation_execution_time("QPU_1", "REC_ENT", None), 1)
 
+    def test_monolithic_to_distributed_circuit_algorithm(self):
+        self.controller_host.connect_host("QPU_2")
+
+        q_map = {
+            'qubit_1': 'QPU_1',
+            'qubut_2': 'QPU_1',
+            'qubit_3': 'QPU_2',
+            'qubit_4': 'QPU_2',
+            'qubit_5': 'QPU_3'}
+
+        # Form layer 1
+        op_1 = Operation(
+            name="SINGLE",
+            qids=["qubit_1"],
+            gate="H",
+            computing_host_ids=["QPU_1"])
+
+        op_2 = Operation(
+            name="SINGLE",
+            qids=["qubit_3"],
+            gate="H",
+            computing_host_ids=["QPU_2"])
+
+        op_3 = Operation(
+            name="SINGLE",
+            qids=["qubit_3"],
+            gate="H",
+            computing_host_ids=["QPU_3"])
+
+        layer_1 = Layer([op_1, op_2, op_3])
+
+        # Form layer 2
+        op_1 = Operation(
+            name="TWO_QUBIT",
+            qids=["qubit_3", "qubit_1"],
+            gate="cnot",
+            computing_host_ids=["QPU_2", "QPU_1"])
+
+        op_2 = Operation(
+            name="SINGLE",
+            qids=["qubit_3"],
+            gate="X",
+            computing_host_ids=["QPU_3"])
+
+        layer_2 = Layer([op_1, op_2])
+
+        # Form layer 3
+        op_1 = Operation(
+            name="MEASURE",
+            qids=["qubit_3"],
+            cids=["bit_1"],
+            computing_host_ids=["QPU_2"])
+
+        layer_3 = Layer([op_1])
+
+        layers = [layer_1, layer_2, layer_3]
+        circuit = Circuit(q_map, layers)
+
+        distributed_circuit = self.controller_host._generate_distributed_circuit(circuit)
+        self.assertEqual(len(distributed_circuit.layers), 12)
+
+        self.assertEqual(len(distributed_circuit.layers[0].operations), 3)
+        self.assertEqual(len(distributed_circuit.layers[1].operations), 3)
+
+        self.assertEqual(distributed_circuit.layers[1].operations[0].name, "SINGLE")
+        self.assertEqual(distributed_circuit.layers[1].operations[1].name, "SEND_ENT")
+        self.assertEqual(distributed_circuit.layers[1].operations[2].name, "REC_ENT")
+
+        self.assertEqual(distributed_circuit.layers[2].operations[0].name, "TWO_QUBIT")
+        self.assertEqual(distributed_circuit.layers[10].operations[0].name, "SINGLE")
+
+        self.assertEqual(distributed_circuit.layers[11].operations[0].name, "MEASURE")
+
     def test_distributed_scheduler(self):
         self.controller_host.connect_host("QPU_2")
 

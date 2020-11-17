@@ -44,7 +44,7 @@ class Layer(object):
         for operation in operations:
             self._operations.append(operation)
 
-    def cnot_present(self, operations):
+    def cnot_present(self):
         """
         Check if a cnot gate is present in the layer
         Args:
@@ -55,12 +55,12 @@ class Layer(object):
 
         cnot_present = False
 
-        for operation in operations:
+        for operation in self._operations:
             if operation.gate == "cnot":
                 cnot_present = True
         return cnot_present
 
-    def remove_operation(self, index, operation):
+    def remove_operation(self, index):
         """
         Remove an operation from the layer
         Args:
