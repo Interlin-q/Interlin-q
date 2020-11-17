@@ -62,3 +62,7 @@ class TestLayer(unittest.TestCase):
 
         self.assertEqual(self.layer.operations[2].name, "REC_ENT")
         self.assertEqual(self.layer.operations[1].computing_host_ids[0], "QPU_1")
+
+        self.layer.remove_operation(index=0)
+        self.assertEqual(len(self.layer.operations), 2)
+        self.assertEqual(self.layer.operations[1].name, "REC_ENT")

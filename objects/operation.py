@@ -44,6 +44,16 @@ class Operation(object):
         return self._name
 
     @property
+    def qids(self):
+        """
+        Get the *qid* or the IDs of the qubits associated to the operation
+
+        Returns:
+            (list): List of qubit IDs
+        """
+        return self._qids
+
+    @property
     def gate(self):
         """
         Get the *gate* associated to the operation, if any

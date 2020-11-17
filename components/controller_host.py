@@ -147,6 +147,7 @@ class ControllerHost(Host):
             computing_host_ids=[target_host, control_host])
 
         layer.add_operations([op_1, op_2])
+        circuit.update_layer(layer_index, layer)
 
         op_1 = Operation(
             name="TWO_QUBIT",
@@ -230,10 +231,12 @@ class ControllerHost(Host):
 
         new_layers.append(Layer([op_1]))
 
-        itr = 0
+        itr = 1
         for layer in new_layers:
-            circuit.insert_layer(index + itr, layer)
+            circuit.insert_layer(layer_index + itr, layer)
             itr += 1
+
+        return circuit
 
     def _generate_distributed_circuit(self, circuit):
         """
@@ -250,12 +253,13 @@ class ControllerHost(Host):
 
         for layer_index, layer in enumerate(layers):
             if layer.cnot_present():
-                for op_index, op in enumerate(layer):
-                    if op.name == "cnot" and len(op.computing_host_ids) == 2:
-                        layer.remove_operation(op_index, op)
+                for op_index, op in enumerate(layer.operations):
+                    if op.name == "TWO_QUBIT" and len(op.computing_host_ids) == 2:
+                        layer.remove_operation(op_index)
+                        circuit.update_layer(layer_index, layer)
                         # TODO: Further optimisation, instead of insert entire new layers
                         # insert relevant operations in existing layers
-                        self._replace_cnot(self, layer_index, layer, circuit, op)
+                        circuit = self._replace_cnot(layer_index, layer, circuit, op)
 
         return circuit
 

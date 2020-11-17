@@ -72,8 +72,19 @@ class Circuit(object):
         Insert a new layer object at a particular index in the circuit
 
         Args:
-            layer (object): List of operations to be applied to the system
+            layer (object): new layer object to be inserted
             index (int): Index at which the new layer should be inserted at
         """
 
         self._layers.insert(index, layer)
+
+    def update_layer(self, index, layer):
+        """
+        Update a layer object at a particular index with a new value
+
+        Args:
+            layer (object): layer object to be updated
+            index (int): Index at which the new layer should be updated
+        """
+
+        self._layers[index] = layer
