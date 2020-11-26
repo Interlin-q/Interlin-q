@@ -91,6 +91,68 @@ class Operation(object):
 
         return self._computing_host_ids
 
+    def get_control_qubit(self):
+        """
+        Get the ID of the control qubit, in case of TWO_QUBIT operations
+
+        Returns:
+            (str): ID of the control qubit associated to the two qubit operation
+        """
+
+        if self._name == "TWO_QUBIT":
+            return self._qids[0]
+        raise ValueError("The operation name has to be TWO_QUBIT to get the control qubit ID")
+
+    def get_control_host(self):
+        """
+        Get the ID of the host with the control qubit, in case of TWO_QUBIT operations
+
+        Returns:
+            (str): ID of the control qubit associated to the two qubit operation
+        """
+
+        if self._name == "TWO_QUBIT":
+            return self._computing_host_ids[0]
+        raise ValueError("The operation name has to be TWO_QUBIT to get the control host")
+
+    def get_target_qubit(self):
+        """
+        Get the ID of the target qubit, in case of TWO_QUBIT operations
+
+        Returns:
+            (str): ID of the target qubit associated to the two qubit operation
+        """
+
+        if self._name == "TWO_QUBIT":
+            return self._qids[1]
+        raise ValueError("The operation name has to be TWO_QUBIT to get the target qubit ID")
+
+    def get_target_host(self):
+        """
+        Get the ID of the host with the target qubit, in case of TWO_QUBIT operations
+
+        Returns:
+            (str): ID of the target qubit associated to the two qubit operation
+        """
+
+        if self._name == "TWO_QUBIT":
+            if len(self._computing_host_ids) == 2:
+                return self._computing_host_ids[1]
+            return self._computing_host_ids[0]
+        raise ValueError("The operation name has to be TWO_QUBIT to get the target host")
+
+    def is_control_gate_over_two_hosts(self):
+        """
+        Check if the operation is a control gate over two different computing hosts
+
+        Returns:
+            (bool): Bool value, which is true if the operation is a control gate over two
+                different computing hosts
+        """
+        if self._name == "TWO_QUBIT" and len(self._computing_host_ids) == 2:
+            return True
+        return False
+
     def get_dict(self):
         """
         Return the Operation object in a dictionary format

@@ -44,13 +44,16 @@ class Layer(object):
         for operation in operations:
             self._operations.append(operation)
 
-    def control_gates_present(self):
+    def control_gate_present(self):
         """
-        Check if a control gate is present in the layer
+        Check if a control gate is present in the layer between two different
+        computing hosts
+
         Args:
             operations (list): List of Operation objects
         Returns:
-            (bool): True if cnot gate is present
+            (bool): True if control gate is present between two different computing
+                hosts
         """
 
         control_gate_present = False

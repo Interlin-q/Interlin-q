@@ -107,3 +107,43 @@ class Circuit(object):
                 computing_host_map[value].append(key)
 
         return computing_host_map
+
+    def control_gate_info(self):
+        """
+        Get information about the control gates between two different computing
+        hosts in the circuit. This information includes the operation index in the
+        layer, the associated computing host IDs, control qubit for the control gate.
+
+        Returns:
+            (list): Layer-wise list of control gate information in the circuit
+        """
+
+        control_gate_info = []
+
+        for layer_index, layer in enumerate(self._layers[::-1]):
+            control_gates = []
+            for op_index, op in enumerate(layer.operations):
+                computing_hosts = op.computing_host_ids
+
+                if op.is_control_gate_over_two_hosts():
+                    control_qubit = op.get_control_qubit()
+
+                    operations = []
+                    if layer_index != 0:
+                        for index, gate in enumerate(control_gate_info[layer_index-1]):
+                            if gate['computing_hosts'] == computing_hosts:
+                                if gate['control_qubit'] == control_qubit:
+                                    operations = gate['operations']
+                                    del control_gate_info[layer_index-1][index]
+                    operations.append(op)
+
+                    control_gate = {
+                        'op_index': op_index,
+                        'computing_hosts': computing_hosts,
+                        'control_qubit': control_qubit,
+                        'operations': operations
+                    }
+                    control_gates.append(control_gate)
+            control_gate_info.append(control_gates)
+
+        return control_gate_info[::-1]
