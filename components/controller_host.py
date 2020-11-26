@@ -2,7 +2,7 @@ import uuid
 
 from qunetsim.components import Host
 from utils import DefaultOperationTime
-from objects import Operation, Layer
+from objects import Operation, Circuit, Layer
 
 
 class ControllerHost(Host):
@@ -123,135 +123,141 @@ class ControllerHost(Host):
 
         return computing_host_schedules
 
-    def _replace_control_gate(self, layer_index, layer, circuit, op):
+    def _replace_control_gates(self, control_gate_info, current_layer):
         """
-        Replace control gate with a distributed version
+        Replace control gates with a distributed version of the control gate over the
+        different computing hosts
 
         Args:
-            layer (object): The layer object which is a collection of operations
-                to be applied to the qubits in the system
+            control_gate_info (List): List of information regarding control gates present
+                in one layer
+            current_layer (object): Layer object in which the control gates are present
         """
-
-        control_qubit, target_qubit = op.qids[0], op.qids[1]
-        control_host, target_host = op.computing_host_ids[0], op.computing_host_ids[1]
 
         # TODO: Discuss the IDs of these new qubits:
 
-        # Generate new EPR pair (counted in the pre-allocated qubits) for the
-        # two computing hosts
-        epr_qubit_id_1 = str(uuid.uuid4())
-        epr_qubit_id_2 = str(uuid.uuid4())
+        max_gates = 0
+        for gate_info in control_gate_info:
+            max_gates = max(len(gate_info['operations']), max_gates)
 
-        bit_id_1 = str(uuid.uuid4())
-        bit_id_2 = str(uuid.uuid4())
+        operations = [[] for _ in range(8 + max_gates)]
 
-        op_1 = Operation(
-            name="SEND_ENT",
-            qids=[epr_qubit_id_1, epr_qubit_id_2],
-            computing_host_ids=[control_host, target_host],
-            pre_allocated_qubits=True)
+        for gate_info in control_gate_info:
+            control_qubit = gate_info['control_qubit']
+            control_host = gate_info['computing_hosts'][0]
+            target_host = gate_info['computing_hosts'][1]
 
-        op_2 = Operation(
-            name="REC_ENT",
-            qids=[epr_qubit_id_2, epr_qubit_id_1],
-            computing_host_ids=[target_host, control_host],
-            pre_allocated_qubits=True)
+            epr_qubit_id_1, epr_qubit_id_2 = str(uuid.uuid4()), str(uuid.uuid4())
+            bit_id_1, bit_id_2 = str(uuid.uuid4()), str(uuid.uuid4())
 
-        layer.add_operations([op_1, op_2])
-        circuit.update_layer(layer_index, layer)
+            # Generate new EPR pair (counted in the pre-allocated qubits) for the
+            # two computing hosts
+            op_1 = Operation(
+                name="SEND_ENT",
+                qids=[epr_qubit_id_1, epr_qubit_id_2],
+                computing_host_ids=[control_host, target_host],
+                pre_allocated_qubits=True)
 
-        # Circuit to implement distributed control gate
-        new_layers = []
+            op_2 = Operation(
+                name="REC_ENT",
+                qids=[epr_qubit_id_2, epr_qubit_id_1],
+                computing_host_ids=[target_host, control_host],
+                pre_allocated_qubits=True)
 
-        op_1 = Operation(
-            name="TWO_QUBIT",
-            qids=[control_qubit, "qid1"],
-            gate="cnot",
-            computing_host_ids=[control_host])
+            current_layer.add_operations([op_1, op_2])
 
-        new_layers.append(Layer([op_1]))
+            # Circuit to implement distributed control gate
+            itr = 0
+            op_1 = Operation(
+                name="TWO_QUBIT",
+                qids=[control_qubit, epr_qubit_id_1],
+                gate="cnot",
+                computing_host_ids=[control_host])
+            operations[itr].extend([op_1])
 
-        op_1 = Operation(
-            name="MEASURE",
-            qids=[epr_qubit_id_1],
-            cids=[bit_id_1],
-            computing_host_ids=[control_host])
-
-        new_layers.append(Layer([op_1]))
-
-        op_1 = Operation(
-            name="SEND_CLASSICAL",
-            cids=[bit_id_1],
-            computing_host_ids=[control_host, target_host])
-
-        op_2 = Operation(
-            name="REC_CLASSICAL",
-            qids=[bit_id_1],
-            computing_host_ids=[target_host, control_host])
-
-        new_layers.append(Layer([op_1, op_2]))
-
-        op_1 = Operation(
-            name="CLASSICAL_CTRL_GATE",
-            qids=[epr_qubit_id_2],
-            cids=[bit_id_1],
-            gate="X",
-            computing_host_ids=[target_host])
-
-        new_layers.append(Layer([op_1]))
-
-        op_1 = Operation(
-            name="TWO_QUBIT",
-            qids=[epr_qubit_id_1, target_qubit],
-            gate=op.gate,
-            gate_param=op.gate_param,
-            computing_host_ids=[target_host])
-
-        new_layers.append(Layer([op_1]))
-
-        op_1 = Operation(
-            name="SINGLE",
-            qids=[epr_qubit_id_2],
-            gate="H",
-            computing_host_ids=[target_host])
-
-        new_layers.append(Layer([op_1]))
-
-        op_1 = Operation(
-            name="MEASURE",
-            qids=[epr_qubit_id_2],
-            cids=[bit_id_2],
-            computing_host_ids=[target_host])
-
-        new_layers.append(Layer([op_1]))
-
-        op_1 = Operation(
-            name="SEND_CLASSICAL",
-            cids=[bit_id_2],
-            computing_host_ids=[target_host, control_host])
-
-        op_2 = Operation(
-            name="REC_CLASSICAL",
-            qids=[bit_id_2],
-            computing_host_ids=[control_host, target_host])
-
-        new_layers.append(Layer([op_1, op_2]))
-
-        op_1 = Operation(
-            name="SINGLE",
-            qids=[control_qubit],
-            gate="Z",
-            computing_host_ids=[control_host])
-
-        new_layers.append(Layer([op_1]))
-
-        # Update the circuit with the new layers
-        itr = 1
-        for layer in new_layers:
-            circuit.insert_layer(layer_index + itr, layer)
             itr += 1
+            op_1 = Operation(
+                name="MEASURE",
+                qids=[epr_qubit_id_1],
+                cids=[bit_id_1],
+                computing_host_ids=[control_host])
+            operations[itr].extend([op_1])
 
-        return circuit
+            itr += 1
+            op_1 = Operation(
+                name="SEND_CLASSICAL",
+                cids=[bit_id_1],
+                computing_host_ids=[control_host, target_host])
+
+            op_2 = Operation(
+                name="REC_CLASSICAL",
+                qids=[bit_id_1],
+                computing_host_ids=[target_host, control_host])
+            operations[itr].extend([op_1, op_2])
+
+            itr += 1
+            op_1 = Operation(
+                name="CLASSICAL_CTRL_GATE",
+                qids=[epr_qubit_id_2],
+                cids=[bit_id_1],
+                gate="X",
+                computing_host_ids=[target_host])
+            operations[itr].extend([op_1])
+
+            for op in gate_info['operations'][::-1]:
+                itr += 1
+                op_1 = Operation(
+                    name="TWO_QUBIT",
+                    qids=[epr_qubit_id_1, op.get_target_qubit()],
+                    gate=op.gate,
+                    gate_param=op.gate_param,
+                    computing_host_ids=[target_host])
+                operations[itr].extend([op_1])
+
+            itr += 1
+            op_1 = Operation(
+                name="SINGLE",
+                qids=[epr_qubit_id_2],
+                gate="H",
+                computing_host_ids=[target_host])
+            operations[itr].extend([op_1])
+
+            itr += 1
+            op_1 = Operation(
+                name="MEASURE",
+                qids=[epr_qubit_id_2],
+                cids=[bit_id_2],
+                computing_host_ids=[target_host])
+            operations[itr].extend([op_1])
+
+            itr += 1
+            op_1 = Operation(
+                name="SEND_CLASSICAL",
+                cids=[bit_id_2],
+                computing_host_ids=[target_host, control_host])
+
+            op_2 = Operation(
+                name="REC_CLASSICAL",
+                qids=[bit_id_2],
+                computing_host_ids=[control_host, target_host])
+            operations[itr].extend([op_1, op_2])
+
+            itr += 1
+            op_1 = Operation(
+                name="SINGLE",
+                qids=[control_qubit],
+                gate="Z",
+                computing_host_ids=[control_host])
+            operations[itr].extend([op_1])
+
+        # Make the new layers from the operations
+        distributed_layers = []
+        if control_gate_info:
+            for ops in operations:
+                layer = Layer(ops)
+                distributed_layers.append(layer)
+
+        return current_layer, distributed_layers
 
     def _generate_distributed_circuit(self, circuit):
         """
@@ -264,19 +270,27 @@ class ControllerHost(Host):
                 regarding a quantum circuit
         """
 
+
+        distributed_circuit_layers = []
+
         layers = circuit.layers
+        control_gate_info = circuit.control_gate_info()
 
         for layer_index, layer in enumerate(layers):
-            if layer.control_gates_present():
-                for op_index, op in enumerate(layer.operations):
-                    if op.name == "TWO_QUBIT" and len(op.computing_host_ids) == 2:
-                        layer.remove_operation(op_index)
-                        circuit.update_layer(layer_index, layer)
-                        # TODO: Further optimisation, instead of insert entire new layers
-                        # insert relevant operations in existing layers
-                        circuit = self._replace_control_gate(layer_index, layer, circuit, op)
+            new_layer = Layer(operations=[])
 
-        return circuit
+            for op_index, op in enumerate(layer.operations):
+                if not op.is_control_gate_over_two_hosts():
+                    new_layer.add_operation(op)
+            new_layer, distributed_layers = self._replace_control_gates(
+                control_gate_info[layer_index],
+                new_layer)
+            distributed_circuit_layers.append(new_layer)
+            distributed_circuit_layers.extend(distributed_layers)
+
+        distributed_circuit = Circuit(circuit.q_map, distributed_circuit_layers)
+
+        return distributed_circuit
 
     def _get_operation_execution_time(self, computing_host_id, op_name, gate):
         """
