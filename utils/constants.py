@@ -1,4 +1,5 @@
 OperationNames = [
+    "PREPARE_QUBITS",
     "SINGLE",
     "TWO_QUBIT",
     "CLASSICAL_CTRL_GATE",

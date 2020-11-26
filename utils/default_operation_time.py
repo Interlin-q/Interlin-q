@@ -27,6 +27,7 @@ DefaultGateTime = DefaultSingleGateTime.copy()
 DefaultGateTime.update(DefaultTwoQubitGateTime)
 
 DefaultOperationTime = {
+    "PREPARE_QUBITS": DefaultSingleGateTime,
     "SINGLE": DefaultSingleGateTime,
     "TWO_QUBIT": DefaultTwoQubitGateTime,
     "CLASSICAL_CTRL_GATE": DefaultGateTime,

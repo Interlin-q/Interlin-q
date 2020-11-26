@@ -11,7 +11,7 @@ class TestCircuit(unittest.TestCase):
     def setUpClass(self) -> None:
         q_map = {
             'qubit_1': 'QPU_1',
-            'qubut_2': 'QPU_2',
+            'qubit_2': 'QPU_2',
             'qubit_3': 'QPU_1'}
         self.circuit = Circuit(q_map)
         self._q_map = q_map
@@ -27,6 +27,14 @@ class TestCircuit(unittest.TestCase):
         self.assertEqual(self.circuit.layers, [])
 
         self.circuit.add_new_qubit({'qubit_4': 'QPU_2'})
+
+        computing_host_map = self.circuit.computing_host_map()
+        test_computing_host_map = {
+            'QPU_1': ['qubit_1', 'qubit_3'],
+            'QPU_2': ['qubit_2'],
+            'QPU_4': ['qubit_4']}
+        self.assertEqual(self.circuit.q_map, self._q_map)
+
         self.assertEqual(self.circuit.total_qubits(), 4)
 
         operations = [Operation(

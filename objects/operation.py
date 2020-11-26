@@ -7,7 +7,7 @@ class Operation(object):
     quantum gate which is to be applied to a circuit
     """
 
-    def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[]):
+    def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[], pre_allocated_qubits=False):
         """
         Returns the important things for a quantum operation
 
@@ -21,6 +21,8 @@ class Operation(object):
             computing_host_ids (list): List of associated ID/IDS of the computing host where
                 the operation/gate is being performed. The first computing host in the list
                 would be the one where the operation is being performed.
+            pre_allocated_qubits (bool): Flag to indicate if this operation is being performed on
+                a sepcific pre-allocated qubit (In case of EPR pair generation)
         """
 
         if name not in OperationNames:
@@ -32,6 +34,7 @@ class Operation(object):
         self._gate = gate
         self._gate_param = gate_param
         self._computing_host_ids = computing_host_ids
+        self._pre_allocated_qubits = pre_allocated_qubits
 
     @property
     def name(self):

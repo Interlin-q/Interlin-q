@@ -44,21 +44,21 @@ class Layer(object):
         for operation in operations:
             self._operations.append(operation)
 
-    def cnot_present(self):
+    def control_gates_present(self):
         """
-        Check if a cnot gate is present in the layer
+        Check if a control gate is present in the layer
         Args:
             operations (list): List of Operation objects
         Returns:
             (bool): True if cnot gate is present
         """
 
-        cnot_present = False
+        control_gate_present = False
 
         for operation in self._operations:
-            if operation.gate == "cnot":
-                cnot_present = True
-        return cnot_present
+            if operation.name == "TWO_QUBIT" and len(operation.computing_host_ids) == 2:
+                control_gate_present = True
+        return control_gate_present
 
     def remove_operation(self, index):
         """

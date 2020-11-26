@@ -9,9 +9,9 @@ class Circuit(object):
 
         Args:
             q_map (dict): A mapping of the qubits required for the circuit to the
-               computing host ID where the qubit is located
+                computing host ID where the qubit is located
             layers (list): List of Layer objects, where each layer contains a
-               collection of operations to be applied on the qubits in the system
+                collection of operations to be applied on the qubits in the system
         """
 
         self._q_map = q_map
@@ -88,3 +88,22 @@ class Circuit(object):
         """
 
         self._layers[index] = layer
+
+    def computing_host_map(self):
+        """
+        Return a map of computing hosts to all the qubits required from that
+        computing host for the circuit.
+
+        Returns:
+            (dict): A mapping of the computing host ID to the qubits required
+                from that computing host in the circuit
+        """
+
+        computing_host_map = {}
+        for key, value in self._q_map.items():
+            if value not in computing_host_map:
+                computing_host_map[value] = [key]
+            else:
+                computing_host_map[value].append(key)
+
+        return computing_host_map

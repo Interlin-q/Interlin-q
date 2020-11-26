@@ -8,19 +8,25 @@ class ComputingHost(Host):
     distributed network system, connected to the controller host.
     """
 
-    def __init__(self, host_id, controller_host_id, gate_time=None):
+    def __init__(self, host_id, controller_host_id, total_qubits=0, pre_allocated_qubits=1, gate_time=None):
         """
         Returns the important things for the computing hosts
 
         Args:
             host_id (str): The ID of the computing host
             controller_host_id (str): The IDs of controller/master host
+            total_qubits (int): Total number of processing qubits possessed by the computing
+               host
+            pre_allocated_qubits (int): Total number of pre allocated qubits (in case of
+               generating an EPR pair) possessed by the computing host
             gate_time (dict): A mapping of gate names to time the gate takes to
                execute for this computing host
         """
         super().__init__(host_id)
 
         self._controller_host_id = controller_host_id
+        self._total_qubits = total_qubits
+        self._pre_allocated_qubits = pre_allocated_qubits
 
         if gate_time is None:
             gate_time = DefaultOperationTime
@@ -36,3 +42,12 @@ class ComputingHost(Host):
             (str): The ID of controller/master host
         """
         return self._controller_host_id
+
+    def update_total_qubits(self, total_qubits):
+        """
+        Set a new value for *total_qubits* in the computing host
+        Args:
+            (int): Total number of qubits possessed by the computing host
+        """
+
+        self._total_qubits = total_qubits
