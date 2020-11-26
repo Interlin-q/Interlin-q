@@ -1,3 +1,5 @@
+import uuid
+
 from qunetsim.components import Host
 from utils import DefaultOperationTime
 from objects import Operation, Layer
@@ -121,9 +123,9 @@ class ControllerHost(Host):
 
         return computing_host_schedules
 
-    def _replace_cnot(self, layer_index, layer, circuit, op):
+    def _replace_control_gate(self, layer_index, layer, circuit, op):
         """
-        Replace cnot with a distributed control gate
+        Replace control gate with a distributed version
 
         Args:
             layer (object): The layer object which is a collection of operations
@@ -133,21 +135,33 @@ class ControllerHost(Host):
         control_qubit, target_qubit = op.qids[0], op.qids[1]
         control_host, target_host = op.computing_host_ids[0], op.computing_host_ids[1]
 
-        new_layers = []
-
         # TODO: Discuss the IDs of these new qubits:
+
+        # Generate new EPR pair (counted in the pre-allocated qubits) for the
+        # two computing hosts
+        epr_qubit_id_1 = str(uuid.uuid4())
+        epr_qubit_id_2 = str(uuid.uuid4())
+
+        bit_id_1 = str(uuid.uuid4())
+        bit_id_2 = str(uuid.uuid4())
+
         op_1 = Operation(
             name="SEND_ENT",
-            qids=["qid1", "qid2"],
-            computing_host_ids=[control_host, target_host])
+            qids=[epr_qubit_id_1, epr_qubit_id_2],
+            computing_host_ids=[control_host, target_host],
+            pre_allocated_qubits=True)
 
         op_2 = Operation(
             name="REC_ENT",
-            qids=["qid2", "qid1"],
-            computing_host_ids=[target_host, control_host])
+            qids=[epr_qubit_id_2, epr_qubit_id_1],
+            computing_host_ids=[target_host, control_host],
+            pre_allocated_qubits=True)
 
         layer.add_operations([op_1, op_2])
         circuit.update_layer(layer_index, layer)
+
+        # Circuit to implement distributed control gate
+        new_layers = []
 
         op_1 = Operation(
             name="TWO_QUBIT",
@@ -159,28 +173,28 @@ class ControllerHost(Host):
 
         op_1 = Operation(
             name="MEASURE",
-            qids=["qid1"],
-            cids=["bit1"],
+            qids=[epr_qubit_id_1],
+            cids=[bit_id_1],
             computing_host_ids=[control_host])
 
         new_layers.append(Layer([op_1]))
 
         op_1 = Operation(
             name="SEND_CLASSICAL",
-            cids=["bit1"],
+            cids=[bit_id_1],
             computing_host_ids=[control_host, target_host])
 
         op_2 = Operation(
             name="REC_CLASSICAL",
-            qids=["bit1"],
+            qids=[bit_id_1],
             computing_host_ids=[target_host, control_host])
 
         new_layers.append(Layer([op_1, op_2]))
 
         op_1 = Operation(
             name="CLASSICAL_CTRL_GATE",
-            qids=["qid2"],
-            cids=["bit1"],
+            qids=[epr_qubit_id_2],
+            cids=[bit_id_1],
             gate="X",
             computing_host_ids=[target_host])
 
@@ -188,7 +202,7 @@ class ControllerHost(Host):
 
         op_1 = Operation(
             name="TWO_QUBIT",
-            qids=["qid2", target_qubit],
+            qids=[epr_qubit_id_1, target_qubit],
             gate=op.gate,
             gate_param=op.gate_param,
             computing_host_ids=[target_host])
@@ -197,7 +211,7 @@ class ControllerHost(Host):
 
         op_1 = Operation(
             name="SINGLE",
-            qids=["qid2"],
+            qids=[epr_qubit_id_2],
             gate="H",
             computing_host_ids=[target_host])
 
@@ -205,20 +219,20 @@ class ControllerHost(Host):
 
         op_1 = Operation(
             name="MEASURE",
-            qids=["qid2"],
-            cids=["bit2"],
+            qids=[epr_qubit_id_2],
+            cids=[bit_id_2],
             computing_host_ids=[target_host])
 
         new_layers.append(Layer([op_1]))
 
         op_1 = Operation(
             name="SEND_CLASSICAL",
-            cids=["bit2"],
+            cids=[bit_id_2],
             computing_host_ids=[target_host, control_host])
 
         op_2 = Operation(
             name="REC_CLASSICAL",
-            qids=["bit2"],
+            qids=[bit_id_2],
             computing_host_ids=[control_host, target_host])
 
         new_layers.append(Layer([op_1, op_2]))
@@ -231,6 +245,7 @@ class ControllerHost(Host):
 
         new_layers.append(Layer([op_1]))
 
+        # Update the circuit with the new layers
         itr = 1
         for layer in new_layers:
             circuit.insert_layer(layer_index + itr, layer)
@@ -252,14 +267,14 @@ class ControllerHost(Host):
         layers = circuit.layers
 
         for layer_index, layer in enumerate(layers):
-            if layer.cnot_present():
+            if layer.control_gates_present():
                 for op_index, op in enumerate(layer.operations):
                     if op.name == "TWO_QUBIT" and len(op.computing_host_ids) == 2:
                         layer.remove_operation(op_index)
                         circuit.update_layer(layer_index, layer)
                         # TODO: Further optimisation, instead of insert entire new layers
                         # insert relevant operations in existing layers
-                        circuit = self._replace_cnot(layer_index, layer, circuit, op)
+                        circuit = self._replace_control_gate(layer_index, layer, circuit, op)
 
         return circuit
 
@@ -274,7 +289,9 @@ class ControllerHost(Host):
         """
         operation_time = self._gate_time[computing_host_id]
 
-        if op_name == "SINGLE" or op_name == "TWO_QUBIT" or op_name == "CLASSICAL_CTRL_GATE":
+        GATE_OP_NAMES = ["SINGLE", "TWO_QUBIT", "CLASSICAL_CTRL_GATE"]
+
+        if op_name in GATE_OP_NAMES:
             execution_time = operation_time[op_name][gate]
         else:
             execution_time = operation_time[op_name]
