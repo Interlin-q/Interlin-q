@@ -68,12 +68,12 @@ class ControllerHost(Host):
             computing_host_id (List): The ID of the computing host
         """
 
-        for computing_host_id in computing_host_id:
+        for computing_host_id in computing_host_ids:
             self._computing_host_ids.append(computing_host_id)
             self.add_c_connection(computing_host_id)
 
             if gate_time is None:
-                gate_time = default_gate_time
+                gate_time = DefaultOperationTime
 
             self._gate_time[computing_host_id] = gate_time
 
@@ -285,7 +285,8 @@ class ControllerHost(Host):
             new_layer, distributed_layers = self._replace_control_gates(
                 control_gate_info[layer_index],
                 new_layer)
-            distributed_circuit_layers.append(new_layer)
+            if new_layer.operations:
+                distributed_circuit_layers.append(new_layer)
             distributed_circuit_layers.extend(distributed_layers)
 
         distributed_circuit = Circuit(circuit.q_map, distributed_circuit_layers)
