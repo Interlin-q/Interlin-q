@@ -37,7 +37,7 @@ jobs:
         run: |
           export PYTHONPATH=$PWD
           nose2 -s tests test_layer
-      - name: Run Layer Tests
+      - name: Run Operation Tests
         run: |
           export PYTHONPATH=$PWD
           nose2 -s tests test_operation
