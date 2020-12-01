@@ -34,7 +34,6 @@ class ComputingHost(Host):
         if gate_time is None:
             gate_time = DefaultOperationTime
 
-        # TODO controller host should take this as input from computing host
         self._gate_time = gate_time
 
     @property
