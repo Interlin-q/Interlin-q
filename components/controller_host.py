@@ -1,9 +1,10 @@
-import uuid
-import json
-
 from qunetsim.components import Host
 from utils import DefaultOperationTime
+from utils.constants import Constants
 from objects import Operation, Circuit, Layer
+
+import uuid
+import json
 
 
 class ControllerHost(Host):
@@ -83,7 +84,7 @@ class ControllerHost(Host):
         Creates a distributed schedule for each of the computing host
 
         Args:
-            circuit (object): The Circuit object which contains information
+            circuit (Circuit): The Circuit object which contains information
                 regarding a quantum circuit
         """
 
@@ -132,7 +133,7 @@ class ControllerHost(Host):
         Args:
             control_gate_info (List): List of information regarding control gates present
                 in one layer
-            current_layer (object): Layer object in which the control gates are present
+            current_layer (Layer): Layer object in which the control gates are present
         """
 
         # TODO: Discuss the IDs of these new qubits:
@@ -141,7 +142,7 @@ class ControllerHost(Host):
         for gate_info in control_gate_info:
             max_gates = max(len(gate_info['operations']), max_gates)
 
-        operations = [[] for _ in range(8 + max_gates)]
+        operations = [[] for _ in range(Constants.DISTRIBUTED_CONTROL_CIRCUIT_LEN + max_gates)]
 
         for gate_info in control_gate_info:
             control_qubit = gate_info['control_qubit']
@@ -154,13 +155,13 @@ class ControllerHost(Host):
             # Generate new EPR pair (counted in the pre-allocated qubits) for the
             # two computing hosts
             op_1 = Operation(
-                name="SEND_ENT",
+                name=Constants.SEND_ENT,
                 qids=[epr_qubit_id_1, epr_qubit_id_2],
                 computing_host_ids=[control_host, target_host],
                 pre_allocated_qubits=True)
 
             op_2 = Operation(
-                name="REC_ENT",
+                name=Constants.REC_ENT,
                 qids=[epr_qubit_id_2, epr_qubit_id_1],
                 computing_host_ids=[target_host, control_host],
                 pre_allocated_qubits=True)
@@ -170,7 +171,7 @@ class ControllerHost(Host):
             # Circuit to implement distributed control gate
             itr = 0
             op_1 = Operation(
-                name="TWO_QUBIT",
+                name=Constants.TWO_QUBIT,
                 qids=[control_qubit, epr_qubit_id_1],
                 gate="cnot",
                 computing_host_ids=[control_host])
@@ -178,7 +179,7 @@ class ControllerHost(Host):
 
             itr += 1
             op_1 = Operation(
-                name="MEASURE",
+                name=Constants.MEASURE,
                 qids=[epr_qubit_id_1],
                 cids=[bit_id_1],
                 computing_host_ids=[control_host])
@@ -186,19 +187,19 @@ class ControllerHost(Host):
 
             itr += 1
             op_1 = Operation(
-                name="SEND_CLASSICAL",
+                name=Constants.SEND_CLASSICAL,
                 cids=[bit_id_1],
                 computing_host_ids=[control_host, target_host])
 
             op_2 = Operation(
-                name="REC_CLASSICAL",
+                name=Constants.REC_CLASSICAL,
                 qids=[bit_id_1],
                 computing_host_ids=[target_host, control_host])
             operations[itr].extend([op_1, op_2])
 
             itr += 1
             op_1 = Operation(
-                name="CLASSICAL_CTRL_GATE",
+                name=Constants.CLASSICAL_CTRL_GATE,
                 qids=[epr_qubit_id_2],
                 cids=[bit_id_1],
                 gate="X",
@@ -208,7 +209,7 @@ class ControllerHost(Host):
             for op in gate_info['operations'][::-1]:
                 itr += 1
                 op_1 = Operation(
-                    name="TWO_QUBIT",
+                    name=Constants.TWO_QUBIT,
                     qids=[epr_qubit_id_1, op.get_target_qubit()],
                     gate=op.gate,
                     gate_param=op.gate_param,
@@ -217,7 +218,7 @@ class ControllerHost(Host):
 
             itr += 1
             op_1 = Operation(
-                name="SINGLE",
+                name=Constants.SINGLE,
                 qids=[epr_qubit_id_2],
                 gate="H",
                 computing_host_ids=[target_host])
@@ -225,7 +226,7 @@ class ControllerHost(Host):
 
             itr += 1
             op_1 = Operation(
-                name="MEASURE",
+                name=Constants.MEASURE,
                 qids=[epr_qubit_id_2],
                 cids=[bit_id_2],
                 computing_host_ids=[target_host])
@@ -233,19 +234,19 @@ class ControllerHost(Host):
 
             itr += 1
             op_1 = Operation(
-                name="SEND_CLASSICAL",
+                name=Constants.SEND_CLASSICAL,
                 cids=[bit_id_2],
                 computing_host_ids=[target_host, control_host])
 
             op_2 = Operation(
-                name="REC_CLASSICAL",
+                name=Constants.REC_CLASSICAL,
                 qids=[bit_id_2],
                 computing_host_ids=[control_host, target_host])
             operations[itr].extend([op_1, op_2])
 
             itr += 1
             op_1 = Operation(
-                name="SINGLE",
+                name=Constants.SINGLE,
                 qids=[control_qubit],
                 gate="Z",
                 computing_host_ids=[control_host])
@@ -267,7 +268,7 @@ class ControllerHost(Host):
         normal two qubit control gates to distributed control gates.
 
         Args:
-            circuit (object): The Circuit object which contains information
+            circuit (Circuit): The Circuit object which contains information
                 regarding a quantum circuit
         """
 
@@ -305,7 +306,7 @@ class ControllerHost(Host):
         """
         operation_time = self._gate_time[computing_host_id]
 
-        GATE_OP_NAMES = ["SINGLE", "TWO_QUBIT", "CLASSICAL_CTRL_GATE"]
+        GATE_OP_NAMES = [Constants.SINGLE, Constants.TWO_QUBIT, Constants.CLASSICAL_CTRL_GATE]
 
         if op_name in GATE_OP_NAMES:
             execution_time = operation_time[op_name][gate]
@@ -320,7 +321,7 @@ class ControllerHost(Host):
         to the circuit
 
         Args:
-            circuit (object): The Circuit object which contains information
+            circuit (Circuit): The Circuit object which contains information
                 regarding a quantum circuit
         """
 
