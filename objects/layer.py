@@ -29,7 +29,7 @@ class Layer(object):
         """
         Add a operation to the layer
         Args:
-            operation (object): Information about the operation to be added in the layer
+            operation (Operation): Information about the operation to be added in the layer
         """
 
         self._operations.append(operation)
@@ -43,3 +43,32 @@ class Layer(object):
 
         for operation in operations:
             self._operations.append(operation)
+
+    def control_gate_present(self):
+        """
+        Check if a control gate is present in the layer between two different
+        computing hosts
+
+        Args:
+            operations (list): List of Operation objects
+        Returns:
+            (bool): True if control gate is present between two different computing
+                hosts
+        """
+
+        control_gate_present = False
+
+        for operation in self._operations:
+            if operation.name == "TWO_QUBIT" and len(operation.computing_host_ids) == 2:
+                control_gate_present = True
+        return control_gate_present
+
+    def remove_operation(self, index):
+        """
+        Remove an operation from the layer
+        Args:
+            index (int): Index of the operation to be removed
+            operation (Operation): Information about the operation to be removed
+        """
+
+        self._operations.pop(index)

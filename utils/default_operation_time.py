@@ -1,5 +1,7 @@
-default_single_gate_time = 1
-default_single_operation_time = 1
+from utils.constants import Constants
+
+default_single_gate_time = Constants.DEFAULT_SINGLE_GATE_TIME
+default_single_operation_time = Constants.DEFAULT_SINGLE_OPERATION_TIME
 
 DefaultSingleGateTime = {
     "I": default_single_gate_time,
@@ -27,6 +29,7 @@ DefaultGateTime = DefaultSingleGateTime.copy()
 DefaultGateTime.update(DefaultTwoQubitGateTime)
 
 DefaultOperationTime = {
+    "PREPARE_QUBITS": DefaultSingleGateTime,
     "SINGLE": DefaultSingleGateTime,
     "TWO_QUBIT": DefaultTwoQubitGateTime,
     "CLASSICAL_CTRL_GATE": DefaultGateTime,
