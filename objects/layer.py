@@ -29,7 +29,7 @@ class Layer(object):
         """
         Add a operation to the layer
         Args:
-            operation (object): Information about the operation to be added in the layer
+            operation (Operation): Information about the operation to be added in the layer
         """
 
         self._operations.append(operation)
@@ -68,7 +68,7 @@ class Layer(object):
         Remove an operation from the layer
         Args:
             index (int): Index of the operation to be removed
-            operation (object): Information about the operation to be removed
+            operation (Operation): Information about the operation to be removed
         """
 
         self._operations.pop(index)

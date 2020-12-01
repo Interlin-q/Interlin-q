@@ -62,7 +62,7 @@ class Circuit(object):
         Add a new Layer object to the circuit
 
         Args:
-            layer (object): List of operations to be applied to the system
+            layer (Layer): List of operations to be applied to the system
         """
         
         self._layers.append(layer)
@@ -72,7 +72,7 @@ class Circuit(object):
         Insert a new layer object at a particular index in the circuit
 
         Args:
-            layer (object): new layer object to be inserted
+            layer (Layer): new layer object to be inserted
             index (int): Index at which the new layer should be inserted at
         """
 
@@ -83,7 +83,7 @@ class Circuit(object):
         Update a layer object at a particular index with a new value
 
         Args:
-            layer (object): layer object to be updated
+            layer (Layer): layer object to be updated
             index (int): Index at which the new layer should be updated
         """
 

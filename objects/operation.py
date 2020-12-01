@@ -1,4 +1,4 @@
-from utils import OperationNames
+from utils import Constants
 
 
 class Operation(object):
@@ -25,7 +25,7 @@ class Operation(object):
                 a sepcific pre-allocated qubit (In case of EPR pair generation)
         """
 
-        if name not in OperationNames:
+        if name not in Constants.OPERATION_NAMES:
             raise (InputError("Operation is invalid"))
         self._name = name
 
@@ -99,7 +99,7 @@ class Operation(object):
             (str): ID of the control qubit associated to the two qubit operation
         """
 
-        if self._name == "TWO_QUBIT":
+        if self._name == Constants.TWO_QUBIT:
             return self._qids[0]
         raise ValueError("The operation name has to be TWO_QUBIT to get the control qubit ID")
 
@@ -111,7 +111,7 @@ class Operation(object):
             (str): ID of the control qubit associated to the two qubit operation
         """
 
-        if self._name == "TWO_QUBIT":
+        if self._name == Constants.TWO_QUBIT:
             return self._computing_host_ids[0]
         raise ValueError("The operation name has to be TWO_QUBIT to get the control host")
 
@@ -123,7 +123,7 @@ class Operation(object):
             (str): ID of the target qubit associated to the two qubit operation
         """
 
-        if self._name == "TWO_QUBIT":
+        if self._name == Constants.TWO_QUBIT:
             return self._qids[1]
         raise ValueError("The operation name has to be TWO_QUBIT to get the target qubit ID")
 
@@ -135,7 +135,7 @@ class Operation(object):
             (str): ID of the target qubit associated to the two qubit operation
         """
 
-        if self._name == "TWO_QUBIT":
+        if self._name == Constants.TWO_QUBIT:
             if len(self._computing_host_ids) == 2:
                 return self._computing_host_ids[1]
             return self._computing_host_ids[0]
@@ -149,7 +149,7 @@ class Operation(object):
             (bool): Bool value, which is true if the operation is a control gate over two
                 different computing hosts
         """
-        if self._name == "TWO_QUBIT" and len(self._computing_host_ids) == 2:
+        if self._name == Constants.TWO_QUBIT and len(self._computing_host_ids) == 2:
             return True
         return False
 
