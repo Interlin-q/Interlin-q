@@ -1,6 +1,8 @@
 from qunetsim.components import Host
 from utils import DefaultOperationTime
 
+import time
+import json
 
 class ComputingHost(Host):
     """
@@ -27,6 +29,7 @@ class ComputingHost(Host):
         self._controller_host_id = controller_host_id
         self._total_qubits = total_qubits
         self._pre_allocated_qubits = pre_allocated_qubits
+        self._schedule = None
 
         if gate_time is None:
             gate_time = DefaultOperationTime
@@ -51,3 +54,17 @@ class ComputingHost(Host):
         """
 
         self._total_qubits = total_qubits
+
+    def receive_schedule(self):
+        """
+        Receive the broadcasted schedule from the Controller Host and update
+        the schedule property
+        """
+
+        messages = []
+        # Await broadcast messages from the controller host
+        while len(messages) < 1:
+            messages = self.classical
+            messages = [x for x in messages if x.content != 'ACK']
+
+        self._schedule = json.loads(messages[0].content)[self._host_id]
