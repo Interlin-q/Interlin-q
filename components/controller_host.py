@@ -28,6 +28,7 @@ class ControllerHost(Host):
         self._computing_host_ids = computing_host_ids
         self.add_c_connections(computing_host_ids)
 
+        # TODO: Take gate_time as an input from computing hosts
         if gate_time is None:
             gate_time = {}
             for computing_host_id in computing_host_ids:
@@ -135,8 +136,6 @@ class ControllerHost(Host):
                 in one layer
             current_layer (Layer): Layer object in which the control gates are present
         """
-
-        # TODO: Discuss the IDs of these new qubits:
 
         max_gates = 0
         for gate_info in control_gate_info:
@@ -324,8 +323,6 @@ class ControllerHost(Host):
             circuit (Circuit): The Circuit object which contains information
                 regarding a quantum circuit
         """
-
-        # TODO: Implement sending schedule to the specific computing hosts.
 
         distributed_circuit = self._generate_distributed_circuit(circuit)
         computing_host_schedules = self._create_distributed_schedules(distributed_circuit)
