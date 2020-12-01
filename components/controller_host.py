@@ -1,4 +1,5 @@
 import uuid
+import json
 
 from qunetsim.components import Host
 from utils import DefaultOperationTime
@@ -77,7 +78,7 @@ class ControllerHost(Host):
 
             self._gate_time[computing_host_id] = gate_time
 
-    def _create_distributed_schedule(self, circuit):
+    def _create_distributed_schedules(self, circuit):
         """
         Creates a distributed schedule for each of the computing host
 
@@ -270,7 +271,6 @@ class ControllerHost(Host):
                 regarding a quantum circuit
         """
 
-
         distributed_circuit_layers = []
 
         layers = circuit.layers
@@ -282,6 +282,7 @@ class ControllerHost(Host):
             for op_index, op in enumerate(layer.operations):
                 if not op.is_control_gate_over_two_hosts():
                     new_layer.add_operation(op)
+
             new_layer, distributed_layers = self._replace_control_gates(
                 control_gate_info[layer_index],
                 new_layer)
@@ -313,7 +314,7 @@ class ControllerHost(Host):
 
         return execution_time
 
-    def generate_schedules(self, circuit):
+    def generate_and_send_schedules(self, circuit):
         """
         Generate and send distributed schedules to all the computing hosts associated
         to the circuit
@@ -327,5 +328,7 @@ class ControllerHost(Host):
 
         distributed_circuit = self._generate_distributed_circuit(circuit)
         computing_host_schedules = self._create_distributed_schedules(distributed_circuit)
+
+        self.send_broadcast(json.dumps(computing_host_schedules))
 
         return computing_host_schedules
