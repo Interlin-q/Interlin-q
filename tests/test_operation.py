@@ -14,6 +14,7 @@ class TestOperation(unittest.TestCase):
             'cids': None,
             'gate': "X",
             'gate_param': None,
+            'pre_allocated_qubits': False,
             'computing_host_ids': ["QPU_1"]}
 
         self.operation = Operation(

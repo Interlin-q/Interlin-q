@@ -21,7 +21,6 @@ DefaultSingleGateTime = {
 DefaultTwoQubitGateTime = {
     "cnot": default_single_gate_time,
     "cphase": default_single_gate_time,
-    "custom_two_qubit_control_gate": default_single_gate_time,
     "custom_two_qubit_gate": default_single_gate_time
 }
 
