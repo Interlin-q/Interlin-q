@@ -164,7 +164,8 @@ class Operation(object):
             'cids': self._cids,
             'gate': self._gate,
             'gate_param': self._gate_param,
-            'computing_host_ids': self._computing_host_ids
+            'computing_host_ids': self._computing_host_ids,
+            'pre_allocated_qubits': self._pre_allocated_qubits
         }
         return operation_info
 
