@@ -148,20 +148,20 @@ class ControllerHost(Host):
             control_host = gate_info['computing_hosts'][0]
             target_host = gate_info['computing_hosts'][1]
 
-            epr_qubit_id_1, epr_qubit_id_2 = str(uuid.uuid4()), str(uuid.uuid4())
+            epr_qubit_id = str(uuid.uuid4())
             bit_id_1, bit_id_2 = str(uuid.uuid4()), str(uuid.uuid4())
 
             # Generate new EPR pair (counted in the pre-allocated qubits) for the
             # two computing hosts
             op_1 = Operation(
                 name=Constants.SEND_ENT,
-                qids=[epr_qubit_id_1, epr_qubit_id_2],
+                qids=[epr_qubit_id],
                 computing_host_ids=[control_host, target_host],
                 pre_allocated_qubits=True)
 
             op_2 = Operation(
                 name=Constants.REC_ENT,
-                qids=[epr_qubit_id_2, epr_qubit_id_1],
+                qids=[epr_qubit_id],
                 computing_host_ids=[target_host, control_host],
                 pre_allocated_qubits=True)
 
@@ -171,7 +171,7 @@ class ControllerHost(Host):
             itr = 0
             op_1 = Operation(
                 name=Constants.TWO_QUBIT,
-                qids=[control_qubit, epr_qubit_id_1],
+                qids=[control_qubit, epr_qubit_id],
                 gate="cnot",
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])
@@ -179,7 +179,7 @@ class ControllerHost(Host):
             itr += 1
             op_1 = Operation(
                 name=Constants.MEASURE,
-                qids=[epr_qubit_id_1],
+                qids=[epr_qubit_id],
                 cids=[bit_id_1],
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])
@@ -199,7 +199,7 @@ class ControllerHost(Host):
             itr += 1
             op_1 = Operation(
                 name=Constants.CLASSICAL_CTRL_GATE,
-                qids=[epr_qubit_id_2],
+                qids=[epr_qubit_id],
                 cids=[bit_id_1],
                 gate="X",
                 computing_host_ids=[target_host])
@@ -209,7 +209,7 @@ class ControllerHost(Host):
                 itr += 1
                 op_1 = Operation(
                     name=Constants.TWO_QUBIT,
-                    qids=[epr_qubit_id_1, op.get_target_qubit()],
+                    qids=[epr_qubit_id, op.get_target_qubit()],
                     gate=op.gate,
                     gate_param=op.gate_param,
                     computing_host_ids=[target_host])
@@ -218,7 +218,7 @@ class ControllerHost(Host):
             itr += 1
             op_1 = Operation(
                 name=Constants.SINGLE,
-                qids=[epr_qubit_id_2],
+                qids=[epr_qubit_id],
                 gate="H",
                 computing_host_ids=[target_host])
             operations[itr].extend([op_1])
@@ -226,7 +226,7 @@ class ControllerHost(Host):
             itr += 1
             op_1 = Operation(
                 name=Constants.MEASURE,
-                qids=[epr_qubit_id_2],
+                qids=[epr_qubit_id],
                 cids=[bit_id_2],
                 computing_host_ids=[target_host])
             operations[itr].extend([op_1])

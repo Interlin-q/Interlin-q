@@ -79,9 +79,6 @@ class ComputingHost(Host):
         if self._host_id in schedules:
             self._schedule = schedules[self._host_id]
 
-        # TODO: Check for errors and report it back to controller host
-        # immediately
-
     def _update_stored_qubits(self, qubits):
         """
         """
@@ -212,7 +209,7 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if len(operation['qids'] != 2) or len(operation['computing_host_ids'] != 1):
+        if len(operation['qids'] != 1) or len(operation['computing_host_ids'] != 1):
             # TODO: Report error back to controller host and stop
             pass
 
@@ -239,7 +236,7 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if len(operation['qids'] != 2) or len(operation['computing_host_ids'] != 1):
+        if len(operation['qids'] != 1) or len(operation['computing_host_ids'] != 1):
             # TODO: Report error back to controller host and stop
             pass
 
