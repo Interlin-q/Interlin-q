@@ -35,8 +35,8 @@ class ComputingHost(Host):
         self._total_qubits = total_qubits
         self._pre_allocated_qubits = pre_allocated_qubits
         self._qubits = None
+        self._bits = None
 
-        self._classical_bits = None
         self._schedule = []
 
         if gate_time is None:
@@ -79,13 +79,22 @@ class ComputingHost(Host):
         if self._host_id in schedules:
             self._schedule = schedules[self._host_id]
 
+    def _report_error(self, message):
+        """
+        Stop the processing and report the error message to the controller host
+
+        Args:
+            (str): Error message in a string
+        """
+        print(message)
+
     def _update_stored_qubits(self, qubits):
         """
         """
 
         if len(qubits) > total_qubits:
-            # TODO: Report error back to controller host and stop
-            pass
+            msg = "Number of qubits required for the circuit are more than the total qubits"
+            self._report_error(msg)
 
         self._qubits = qubits
 
@@ -98,8 +107,7 @@ class ComputingHost(Host):
         """
 
         if prepare_qubits_op['name'] != Constants.PREPARE_QUBITS:
-            # TODO: Report error back to controller host and stop
-            pass
+            return None
 
         qubits = {}
         for qubit_id in prepare_qubits_op['qids']:
@@ -115,9 +123,9 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if len(operation['qids'] > 1) or len(operation['computing_host_ids'] > 1):
-            # TODO: Report error back to controller host and stop
-            pass
+        if len(operation['qids']) > 1 or len(operation['computing_host_ids']) > 1:
+            msg = "Wrong input format for single gate operation"
+            self._report_error(msg)
 
         q_id = operation['qids'][0]
         qubit = self._qubits[q_id]
@@ -166,9 +174,9 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if len(operation['qids'] != 2) or len(operation['computing_host_ids'] > 1):
-            # TODO: Report error back to controller host and stop
-            pass
+        if len(operation['qids']) != 2 or len(operation['computing_host_ids']) > 1:
+            msg = "Wrong input format for two qubit gate operation"
+            self._report_error(msg)
 
         q_ids = operation['qids']
         qubit_1 = self._qubits[q_ids[0]]
@@ -182,8 +190,8 @@ class ComputingHost(Host):
 
         if operation['gate'] == "custom_two_qubit_gate":
             if type(operation['gate_param']) is not np.ndarray:
-                # TODO: Report error back to controller host and stop
-                pass
+                msg = "Wrong input format for gate param in the two qubit gate operation"
+                self._report_error(msg)
             qubit_1.custom_two_qubit_gate(qubit_2, operation['gate_param'])
 
     def _process_classical_ctrl_gates(self, operation):
@@ -194,9 +202,9 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if len(operation['cids'] > 1):
-            # TODO: Report error back to controller host and stop
-            pass
+        if len(operation['cids']) > 1:
+            msg = "Wrong input format for classical control gate operation"
+            self._report_error(msg)
 
         if operation['cids'][0]:
             self._process_single_gates(operation)
@@ -209,24 +217,30 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if len(operation['qids'] != 1) or len(operation['computing_host_ids'] != 1):
-            # TODO: Report error back to controller host and stop
-            pass
+        if len(operation['qids']) != 1 or len(operation['computing_host_ids']) != 2:
+            msg = "Wrong input format for entanglement sending operation"
+            self._report_error(msg)
 
         if operation['computing_host_ids'][0] != self._host_id:
-            # TODO: Report error back to controller host and stop
-            pass
-
-        received_id = operation['computing_host_ids'][1]
+            msg = "Wrong input format for entanglement sending operation"
+            self._report_error(msg)
 
         if operation['pre_allocated_qubits']:
             if self._pre_allocated_qubits > 0:
                 self._pre_allocated_qubits -= 1
             else:
-                # TODO: Report error back to controller host and stop
-                pass
+                msg = "No more preallocated qubits left with the computing host"
+                self._report_error(msg)
 
-        self.send_epr(receiver, await_ack=True)
+        qubit_id = operation['qids'][0]
+        received_id = operation['computing_host_ids'][1]
+
+        self.send_epr(receiver_id, q_id=qubit_id, await_ack=True)
+        epr_qubit = self.get_epr(self.id, q_id=qubit_id)
+
+        qubits = self._qubits
+        qubits[qubit_id] = epr_qubit
+        self._update_stored_qubits(qubits)
 
     def _process_rec_ent(self, operation):
         """
@@ -236,16 +250,103 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if len(operation['qids'] != 1) or len(operation['computing_host_ids'] != 1):
-            # TODO: Report error back to controller host and stop
-            pass
+        if len(operation['qids']) != 1 or len(operation['computing_host_ids']) != 2:
+            msg = "Wrong input format for entanglement receiving operation"
+            self._report_error(msg)
 
         if operation['computing_host_ids'][0] != self._host_id:
-            # TODO: Report error back to controller host and stop
-            pass
+            msg = "Wrong input format for entanglement receiving operation"
+            self._report_error(msg)
+
+        if operation['pre_allocated_qubits']:
+            if self._pre_allocated_qubits > 0:
+                self._pre_allocated_qubits -= 1
+            else:
+                msg = "No more preallocated qubits left with the computing host"
+                self._report_error(msg)
+
+        epr_qubit = self.get_epr(self.id, q_id=qubit_id)
+
+        qubits = self._qubits
+        qubits[qubit_id] = epr_qubit
+        self._update_stored_qubits(qubits)
+
+    def _process_send_classical(self, operation):
+        """
+        Follows the operation command to receive a classical bit
+
+        Args:
+            (Dict): Dictionary of information regarding the operation
+        """
+
+        if len(operation['cids']) != 1 or len(operation['computing_host_ids']) != 2:
+            msg = "Wrong input format for entanglement receiving operation"
+            self._report_error(msg)
+
+        if operation['computing_host_ids'][0] != self._host_id:
+            msg = "Wrong input format for entanglement receiving operation"
+            self._report_error(msg)
+
+        bit_id = operation['cids'][0]
+
+        if bit_id not in self._bits.keys():
+            msg = "Bit not present in the computing host"
+            self._report_error(msg)
+
+        receiver_id = operation['computing_host_ids'][1]
+
+        self.send_classical(receiver_id, self._bits[bit_id], await_ack=True)
+
+    def _process_rec_classical(self, operation):
+        """
+        Follows the operation command to receive a classical bit
+
+        Args:
+            (Dict): Dictionary of information regarding the operation
+        """
+
+        if len(operation['cids']) != 1 or len(operation['computing_host_ids']) != 2:
+            msg = "Wrong input format for entanglement receiving operation"
+            self._report_error(msg)
+
+        if operation['computing_host_ids'][0] != self._host_id:
+            msg = "Wrong input format for entanglement receiving operation"
+            self._report_error(msg)
+
+        sender_id = operation['computing_host_ids'][1]
+        bit = host.get_classical(sender_id, wait=-1)
+
+        self._bits[bit_id] = bit
+
+    def _process_send_classical(self, operation):
+        """
+        Follows the operation command to measure a qubit and save the result
+
+        Args:
+            (Dict): Dictionary of information regarding the operation
+        """
+
+        if len(operation['cids']) != 1 or len(operation['qids']) != 1:
+            msg = "Wrong input format for measurement of qubit"
+            self._report_error(msg)
+
+        if len(operation['computing_host_ids']) != 1:
+            msg = "Wrong input format for measurement of qubit"
+            self._report_error(msg)
+
+        qubit_id = operation['qids'][0]
+        bit_id = operation['cids'][0]
+
+        qubit = self._qubits[qubit_id]
+        bit = qubit.measure()
+
+        # Manage pre-allocated qubits
+        total_qubits = self._total_qubits - 1
+        update_total_qubits(total_qubits)
 
     def perform_schedule(self):
         """
+        Process the schedule and perform the corresponding operations accordingly
         """
 
         if self._schedule:
@@ -269,3 +370,12 @@ class ComputingHost(Host):
 
             if operation['name'] == Constants.REC_ENT:
                 self._process_rec_ent(operation)
+
+            if operation['name'] == Constants.SEND_CLASSICAL:
+                self._process_send_classical(operation)
+
+            if operation['name'] == Constants.REC_CLASSICAL:
+                self._process_rec_classical(operation)
+
+            if operation['name'] == Constants.MEASURE:
+                self._process_rec_classical(operation)

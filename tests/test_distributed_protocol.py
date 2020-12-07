@@ -60,10 +60,8 @@ class TestDistributedProtocol(unittest.TestCase):
 
     def test_distributed_scheduler(self):
         q_map = {
-            'qubit_1': 'QPU_1',
-            'qubit_2': 'QPU_1',
-            'qubit_3': 'QPU_2',
-            'qubit_4': 'QPU_2'}
+            'QPU_1': ['qubit_1', 'qubit_2'],
+            'QPU_2': ['qubit_2', 'qubit_3']}
 
         # Form layer 1
         op_1 = Operation(
@@ -74,12 +72,12 @@ class TestDistributedProtocol(unittest.TestCase):
 
         op_2 = Operation(
             name="SEND_ENT",
-            qids=["qubit_2", "qubit_3"],
+            qids=["qubit_2"],
             computing_host_ids=["QPU_1", "QPU_2"])
 
         op_3 = Operation(
             name="REC_ENT",
-            qids=["qubit_3", "qubit_2"],
+            qids=["qubit_2"],
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_1 = Layer([op_1, op_2, op_3])
@@ -87,7 +85,7 @@ class TestDistributedProtocol(unittest.TestCase):
         # Form layer 2
         op_1 = Operation(
             name="TWO_QUBIT",
-            qids=["qubit_3", "qubit_4"],
+            qids=["qubit_2", "qubit_3"],
             gate="cnot",
             computing_host_ids=["QPU_2"])
 
