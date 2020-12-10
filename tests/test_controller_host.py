@@ -114,11 +114,13 @@ class TestControllerHost(unittest.TestCase):
         layers = [layer_1, layer_2, layer_3, layer_4, layer_5]
         circuit = Circuit(q_map, layers)
 
-        computing_host_schedules = self.controller_host._create_distributed_schedules(circuit)
+        computing_host_schedules, max_execution_time = self.controller_host._create_distributed_schedules(circuit)
 
         self.assertEqual(len(computing_host_schedules), 2)
         self.assertEqual(len(computing_host_schedules['QPU_1']), 4)
         self.assertEqual(len(computing_host_schedules['QPU_2']), 4)
+
+        self.assertEqual(max_execution_time, 5)
 
         self.assertEqual(computing_host_schedules['QPU_1'][0]['name'], "SINGLE")
         self.assertEqual(computing_host_schedules['QPU_1'][0]['layer_end'], 0)
@@ -195,6 +197,7 @@ class TestControllerHost(unittest.TestCase):
         circuit = Circuit(q_map, layers)
 
         distributed_circuit = self.controller_host._generate_distributed_circuit(circuit)
+
         self.assertEqual(len(distributed_circuit.layers), 12)
 
         self.assertEqual(len(distributed_circuit.layers[0].operations), 3)

@@ -27,6 +27,7 @@ class ControllerHost(Host):
 
         self._computing_host_ids = computing_host_ids
         self.add_c_connections(computing_host_ids)
+        self._circuit_max_execution_time = 0
 
         # TODO: Take gate_time as an input from computing hosts
         if gate_time is None:
@@ -124,7 +125,7 @@ class ControllerHost(Host):
                     computing_host_schedule.append(op)
             computing_host_schedules[computing_host_id] = computing_host_schedule
 
-        return computing_host_schedules
+        return computing_host_schedules, time_layer_end
 
     def _replace_control_gates(self, control_gate_info, current_layer):
         """
@@ -325,7 +326,8 @@ class ControllerHost(Host):
         """
 
         distributed_circuit = self._generate_distributed_circuit(circuit)
-        computing_host_schedules = self._create_distributed_schedules(distributed_circuit)
+        computing_host_schedules, max_execution_time = self._create_distributed_schedules(distributed_circuit)
+        self._circuit_max_execution_time = max_execution_time
 
         self.send_broadcast(json.dumps(computing_host_schedules))
 

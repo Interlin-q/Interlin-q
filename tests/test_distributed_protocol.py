@@ -1,4 +1,5 @@
 from components.controller_host import ControllerHost
+from components.clock import Clock
 from components.computing_host import ComputingHost
 from objects.circuit import Circuit
 from objects.layer import Layer
@@ -103,13 +104,20 @@ class TestDistributedProtocol(unittest.TestCase):
         def computing_host_2_protocol(host):
             host.receive_schedule()
 
-        computing_host_schedules = self.controller_host._create_distributed_schedules(circuit)
+        computing_host_schedules, max_execution_time = self.controller_host._create_distributed_schedules(circuit)
+
+        self.assertEqual(max_execution_time, 2)
 
         for i in range(1):
             self.controller_host.run_protocol(controller_host_protocol)
             self.computing_host_1.run_protocol(computing_host_1_protocol)
             self.computing_host_2.run_protocol(computing_host_2_protocol)
             time.sleep(0.5)
+
+        self.assertEqual(self.controller_host._circuit_max_execution_time, 2)
+        clock = Clock()
+        clock.initialise_clock(self.controller_host)
+        self.assertEqual(clock._maximum_ticks, 2)
 
         self.assertEqual(self.computing_host_1._schedule, computing_host_schedules['QPU_1'])
         self.assertEqual(self.computing_host_2._schedule, computing_host_schedules['QPU_2'])
