@@ -14,7 +14,7 @@ class ComputingHost(Host):
     distributed network system, connected to the controller host.
     """
 
-    def __init__(self, host_id, controller_host_id, total_qubits=0,
+    def __init__(self, host_id, controller_host_id, clock, total_qubits=0,
         total_pre_allocated_qubits=1, gate_time=None):
 
         """
@@ -23,6 +23,8 @@ class ComputingHost(Host):
         Args:
             host_id (str): The ID of the computing host
             controller_host_id (str): The IDs of controller/master host
+            clock (Clock): The clock object which ensures clock synchronization amongst the
+               computing hosts
             total_qubits (int): Total number of processing qubits possessed by the computing
                host
             total_pre_allocated_qubits (int): Total number of pre allocated qubits (in case of
@@ -41,12 +43,16 @@ class ComputingHost(Host):
         self._pre_allocated_qubits = None
         self._bits = None
 
-        self._schedule = []
+        self._schedule = {}
 
         if gate_time is None:
             gate_time = DefaultOperationTime
 
         self._gate_time = gate_time
+
+        # Attach computing host to the clock
+        clock.attach_host(self)
+        self._clock = clock
 
     @property
     def controller_host_id(self):
@@ -80,8 +86,16 @@ class ComputingHost(Host):
 
         # TODO: Add encryption for this message
         schedules = json.loads(messages[0].content)
+
         if self._host_id in schedules:
-            self._schedule = schedules[self._host_id]
+            schedule = {}
+            for op in schedules[self._host_id]:
+                if op['layer_end'] in schedules[self._host_id]:
+                    schedule[op['layer_end']].append(op)
+                else:
+                    schedule[op['layer_end']] = [op]
+
+        self._schedule = schedule
 
     def _report_error(self, message):
         """
@@ -165,14 +179,11 @@ class ComputingHost(Host):
             (Dict): Dictionary of information regarding the operation
         """
 
-        if prepare_qubits_op['name'] != Constants.PREPARE_QUBITS:
-            return None
-
         qubits = {}
         for qubit_id in prepare_qubits_op['qids']:
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
 
-        return qubits
+        self._update_stored_qubits(qubits)
 
     def _process_single_gates(self, operation):
         """
@@ -356,38 +367,39 @@ class ComputingHost(Host):
             del self._qubits[qubit_id]
             self._total_qubits -= 1
 
-    def perform_schedule(self):
+    def perform_schedule(self, ticks):
         """
         Process the schedule and perform the corresponding operations accordingly
         """
 
-        if self._schedule:
-            qubits = self._prepare_qubits(self._schedule[0])
-            self._update_stored_qubits(qubits)
-
-        for operation in self._schedule:
+        if ticks in self._schedule:
             # TODO: Add a clock object layer in this section
+            for operation in self._schedule[ticks]:
+                if operation['name'] == Constants.PREPARE_QUBITS:
+                    self._prepare_qubits(operation)
 
-            if operation['name'] == Constants.SINGLE:
-                self._process_single_gates(operation)
+                if operation['name'] == Constants.SINGLE:
+                    self._process_single_gates(operation)
 
-            if operation['name'] == Constants.TWO_QUBIT:
-                self._process_two_qubit_gates(operation)
+                if operation['name'] == Constants.TWO_QUBIT:
+                    self._process_two_qubit_gates(operation)
 
-            if operation['name'] == Constants.CLASSICAL_CTRL_GATE:
-                self._process_classical_ctrl_gate(operation)
+                if operation['name'] == Constants.CLASSICAL_CTRL_GATE:
+                    self._process_classical_ctrl_gate(operation)
 
-            if operation['name'] == Constants.SEND_ENT:
-                self._process_send_ent(operation)
+                if operation['name'] == Constants.SEND_ENT:
+                    self._process_send_ent(operation)
 
-            if operation['name'] == Constants.REC_ENT:
-                self._process_rec_ent(operation)
+                if operation['name'] == Constants.REC_ENT:
+                    self._process_rec_ent(operation)
 
-            if operation['name'] == Constants.SEND_CLASSICAL:
-                self._process_send_classical(operation)
+                if operation['name'] == Constants.SEND_CLASSICAL:
+                    self._process_send_classical(operation)
 
-            if operation['name'] == Constants.REC_CLASSICAL:
-                self._process_rec_classical(operation)
+                if operation['name'] == Constants.REC_CLASSICAL:
+                    self._process_rec_classical(operation)
 
-            if operation['name'] == Constants.MEASURE:
-                self._process_rec_classical(operation)
+                if operation['name'] == Constants.MEASURE:
+                    self._process_rec_classical(operation)
+
+        self._clock.respond()

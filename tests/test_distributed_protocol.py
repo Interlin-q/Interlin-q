@@ -28,14 +28,18 @@ class TestDistributedProtocol(unittest.TestCase):
         network = Network.get_instance()
         network.start(["host_1", "QPU_1", "QPU_2"], EQSNBackend())
 
+        clock = Clock()
+
         self.computing_host_1 = ComputingHost(
             host_id="QPU_1",
             controller_host_id="host_1",
+            clock=clock,
             total_qubits=2)
 
         self.computing_host_2 = ComputingHost(
             host_id="QPU_2",
             controller_host_id="host_1",
+            clock=clock,
             total_qubits=2)
 
         self.controller_host = ControllerHost(
@@ -55,6 +59,7 @@ class TestDistributedProtocol(unittest.TestCase):
             self.computing_host_2])
 
         self._network = network
+        self._clock = clock
 
     def tearDown(self):
         self._network.stop(True)
@@ -115,9 +120,21 @@ class TestDistributedProtocol(unittest.TestCase):
             time.sleep(0.5)
 
         self.assertEqual(self.controller_host._circuit_max_execution_time, 2)
-        clock = Clock()
-        clock.initialise_clock(self.controller_host)
-        self.assertEqual(clock._maximum_ticks, 2)
+        self._clock.initialise(self.controller_host)
+        self.assertEqual(self._clock._maximum_ticks, 2)
 
-        self.assertEqual(self.computing_host_1._schedule, computing_host_schedules['QPU_1'])
-        self.assertEqual(self.computing_host_2._schedule, computing_host_schedules['QPU_2'])
+        def extract_schedule_with_time(computing_host_schedule):
+            schedule = {}
+            for op in computing_host_schedule:
+                if op['layer_end'] in computing_host_schedule:
+                    schedule[op['layer_end']].append(op)
+                else:
+                    schedule[op['layer_end']] = [op]
+
+            return schedule
+
+        computing_host_1_schedule = extract_schedule_with_time(computing_host_schedules['QPU_1'])
+        computing_host_2_schedule = extract_schedule_with_time(computing_host_schedules['QPU_2'])
+
+        self.assertEqual(self.computing_host_1._schedule, computing_host_1_schedule)
+        self.assertEqual(self.computing_host_2._schedule, computing_host_2_schedule)
