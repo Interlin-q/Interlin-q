@@ -1,3 +1,6 @@
+from qunetsim.objects import DaemonThread
+
+
 class Clock(object):
     """
     This is a clock simulator which synchronises the scheduled operations in computing
@@ -13,6 +16,7 @@ class Clock(object):
         self._ticks = 0
         self._maximum_ticks = 0
         self._response = 0
+        self._stop = False
 
         self._computing_hosts = []
 
@@ -48,14 +52,6 @@ class Clock(object):
         """
         self._response += 1
 
-    def tick_clock(self):
-        """
-        Tick the clock and trigger operations in the computings hosts
-        """
-
-        for host in self._computing_host:
-            host.update(self)
-
     def initialise(self, controller_host):
         """
         Obtain the maximum number of ticks for a clock from the controller host object
@@ -65,8 +61,17 @@ class Clock(object):
                 centralised distributed network system
         """
 
+        self._stop = False
+
         maximum_ticks = controller_host._circuit_max_execution_time
         self._maximum_ticks = maximum_ticks
+
+    def stop(self):
+        """
+        Stop ticking the clock, due to an error being triggered
+        """
+
+        self._stop = True
 
     def start(self):
         """
@@ -79,14 +84,16 @@ class Clock(object):
 
         # Tick the clock
         while self._ticks <= self._maximum_ticks:
+            self._response = 0
 
-            self.tick_clock()
+            if self._stop:
+                print("Clock stopped ticking due to an error")
+                break
 
             for host in self._computing_hosts:
-                perform_schedule(self._ticks)
+                DaemonThread(host.perform_schedule, args=(self._ticks,))
 
             # Wait to receive responses from all the computing hosts
             while self._response < len(self._computing_hosts):
                 pass
-
             self._ticks += 1

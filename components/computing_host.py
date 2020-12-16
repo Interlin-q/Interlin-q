@@ -4,9 +4,11 @@ from utils.constants import Constants
 from qunetsim.objects import Qubit
 
 import numpy as np
-import time
 import json
+import time
 
+
+MAX_WAIT = 3
 
 class ComputingHost(Host):
     """
@@ -39,9 +41,9 @@ class ComputingHost(Host):
         self._total_qubits = total_qubits
         self._total_pre_allocated_qubits = total_pre_allocated_qubits
 
-        self._qubits = None
-        self._pre_allocated_qubits = None
-        self._bits = None
+        self._qubits = {}
+        self._pre_allocated_qubits = {}
+        self._bits = {}
 
         self._schedule = {}
 
@@ -85,6 +87,7 @@ class ComputingHost(Host):
             messages = [x for x in messages if x.content != 'ACK']
 
         # TODO: Add encryption for this message
+        print(messages)
         schedules = json.loads(messages[0].content)
 
         if self._host_id in schedules:
@@ -96,6 +99,7 @@ class ComputingHost(Host):
                     schedule[op['layer_end']] = [op]
 
         self._schedule = schedule
+        print(schedule)
 
     def _report_error(self, message):
         """
@@ -104,9 +108,12 @@ class ComputingHost(Host):
         Args:
             (str): Error message in a string
         """
-        print(message)
 
-    def _check_error(self, op, len_qids=0, len_computing_host_ids=1, len_cids=0):
+        self._clock.stop()
+        print(message)
+        # TODO send error to controller host
+
+    def _check_errors(self, op, len_qids=0, len_computing_host_ids=1, len_cids=0):
         """
         Check if there is any error in the operation format
 
@@ -117,21 +124,25 @@ class ComputingHost(Host):
             (int): Permissible number of classical bit IDs in the operation
         """
 
-        msg = "Error in the operation name: {0}.".format(op['name'])
+        msg = None
+        error_msg = "Error in the operation name: {0}. ".format(op['name'])
 
-        if len(operation['qids']) > len_qids:
-            msg += "Error Message: 'Number of qubit IDs is exceeding the permissible number"
+        if op['qids']:
+            if len(op['qids']) > len_qids:
+                msg = error_msg + "Error Message: 'Number of qubit IDs is exceeding the permissible number"
 
-        if len(operation['computing_host_ids']) > len_computing_host_ids:
-            msg += "Error Message: 'Number of computing host IDs is exceeding the permissible number"
+        if len(op['computing_host_ids']) > len_computing_host_ids:
+            msg = error_msg + "Error Message: 'Number of computing host IDs is exceeding the permissible number"
 
-        if len(operation['cids']) > len_cids:
-            msg += "Error Message: 'Number of classical bit IDs is exceeding the permissible number"
+        if op['cids']:
+            if len(op['cids']) > len_cids:
+                msg = error_msg + "Error Message: 'Number of classical bit IDs is exceeding the permissible number"
 
-        if operation['computing_host_ids'][0] != self._host_id:
-            msg += "Error Message: 'Wrong input format for computing host ids in the operation'"
+        if op['computing_host_ids'][0] != self._host_id:
+            msg = error_msg + "Error Message: 'Wrong input format for computing host ids in the operation'"
 
-        self._report_error(msg)
+        if msg:
+            self._report_error(msg)
 
     def _add_new_qubit(self, qubit, qubit_id, pre_allocated=False):
         """
@@ -150,11 +161,20 @@ class ComputingHost(Host):
                 msg = "No more preallocated qubits left with the computing host"
                 self._report_error(msg)
 
-            self._pre_allocated_qubit[qubit_id] = epr_qubit
+            self._pre_allocated_qubits[qubit_id] = qubit
         else:
             qubits = self._qubits
-            qubits[qubit_id] = epr_qubit
+            qubits[qubit_id] = qubit
             self._update_stored_qubits(qubits)
+
+    def _get_stored_qubit(self, qubit_id):
+        """
+        """
+
+        if qubit_id in self._qubits:
+            return self._qubits[qubit_id]
+        if qubit_id in self._pre_allocated_qubits:
+            return self._pre_allocated_qubits[qubit_id]
 
     def _update_stored_qubits(self, qubits):
         """
@@ -165,7 +185,7 @@ class ComputingHost(Host):
                 computing host
         """
 
-        if len(qubits) > total_qubits:
+        if len(qubits) > self._total_qubits:
             msg = "Number of qubits required for the circuit are more than the total qubits"
             self._report_error(msg)
 
@@ -180,23 +200,26 @@ class ComputingHost(Host):
         """
 
         qubits = {}
-        for qubit_id in prepare_qubits_op['qids']:
+        for qubit_id in prepare_qubit_op['qids']:
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
 
         self._update_stored_qubits(qubits)
 
-    def _process_single_gates(self, operation):
+    def _process_single_gates(self, operation, classical_ctrl_gate=False):
         """
         Follows the operation command to perform single gates on a qubit
 
         Args:
             (Dict): Dictionary of information regarding the operation
+            (Bool): If the single gate being performed is part of a classical control
+                single gate
         """
 
-        self._check_errors(op=operation, len_qids=1, len_computing_host_ids=1)
+        if not classical_ctrl_gate:
+            self._check_errors(op=operation, len_qids=1, len_computing_host_ids=1)
 
         q_id = operation['qids'][0]
-        qubit = self._qubits[q_id]
+        qubit = self._get_stored_qubit(q_id)
 
         if operation['gate'] == "I":
             qubit.I()
@@ -245,8 +268,8 @@ class ComputingHost(Host):
         self._check_errors(op=operation, len_qids=2, len_computing_host_ids=1)
 
         q_ids = operation['qids']
-        qubit_1 = self._qubits[q_ids[0]]
-        qubit_2 = self._qubits[q_ids[1]]
+        qubit_1 = self._get_stored_qubit(q_ids[0])
+        qubit_2 = self._get_stored_qubit(q_ids[1])
 
         if operation['gate'] == "cnot":
             qubit_1.cnot(qubit_2)
@@ -270,8 +293,10 @@ class ComputingHost(Host):
 
         self._check_errors(op=operation, len_qids=1, len_computing_host_ids=1, len_cids=1)
 
-        if operation['cids'][0]:
-            self._process_single_gates(operation)
+        control_bit_id = operation['cids'][0]
+
+        if int(self._bits[control_bit_id]):
+            self._process_single_gates(operation, classical_ctrl_gate=True)
 
     def _process_send_ent(self, operation):
         """
@@ -288,7 +313,7 @@ class ComputingHost(Host):
 
         self.send_epr(receiver_id, q_id=qubit_id, await_ack=True)
 
-        epr_qubit = self.get_epr(self.id, q_id=qubit_id)
+        epr_qubit = self.get_epr(receiver_id, q_id=qubit_id)
         self._add_new_qubit(epr_qubit, qubit_id, operation['pre_allocated_qubits'])
 
     def _process_rec_ent(self, operation):
@@ -301,7 +326,17 @@ class ComputingHost(Host):
 
         self._check_errors(op=operation, len_qids=1, len_computing_host_ids=2)
 
-        epr_qubit = self.get_epr(self.id, q_id=qubit_id)
+        qubit_id = operation['qids'][0]
+        receiver_id = operation['computing_host_ids'][1]
+
+        i = 0
+        epr_qubit = None
+
+        while i < MAX_WAIT and epr_qubit is None:
+            epr_qubit = self.get_epr(receiver_id, q_id=qubit_id)
+            i += 1
+            time.sleep(1)
+
         self._add_new_qubit(epr_qubit, qubit_id, operation['pre_allocated_qubits'])
 
     def _process_send_classical(self, operation):
@@ -335,11 +370,13 @@ class ComputingHost(Host):
         self._check_errors(op=operation, len_computing_host_ids=2, len_cids=1)
 
         sender_id = operation['computing_host_ids'][1]
-        bit = host.get_classical(sender_id, wait=-1)
+        msg = self.get_classical(sender_id, wait=-1)
+        bit = msg[0].content
+        bit_id = operation['cids'][0]
 
         self._bits[bit_id] = bit
 
-    def _process_measure(self, operation):
+    def _process_measurement(self, operation):
         """
         Follows the operation command to measure a qubit and save the result
 
@@ -352,10 +389,7 @@ class ComputingHost(Host):
         qubit_id = operation['qids'][0]
         bit_id = operation['cids'][0]
 
-        if qubit_id in self._pre_allocated_qubits:
-            qubit = self._pre_allocated_qubits[qubit_id]
-        else:
-            qubit = self._qubits[qubit_id]
+        qubit = self._get_stored_qubit(qubit_id)
 
         bit = qubit.measure()
         self._bits[bit_id] = bit
@@ -371,9 +405,7 @@ class ComputingHost(Host):
         """
         Process the schedule and perform the corresponding operations accordingly
         """
-
         if ticks in self._schedule:
-            # TODO: Add a clock object layer in this section
             for operation in self._schedule[ticks]:
                 if operation['name'] == Constants.PREPARE_QUBITS:
                     self._prepare_qubits(operation)
@@ -385,7 +417,7 @@ class ComputingHost(Host):
                     self._process_two_qubit_gates(operation)
 
                 if operation['name'] == Constants.CLASSICAL_CTRL_GATE:
-                    self._process_classical_ctrl_gate(operation)
+                    self._process_classical_ctrl_gates(operation)
 
                 if operation['name'] == Constants.SEND_ENT:
                     self._process_send_ent(operation)
@@ -400,6 +432,6 @@ class ComputingHost(Host):
                     self._process_rec_classical(operation)
 
                 if operation['name'] == Constants.MEASURE:
-                    self._process_rec_classical(operation)
+                    self._process_measurement(operation)
 
         self._clock.respond()

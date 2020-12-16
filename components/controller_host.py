@@ -193,7 +193,7 @@ class ControllerHost(Host):
 
             op_2 = Operation(
                 name=Constants.REC_CLASSICAL,
-                qids=[bit_id_1],
+                cids=[bit_id_1],
                 computing_host_ids=[target_host, control_host])
             operations[itr].extend([op_1, op_2])
 
@@ -240,7 +240,7 @@ class ControllerHost(Host):
 
             op_2 = Operation(
                 name=Constants.REC_CLASSICAL,
-                qids=[bit_id_2],
+                cids=[bit_id_2],
                 computing_host_ids=[control_host, target_host])
             operations[itr].extend([op_1, op_2])
 

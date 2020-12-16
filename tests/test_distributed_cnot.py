@@ -12,7 +12,7 @@ import unittest
 import time
 
 
-class TestDistributedProtocol(unittest.TestCase):
+class TestDistributedCnotProtocol(unittest.TestCase):
 
     # Runs before all tests
     @classmethod
@@ -58,46 +58,72 @@ class TestDistributedProtocol(unittest.TestCase):
             self.computing_host_1,
             self.computing_host_2])
 
-        self._network = network
-        self._clock = clock
+        self.network = network
+        self.clock = clock
 
     def tearDown(self):
-        self._network.stop(True)
+        self.network.stop(True)
+        self.network.remove_host(self.computing_host_1)
+        self.network.remove_host(self.computing_host_2)
+        self.network.remove_host(self.controller_host)
+        del self.network
+        del self.clock
+        del self.computing_host_1
+        del self.computing_host_2
+        del self.controller_host
 
-    def test_distributed_scheduler(self):
+    def test_cnot_protocol(self):
         q_map = {
-            'QPU_1': ['qubit_1', 'qubit_2'],
-            'QPU_2': ['qubit_2', 'qubit_3']}
+            'QPU_1': ['qubit_1'],
+            'QPU_2': ['qubit_2']}
 
         # Form layer 1
         op_1 = Operation(
-            name="SINGLE",
+            name="PREPARE_QUBITS",
             qids=["qubit_1"],
-            gate="H",
             computing_host_ids=["QPU_1"])
 
         op_2 = Operation(
-            name="SEND_ENT",
+            name="PREPARE_QUBITS",
             qids=["qubit_2"],
-            computing_host_ids=["QPU_1", "QPU_2"])
+            computing_host_ids=["QPU_2"])
 
-        op_3 = Operation(
-            name="REC_ENT",
-            qids=["qubit_2"],
-            computing_host_ids=["QPU_2", "QPU_1"])
-
-        layer_1 = Layer([op_1, op_2, op_3])
+        layer_1 = Layer([op_1, op_2])
 
         # Form layer 2
         op_1 = Operation(
-            name="TWO_QUBIT",
-            qids=["qubit_2", "qubit_3"],
-            gate="cnot",
-            computing_host_ids=["QPU_2"])
+            name="SINGLE",
+            qids=["qubit_1"],
+            gate="X",
+            computing_host_ids=["QPU_1"])
 
         layer_2 = Layer([op_1])
 
-        layers = [layer_1, layer_2]
+        # Form layer 3
+        op_1 = Operation(
+            name="TWO_QUBIT",
+            qids=["qubit_1", "qubit_2"],
+            gate="cnot",
+            computing_host_ids=["QPU_1", "QPU_2"])
+
+        layer_3 = Layer([op_1])
+
+        # Form layer 4
+        op_1 = Operation(
+            name="MEASURE",
+            qids=["qubit_1"],
+            cids=["qubit_1"],
+            computing_host_ids=["QPU_1"])
+
+        op_2 = Operation(
+            name="MEASURE",
+            qids=["qubit_2"],
+            cids=["qubit_2"],
+            computing_host_ids=["QPU_2"])
+
+        layer_4 = Layer([op_1, op_2])
+
+        layers = [layer_1, layer_2, layer_3, layer_4]
         circuit = Circuit(q_map, layers)
 
         def controller_host_protocol(host):
@@ -109,32 +135,15 @@ class TestDistributedProtocol(unittest.TestCase):
         def computing_host_2_protocol(host):
             host.receive_schedule()
 
-        computing_host_schedules, max_execution_time = self.controller_host._create_distributed_schedules(circuit)
-
-        self.assertEqual(max_execution_time, 2)
-
         for i in range(1):
             self.controller_host.run_protocol(controller_host_protocol)
             self.computing_host_1.run_protocol(computing_host_1_protocol)
             self.computing_host_2.run_protocol(computing_host_2_protocol)
             time.sleep(0.5)
 
-        self.assertEqual(self.controller_host._circuit_max_execution_time, 2)
-        self._clock.initialise(self.controller_host)
-        self.assertEqual(self._clock._maximum_ticks, 2)
+        self.clock.initialise(self.controller_host)
+        self.clock.start()
+        self.assertEqual(self.clock._maximum_ticks, 13)
 
-        def extract_schedule_with_time(computing_host_schedule):
-            schedule = {}
-            for op in computing_host_schedule:
-                if op['layer_end'] in computing_host_schedule:
-                    schedule[op['layer_end']].append(op)
-                else:
-                    schedule[op['layer_end']] = [op]
-
-            return schedule
-
-        computing_host_1_schedule = extract_schedule_with_time(computing_host_schedules['QPU_1'])
-        computing_host_2_schedule = extract_schedule_with_time(computing_host_schedules['QPU_2'])
-
-        self.assertEqual(self.computing_host_1._schedule, computing_host_1_schedule)
-        self.assertEqual(self.computing_host_2._schedule, computing_host_2_schedule)
+        self.assertEqual(self.computing_host_1._bits['qubit_1'], 1)
+        self.assertEqual(self.computing_host_2._bits['qubit_2'], 1)
