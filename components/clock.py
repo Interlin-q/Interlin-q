@@ -23,6 +23,7 @@ class Clock(object):
     @property
     def ticks(self):
         """
+        Number of times the clock has ticked
         """
         return self._ticks
 

@@ -63,14 +63,6 @@ class TestDistributedCnotProtocol(unittest.TestCase):
 
     def tearDown(self):
         self.network.stop(True)
-        self.network.remove_host(self.computing_host_1)
-        self.network.remove_host(self.computing_host_2)
-        self.network.remove_host(self.controller_host)
-        del self.network
-        del self.clock
-        del self.computing_host_1
-        del self.computing_host_2
-        del self.controller_host
 
     def test_cnot_protocol(self):
         q_map = {

@@ -99,7 +99,6 @@ class ComputingHost(Host):
                     schedule[op['layer_end']] = [op]
 
         self._schedule = schedule
-        print(schedule)
 
     def _report_error(self, message):
         """
@@ -169,6 +168,10 @@ class ComputingHost(Host):
 
     def _get_stored_qubit(self, qubit_id):
         """
+        Extract the qubit from the computing host given the qubit id
+
+        Args:
+            (str): ID of the qubit to be added
         """
 
         if qubit_id in self._qubits:
@@ -404,7 +407,11 @@ class ComputingHost(Host):
     def perform_schedule(self, ticks):
         """
         Process the schedule and perform the corresponding operations accordingly
+
+        Args:
+            (int): Number of times the clock has ticked
         """
+
         if ticks in self._schedule:
             for operation in self._schedule[ticks]:
                 if operation['name'] == Constants.PREPARE_QUBITS:
