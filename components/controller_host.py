@@ -36,6 +36,7 @@ class ControllerHost(Host):
                 gate_time[computing_host_id] = DefaultOperationTime
 
         self._gate_time = gate_time
+        self._results = None
 
     @property
     def computing_host_ids(self):
@@ -332,3 +333,17 @@ class ControllerHost(Host):
         self.send_broadcast(json.dumps(computing_host_schedules))
 
         return computing_host_schedules
+
+    def receive_results(self):
+        """
+        Receive the final output results from all the computing hosts
+        """
+
+        results = {}
+
+        for host_id in self._computing_host_ids:
+            result = self.get_classical(host_id, wait=-1)
+            result = json.loads(result[0].content)
+            results.update(result)
+
+        self._results = results

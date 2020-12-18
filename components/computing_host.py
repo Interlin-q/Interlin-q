@@ -36,6 +36,7 @@ class ComputingHost(Host):
         """
         super().__init__(host_id)
 
+        self.add_c_connection(controller_host_id)
         self._controller_host_id = controller_host_id
 
         self._total_qubits = total_qubits
@@ -87,7 +88,6 @@ class ComputingHost(Host):
             messages = [x for x in messages if x.content != 'ACK']
 
         # TODO: Add encryption for this message
-        print(messages)
         schedules = json.loads(messages[0].content)
 
         if self._host_id in schedules:
@@ -442,3 +442,12 @@ class ComputingHost(Host):
                     self._process_measurement(operation)
 
         self._clock.respond()
+
+    def send_results(self):
+        """
+        Send results to Controller Host
+        """
+
+        message = json.dumps({self.host_id: self._bits})
+
+        self.send_classical(self._controller_host_id, message, await_ack=True)

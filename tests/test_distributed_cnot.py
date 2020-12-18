@@ -89,7 +89,13 @@ class TestDistributedCnotProtocol(unittest.TestCase):
             gate="X",
             computing_host_ids=["QPU_1"])
 
-        layer_2 = Layer([op_1])
+        op_2 = Operation(
+            name="SINGLE",
+            qids=["qubit_2"],
+            gate="X",
+            computing_host_ids=["QPU_2"])
+
+        layer_2 = Layer([op_1, op_2])
 
         # Form layer 3
         op_1 = Operation(
@@ -138,4 +144,22 @@ class TestDistributedCnotProtocol(unittest.TestCase):
         self.assertEqual(self.clock._maximum_ticks, 13)
 
         self.assertEqual(self.computing_host_1._bits['qubit_1'], 1)
-        self.assertEqual(self.computing_host_2._bits['qubit_2'], 1)
+        self.assertEqual(self.computing_host_2._bits['qubit_2'], 0)
+
+        def computing_host_1_protocol(host):
+            host.send_results()
+
+        def computing_host_2_protocol(host):
+            host.send_results()
+
+        def controller_host_protocol(host):
+            host.receive_results()
+
+        for i in range(1):
+            self.computing_host_1.run_protocol(computing_host_1_protocol)
+            self.computing_host_2.run_protocol(computing_host_2_protocol)
+            self.controller_host.run_protocol(controller_host_protocol)
+            time.sleep(0.5)
+
+        self.assertEqual(self.controller_host._results['QPU_1']['qubit_1'], 1)
+        self.assertEqual(self.controller_host._results['QPU_2']['qubit_2'], 0)
