@@ -44,13 +44,14 @@ class TestDistributedCnotProtocol(unittest.TestCase):
 
         self.controller_host = ControllerHost(
             host_id="host_1",
+            clock=clock,
             computing_host_ids=["QPU_1", "QPU_2"])
 
         self.computing_host_1.add_connections(['QPU_2'])
         self.computing_host_1.start()
         self.computing_host_2.add_connections(['QPU_1'])
         self.computing_host_2.start()
-        self.controller_host.add_c_connections(['QPU_1', 'QPU_2'])
+
         self.controller_host.start()
 
         network.add_hosts([
@@ -137,10 +138,8 @@ class TestDistributedCnotProtocol(unittest.TestCase):
             self.controller_host.run_protocol(controller_host_protocol)
             self.computing_host_1.run_protocol(computing_host_1_protocol)
             self.computing_host_2.run_protocol(computing_host_2_protocol)
-            time.sleep(0.5)
+            time.sleep(10)
 
-        self.clock.initialise(self.controller_host)
-        self.clock.start()
         self.assertEqual(self.clock._maximum_ticks, 13)
 
         self.assertEqual(self.computing_host_1._bits['qubit_1'], 1)
@@ -159,7 +158,7 @@ class TestDistributedCnotProtocol(unittest.TestCase):
             self.computing_host_1.run_protocol(computing_host_1_protocol)
             self.computing_host_2.run_protocol(computing_host_2_protocol)
             self.controller_host.run_protocol(controller_host_protocol)
-            time.sleep(0.5)
+            time.sleep(1)
 
         self.assertEqual(self.controller_host._results['QPU_1']['qubit_1'], 1)
         self.assertEqual(self.controller_host._results['QPU_2']['qubit_2'], 0)

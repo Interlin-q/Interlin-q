@@ -13,19 +13,21 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id, computing_host_ids=[], gate_time=None):
+    def __init__(self, host_id, clock, computing_host_ids=[], gate_time=None):
         """
         Returns the important things for the controller hosts
 
         Args:
             host_id (str): The ID of the controller host
             computing_host_ids (list): The IDs of computing/slave hosts
+            clock (Clock): Clock object for synchronising the computing hosts
             gate_time (dict): A mapping of gate names to time the gate takes to
                execute for each computing host
         """
         super().__init__(host_id)
 
         self._computing_host_ids = computing_host_ids
+        self._clock = clock
         self.add_c_connections(computing_host_ids)
         self._circuit_max_execution_time = 0
 
@@ -332,6 +334,12 @@ class ControllerHost(Host):
 
         self.send_broadcast(json.dumps(computing_host_schedules))
 
+        for host_id in self._computing_host_ids:
+            result = self.get_classical(host_id, wait=-1)
+
+        self._clock.initialise(max_execution_time)
+        self._clock.start()
+
         return computing_host_schedules
 
     def receive_results(self):
@@ -342,8 +350,8 @@ class ControllerHost(Host):
         results = {}
 
         for host_id in self._computing_host_ids:
-            result = self.get_classical(host_id, wait=-1)
-            result = json.loads(result[0].content)
+            result = self.get_classical(host_id, wait=-1, seq_num=1)
+            result = json.loads(result.content)
             results.update(result)
 
         self._results = results

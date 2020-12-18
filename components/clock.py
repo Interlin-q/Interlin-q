@@ -53,19 +53,17 @@ class Clock(object):
         """
         self._response += 1
 
-    def initialise(self, controller_host):
+    def initialise(self, max_execution_time):
         """
-        Obtain the maximum number of ticks for a clock from the controller host object
+        Initialise the clock with the maximum number of times the clock should tick
 
         Args:
-            (ControllerHost): Controller host object which is the master node in the
-                centralised distributed network system
+            (int): Maximum number of times the clock should tick
         """
 
         self._stop = False
 
-        maximum_ticks = controller_host._circuit_max_execution_time
-        self._maximum_ticks = maximum_ticks
+        self._maximum_ticks = max_execution_time
 
     def stop(self):
         """

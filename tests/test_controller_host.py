@@ -1,4 +1,5 @@
 from components.controller_host import ControllerHost
+from components.clock import Clock
 from objects.circuit import Circuit
 from objects.layer import Layer
 from objects.operation import Operation
@@ -25,8 +26,11 @@ class TestControllerHost(unittest.TestCase):
         network = Network.get_instance()
         network.start(["host_1"], EQSNBackend())
 
+        clock = Clock()
+
         self.controller_host = ControllerHost(
             host_id="host_1",
+            clock=clock,
             computing_host_ids=["QPU_1"])
         network.add_host(self.controller_host)
 

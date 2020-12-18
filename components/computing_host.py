@@ -97,8 +97,11 @@ class ComputingHost(Host):
                     schedule[op['layer_end']].append(op)
                 else:
                     schedule[op['layer_end']] = [op]
-
         self._schedule = schedule
+
+        # Send Acknowledgement of receiving broadcast to the ControllerHost
+        msg = 'ACK'
+        self.send_classical(self._controller_host_id, msg, await_ack=True)
 
     def _report_error(self, message):
         """
