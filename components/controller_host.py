@@ -340,8 +340,6 @@ class ControllerHost(Host):
         self._clock.initialise(max_execution_time)
         self._clock.start()
 
-        return computing_host_schedules
-
     def receive_results(self):
         """
         Receive the final output results from all the computing hosts

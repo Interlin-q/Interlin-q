@@ -27,6 +27,13 @@ class Clock(object):
         """
         return self._ticks
 
+    @property
+    def stop(self):
+        """
+        Check if the clock has stopped
+        """
+        return self._stop
+
     def attach_host(self, computing_host):
         """
         This function attaches the computing host who will listen to the clock object
@@ -65,7 +72,7 @@ class Clock(object):
 
         self._maximum_ticks = max_execution_time
 
-    def stop(self):
+    def stop_clock(self):
         """
         Stop ticking the clock, due to an error being triggered
         """
@@ -96,3 +103,5 @@ class Clock(object):
             while self._response < len(self._computing_hosts):
                 pass
             self._ticks += 1
+
+        self._stop = True

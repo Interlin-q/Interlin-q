@@ -111,7 +111,7 @@ class ComputingHost(Host):
             (str): Error message in a string
         """
 
-        self._clock.stop()
+        self._clock.stop_clock()
         print(message)
         # TODO send error to controller host
 
@@ -341,7 +341,7 @@ class ComputingHost(Host):
         while i < MAX_WAIT and epr_qubit is None:
             epr_qubit = self.get_epr(receiver_id, q_id=qubit_id)
             i += 1
-            time.sleep(1)
+            time.sleep(0.5)
 
         self._add_new_qubit(epr_qubit, qubit_id, operation['pre_allocated_qubits'])
 
@@ -451,6 +451,10 @@ class ComputingHost(Host):
         Send results to Controller Host
         """
 
-        message = json.dumps({self.host_id: self._bits})
+        # TODO: Check if there is a better implementation
+        # Wait for the clock to stop ticking to send the results
+        while not self._clock.stop:
+            time.sleep(1)
 
+        message = json.dumps({self.host_id: self._bits})
         self.send_classical(self._controller_host_id, message, await_ack=True)
