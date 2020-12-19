@@ -69,6 +69,7 @@ class TestDistributedCnotProtocol(unittest.TestCase):
             'QPU_1': ['qubit_1'],
             'QPU_2': ['qubit_2']}
 
+        # TODO: Maybe layer one is always like this
         # Form layer 1
         op_1 = Operation(
             name="PREPARE_QUBITS",
@@ -82,17 +83,22 @@ class TestDistributedCnotProtocol(unittest.TestCase):
 
         layer_1 = Layer([op_1, op_2])
 
+        # TODO: For operations, can the name and computing host ids be found from
+        #       the gate name and qubit id? That would simplify the inputs
+        #       We could have an OperationFactory object that takes the topology as input
+        #       and then it can generate the operations using those two points
+
         # Form layer 2
         op_1 = Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="X",
+            gate=Operation.X,
             computing_host_ids=["QPU_1"])
 
         op_2 = Operation(
             name="SINGLE",
             qids=["qubit_2"],
-            gate="X",
+            gate=Operation.X,
             computing_host_ids=["QPU_2"])
 
         layer_2 = Layer([op_1, op_2])
@@ -101,7 +107,7 @@ class TestDistributedCnotProtocol(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_1", "qubit_2"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_1", "QPU_2"])
 
         layer_3 = Layer([op_1])

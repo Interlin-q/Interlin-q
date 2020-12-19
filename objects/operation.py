@@ -7,7 +7,22 @@ class Operation(object):
     quantum gate which is to be applied to a circuit
     """
 
-    def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[], pre_allocated_qubits=False):
+    I = "I"
+    X = "X"
+    Y = "Y"
+    Z = "Z"
+    CNOT = "cnot"
+    T = "T"
+    H = "H"
+    K = "K"
+    RX = "rx"
+    RY = "ry"
+    RZ = "rz"
+    CUSTOM = "custom_gate"
+    MEASURE = "measure"
+
+    def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[],
+                 pre_allocated_qubits=False):
         """
         Returns the important things for a quantum operation
 
@@ -179,4 +194,4 @@ class InputError(Exception):
     """
 
     def __init__(self, message):
-        self.message = message            
+        self.message = message
