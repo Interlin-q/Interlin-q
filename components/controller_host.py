@@ -303,15 +303,17 @@ class ControllerHost(Host):
         Return the execution time for an operation for a specific computing host
 
         Args:
-            computing_host_ids (list): The IDs of computing/slave hosts
+            computing_host_id (str): The IDs of computing/slave hosts
             op_name (str): Name of the operation
             gate (str): Name of the gate being performed in the operation, if any
+        Returns:
+            (float): The operation execution time
         """
         operation_time = self._gate_time[computing_host_id]
 
-        GATE_OP_NAMES = [Constants.SINGLE, Constants.TWO_QUBIT, Constants.CLASSICAL_CTRL_GATE]
+        gate_op_names = [Constants.SINGLE, Constants.TWO_QUBIT, Constants.CLASSICAL_CTRL_GATE]
 
-        if op_name in GATE_OP_NAMES:
+        if op_name in gate_op_names:
             execution_time = operation_time[op_name][gate]
         else:
             execution_time = operation_time[op_name]

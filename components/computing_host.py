@@ -1,4 +1,6 @@
 from qunetsim.components import Host
+
+from objects import Operation
 from utils import DefaultOperationTime
 from utils.constants import Constants
 from qunetsim.objects import Qubit
@@ -7,8 +9,8 @@ import numpy as np
 import json
 import time
 
-
 MAX_WAIT = 3
+
 
 class ComputingHost(Host):
     """
@@ -17,7 +19,7 @@ class ComputingHost(Host):
     """
 
     def __init__(self, host_id, controller_host_id, clock, total_qubits=0,
-        total_pre_allocated_qubits=1, gate_time=None):
+                 total_pre_allocated_qubits=1, gate_time=None):
 
         """
         Returns the important things for the computing hosts
@@ -89,9 +91,8 @@ class ComputingHost(Host):
 
         # TODO: Add encryption for this message
         schedules = json.loads(messages[0].content)
-
+        schedule = {}
         if self._host_id in schedules:
-            schedule = {}
             for op in schedules[self._host_id]:
                 if op['layer_end'] in schedules[self._host_id]:
                     schedule[op['layer_end']].append(op)
@@ -151,10 +152,9 @@ class ComputingHost(Host):
         Add a new qubit in either 'qubits' property or 'pre_allocated_qubits' property
 
         Args:
-            (Qubit): The qubit to be added
-            (str): ID of the qubit to be added
-            (bool): Boolean flag to check if the new qubit should be created in the pre_allocated
-                register
+            qubit (Qubit): The qubit to be added
+            qubit_id (str): ID of the qubit to be added
+            pre_allocated (bool): Boolean flag to check if the new qubit should be created in the pre_allocated register
         """
         if pre_allocated:
             if self._total_pre_allocated_qubits > 0:
@@ -171,10 +171,10 @@ class ComputingHost(Host):
 
     def _get_stored_qubit(self, qubit_id):
         """
-        Extract the qubit from the computing host given the qubit id
+        Extract the qubit from the computing host given the qubit id.
 
         Args:
-            (str): ID of the qubit to be added
+            qubit_id (str): ID of the qubit to be added
         """
 
         if qubit_id in self._qubits:
@@ -187,8 +187,8 @@ class ComputingHost(Host):
         Update the stored qubits in the class
 
         Args:
-            (Dict): Map of the qubit ids to the corresponding qubits stored with the
-                computing host
+            qubits (Dict): Map of the qubit ids to the corresponding qubits stored with the
+                           computing host
         """
 
         if len(qubits) > self._total_qubits:
@@ -202,7 +202,7 @@ class ComputingHost(Host):
         Follows the operation command to prepare the necessary qubits
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+            prepare_qubit_op (Dict): Dictionary of information regarding the operation
         """
 
         qubits = {}
@@ -227,37 +227,37 @@ class ComputingHost(Host):
         q_id = operation['qids'][0]
         qubit = self._get_stored_qubit(q_id)
 
-        if operation['gate'] == "I":
+        if operation['gate'] == Operation.I:
             qubit.I()
 
-        if operation['gate'] == "X":
+        if operation['gate'] == Operation.X:
             qubit.X()
 
-        if operation['gate'] == "Y":
+        if operation['gate'] == Operation.Y:
             qubit.Y()
 
-        if operation['gate'] == "Z":
+        if operation['gate'] == Operation.Z:
             qubit.Z()
 
-        if operation['gate'] == "T":
+        if operation['gate'] == Operation.T:
             qubit.T()
 
-        if operation['gate'] == "H":
+        if operation['gate'] == Operation.H:
             qubit.H()
 
-        if operation['gate'] == "K":
+        if operation['gate'] == Operation.K:
             qubit.K()
 
-        if operation['gate'] == "rx":
+        if operation['gate'] == Operation.RX:
             qubit.rx(operation['gate_param'])
 
-        if operation['gate'] == "ry":
+        if operation['gate'] == Operation.RY:
             qubit.ry(operation['gate_param'])
 
-        if operation['gate'] == "rz":
+        if operation['gate'] == Operation.RZ:
             qubit.rz(operation['gate_param'])
 
-        if operation['gate'] == "custom_gate":
+        if operation['gate'] == Operation.CUSTOM:
             if type(operation['gate_param']) is not np.ndarray:
                 msg = "Wrong input format for the gate param in the operation"
                 self._report_error(msg)
