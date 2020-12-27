@@ -402,7 +402,7 @@ class ComputingHost(Host):
 
         if qubit_id in self._pre_allocated_qubits:
             del self._pre_allocated_qubits[qubit_id]
-            self._total_pre_allocated_qubits -= 1
+            self._total_pre_allocated_qubits += 1
         else:
             del self._qubits[qubit_id]
             self._total_qubits -= 1
