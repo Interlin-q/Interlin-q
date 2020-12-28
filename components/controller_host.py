@@ -176,7 +176,7 @@ class ControllerHost(Host):
             op_1 = Operation(
                 name=Constants.TWO_QUBIT,
                 qids=[control_qubit, epr_qubit_id],
-                gate="cnot",
+                gate=Operation.CNOT,
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])
 
@@ -205,7 +205,7 @@ class ControllerHost(Host):
                 name=Constants.CLASSICAL_CTRL_GATE,
                 qids=[epr_qubit_id],
                 cids=[bit_id_1],
-                gate="X",
+                gate=Operation.X,
                 computing_host_ids=[target_host])
             operations[itr].extend([op_1])
 
@@ -223,7 +223,7 @@ class ControllerHost(Host):
             op_1 = Operation(
                 name=Constants.SINGLE,
                 qids=[epr_qubit_id],
-                gate="H",
+                gate=Operation.H,
                 computing_host_ids=[target_host])
             operations[itr].extend([op_1])
 
@@ -251,7 +251,7 @@ class ControllerHost(Host):
             op_1 = Operation(
                 name=Constants.SINGLE,
                 qids=[control_qubit],
-                gate="Z",
+                gate=Operation.Z,
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])
 

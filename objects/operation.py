@@ -12,6 +12,7 @@ class Operation(object):
     Y = "Y"
     Z = "Z"
     CNOT = "cnot"
+    CPHASE = "cphase"
     T = "T"
     H = "H"
     K = "K"
@@ -19,6 +20,8 @@ class Operation(object):
     RY = "ry"
     RZ = "rz"
     CUSTOM = "custom_gate"
+    CUSTOM_TWO_QUBIT = "custom_two_qubit_gate"
+    CUSTOM_CONTROLLED = "custom_controlled_gate"
     MEASURE = "measure"
 
     def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[],

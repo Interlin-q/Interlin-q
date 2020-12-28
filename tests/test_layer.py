@@ -12,7 +12,7 @@ class TestLayer(unittest.TestCase):
         op_info_1 = {
             'name': "SINGLE",
             'qids': ["qubit_3"],
-            'gate': "X",
+            'gate': Operation.X,
             'computing_host_ids': ["QPU_3"]}
 
         op_info_2 = {

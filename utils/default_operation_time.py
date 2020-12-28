@@ -14,14 +14,14 @@ DefaultSingleGateTime = {
     "rx": default_single_gate_time,
     "ry": default_single_gate_time,
     "rz": default_single_gate_time,
-    "custom_gate": default_single_gate_time,
-    "custom_controlled_gate": default_single_gate_time
+    "custom_gate": default_single_gate_time
 }
 
 DefaultTwoQubitGateTime = {
     "cnot": default_single_gate_time,
     "cphase": default_single_gate_time,
-    "custom_two_qubit_gate": default_single_gate_time
+    "custom_two_qubit_gate": default_single_gate_time,
+    "custom_controlled_gate": default_single_gate_time
 }
 
 DefaultGateTime = DefaultSingleGateTime.copy()

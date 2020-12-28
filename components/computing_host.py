@@ -277,17 +277,23 @@ class ComputingHost(Host):
         qubit_1 = self._get_stored_qubit(q_ids[0])
         qubit_2 = self._get_stored_qubit(q_ids[1])
 
-        if operation['gate'] == "cnot":
+        if operation['gate'] == Operation.CNOT:
             qubit_1.cnot(qubit_2)
 
-        if operation['gate'] == "cphase":
+        if operation['gate'] == Operation.CPHASE:
             qubit_1.cphase(qubit_2)
 
-        if operation['gate'] == "custom_two_qubit_gate":
+        if operation['gate'] == Operation.CUSTOM_TWO_QUBIT:
             if type(operation['gate_param']) is not np.ndarray:
                 msg = "Wrong input format for gate param in the two qubit gate operation"
                 self._report_error(msg)
             qubit_1.custom_two_qubit_gate(qubit_2, operation['gate_param'])
+
+        if operation['gate'] == Operation.CUSTOM_CONTROLLED:
+            if type(operation['gate_param']) is not np.ndarray:
+                msg = "Wrong input format for gate param in the two qubit gate operation"
+                self._report_error(msg)
+            qubit_1.custom_controlled_gate(qubit_2, operation['gate_param'])
 
     def _process_classical_ctrl_gates(self, operation):
         """

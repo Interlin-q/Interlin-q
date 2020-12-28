@@ -59,7 +59,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_1"])
 
         op_2 = Operation(
@@ -78,7 +78,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_4"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2"])
 
         layer_2 = Layer([op_1])
@@ -110,7 +110,7 @@ class TestControllerHost(unittest.TestCase):
             name="CLASSICAL_CTRL_GATE",
             qids=["qubit_1"],
             cids=["bit_1"],
-            gate="X",
+            gate=Operation.X,
             computing_host_ids=["QPU_1"])
 
         layer_5 = Layer([op_1])
@@ -156,19 +156,19 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_1"])
 
         op_2 = Operation(
             name="SINGLE",
             qids=["qubit_3"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_2"])
 
         op_3 = Operation(
             name="SINGLE",
             qids=["qubit_3"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_3"])
 
         layer_1 = Layer([op_1, op_2, op_3])
@@ -177,13 +177,13 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_3", "qubit_1"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         op_2 = Operation(
             name="SINGLE",
             qids=["qubit_3"],
-            gate="X",
+            gate=Operation.X,
             computing_host_ids=["QPU_3"])
 
         layer_2 = Layer([op_1, op_2])
@@ -230,7 +230,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_1"])
 
         layer_1 = Layer([op_1])
@@ -239,19 +239,19 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_1"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         op_2 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_5", "qubit_6"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_3", "QPU_4"])
 
         op_3 = Operation(
             name="SINGLE",
             qids=["qubit_7"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_5"])
 
         layer_2 = Layer([op_1, op_2, op_3])
@@ -260,7 +260,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_3"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_3 = Layer([op_1])
@@ -269,7 +269,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_4"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_4 = Layer([op_1])
@@ -278,7 +278,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_1", "qubit_6"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_1", "QPU_4"])
 
         layer_5 = Layer([op_1])

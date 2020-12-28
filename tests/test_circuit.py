@@ -38,7 +38,7 @@ class TestCircuit(unittest.TestCase):
         operations = [Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="X",
+            gate=Operation.X,
             computing_host_ids=["QPU_1"])]
         layer = Layer(operations)
         self._circuit.add_layer_to_circuit(layer)
@@ -56,13 +56,13 @@ class TestCircuit(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_1"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         op_2 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_5", "qubit_6"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_3", "QPU_4"])
 
         layer_1 = Layer([op_1, op_2])
@@ -70,7 +70,7 @@ class TestCircuit(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_3"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_2 = Layer([op_1])
@@ -78,7 +78,7 @@ class TestCircuit(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_4"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_3 = Layer([op_1])
@@ -86,7 +86,7 @@ class TestCircuit(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_6", "qubit_1"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_4", "QPU_1"])
 
         layer_4= Layer([op_1])

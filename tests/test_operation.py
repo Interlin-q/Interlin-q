@@ -12,7 +12,7 @@ class TestOperation(unittest.TestCase):
             'name': "SINGLE",
             'qids': ["qubit_1"],
             'cids': None,
-            'gate': "X",
+            'gate': Operation.X,
             'gate_param': None,
             'pre_allocated_qubits': False,
             'computing_host_ids': ["QPU_1"]}
@@ -32,7 +32,7 @@ class TestOperation(unittest.TestCase):
 
     def test_instantiation(self):
         self.assertEqual(self.operation.name, "SINGLE")
-        self.assertEqual(self.operation.gate, "X")
+        self.assertEqual(self.operation.gate, Operation.X)
         self.assertEqual(self.operation.computing_host_ids, ["QPU_1"])
         
         self.assertEqual(self.operation.get_dict(), self._op_info)
