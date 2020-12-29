@@ -3,6 +3,7 @@ from utils import DefaultOperationTime
 from utils.constants import Constants
 from objects import Operation, Circuit, Layer
 
+import numpy as np
 import uuid
 import json
 
@@ -334,7 +335,7 @@ class ControllerHost(Host):
         computing_host_schedules, max_execution_time = self._create_distributed_schedules(distributed_circuit)
         self._circuit_max_execution_time = max_execution_time
 
-        self.send_broadcast(json.dumps(computing_host_schedules))
+        self.send_broadcast(json.dumps(computing_host_schedules, cls=NumpyEncoder))
 
         for host_id in self._computing_host_ids:
             result = self.get_classical(host_id, wait=-1)
@@ -355,3 +356,11 @@ class ControllerHost(Host):
             results.update(result)
 
         self._results = results
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, complex):
+            return (obj.real, obj.imag)
+        return json.JSONEncoder.default(self, obj)

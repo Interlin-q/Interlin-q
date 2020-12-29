@@ -9,7 +9,7 @@ import numpy as np
 import json
 import time
 
-MAX_WAIT = 3
+MAX_WAIT = 5
 
 
 class ComputingHost(Host):
@@ -92,9 +92,10 @@ class ComputingHost(Host):
         # TODO: Add encryption for this message
         schedules = json.loads(messages[0].content)
         schedule = {}
+
         if self._host_id in schedules:
             for op in schedules[self._host_id]:
-                if op['layer_end'] in schedules[self._host_id]:
+                if op['layer_end'] in schedule.keys():
                     schedule[op['layer_end']].append(op)
                 else:
                     schedule[op['layer_end']] = [op]
@@ -154,7 +155,8 @@ class ComputingHost(Host):
         Args:
             qubit (Qubit): The qubit to be added
             qubit_id (str): ID of the qubit to be added
-            pre_allocated (bool): Boolean flag to check if the new qubit should be created in the pre_allocated register
+            pre_allocated (bool): Boolean flag to check if the new qubit should be created
+                in the pre_allocated register
         """
         if pre_allocated:
             if self._total_pre_allocated_qubits > 0:
@@ -176,7 +178,6 @@ class ComputingHost(Host):
         Args:
             qubit_id (str): ID of the qubit to be added
         """
-
         if qubit_id in self._qubits:
             return self._qubits[qubit_id]
         if qubit_id in self._pre_allocated_qubits:
@@ -188,7 +189,7 @@ class ComputingHost(Host):
 
         Args:
             qubits (Dict): Map of the qubit ids to the corresponding qubits stored with the
-                           computing host
+                computing host
         """
 
         if len(qubits) > self._total_qubits:
@@ -208,7 +209,6 @@ class ComputingHost(Host):
         qubits = {}
         for qubit_id in prepare_qubit_op['qids']:
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
-
         self._update_stored_qubits(qubits)
 
     def _process_single_gates(self, operation, classical_ctrl_gate=False):
@@ -258,10 +258,8 @@ class ComputingHost(Host):
             qubit.rz(operation['gate_param'])
 
         if operation['gate'] == Operation.CUSTOM:
-            if type(operation['gate_param']) is not np.ndarray:
-                msg = "Wrong input format for the gate param in the operation"
-                self._report_error(msg)
-            qubit.custom_gate(operation['gate_param'])
+            gate_param = np.asarray(operation['gate_param'])
+            qubit.custom_gate(gate_param)
 
     def _process_two_qubit_gates(self, operation):
         """
@@ -284,16 +282,16 @@ class ComputingHost(Host):
             qubit_1.cphase(qubit_2)
 
         if operation['gate'] == Operation.CUSTOM_TWO_QUBIT:
-            if type(operation['gate_param']) is not np.ndarray:
-                msg = "Wrong input format for gate param in the two qubit gate operation"
-                self._report_error(msg)
-            qubit_1.custom_two_qubit_gate(qubit_2, operation['gate_param'])
+            gate_param = np.asarray(operation['gate_param'])
+            qubit_1.custom_two_qubit_gate(qubit_2, gate_param)
 
         if operation['gate'] == Operation.CUSTOM_CONTROLLED:
-            if type(operation['gate_param']) is not np.ndarray:
-                msg = "Wrong input format for gate param in the two qubit gate operation"
-                self._report_error(msg)
-            qubit_1.custom_controlled_gate(qubit_2, operation['gate_param'])
+            p = operation['gate_param']
+            for i in range(len(p)):
+                for j in range(len(p[0])):
+                    p[i][j] = (p[i][j][0] + p[i][j][1]*1j)
+            gate_param = np.asarray(p)
+            qubit_1.custom_controlled_gate(qubit_2, gate_param)
 
     def _process_classical_ctrl_gates(self, operation):
         """
