@@ -41,7 +41,7 @@ def quantum_phase_estimation_circuit():
         'QPU_1': ['qubit_1', 'qubit_2', 'qubit_3'],
         'QPU_2': ['qubit_4']}
 
-    # Form Layer 1
+    # Prepare the qubits
     op_1 = Operation(
         name=Constants.PREPARE_QUBITS,
         qids=q_map['QPU_1'],
@@ -54,7 +54,7 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1, op_2]))
 
-    # Form Layer 2
+    # Apply Hadamard gates
     op_1 = Operation(
         name="SINGLE",
         qids=["qubit_1"],
@@ -75,7 +75,7 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1, op_2, op_3]))
 
-    # Form Layer 3
+    # Apply controlled unitaries
     op_1 = Operation(
         name="TWO_QUBIT",
         qids=["qubit_1", "qubit_4"],
@@ -85,7 +85,6 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1]))
 
-    # Form Layer 4
     for i in range(2):
         op = Operation(
             name="TWO_QUBIT",
@@ -95,7 +94,6 @@ def quantum_phase_estimation_circuit():
             computing_host_ids=["QPU_1", "QPU_2"])
         layers.append(Layer([op]))
 
-    # Form Layer 5
     for i in range(4):
         op = Operation(
             name="TWO_QUBIT",
@@ -105,7 +103,7 @@ def quantum_phase_estimation_circuit():
             computing_host_ids=["QPU_1", "QPU_2"])
         layers.append(Layer([op]))
 
-    # Form Layer 6
+    # Inverse Fourier Transform circuit
     op_1 = Operation(
         name="SINGLE",
         qids=["qubit_1"],
@@ -114,7 +112,6 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1]))
 
-    # Form Layer 7
     op_1 = Operation(
         name="TWO_QUBIT",
         qids=["qubit_1", "qubit_2"],
@@ -124,7 +121,6 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1]))
 
-    # Form Layer 8
     op_1 = Operation(
         name="SINGLE",
         qids=["qubit_2"],
@@ -133,7 +129,6 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1]))
 
-    # Form Layer 9
     op_1 = Operation(
         name="TWO_QUBIT",
         qids=["qubit_1", "qubit_3"],
@@ -143,7 +138,6 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1]))
 
-    # Form Layer 10
     op_1 = Operation(
         name="TWO_QUBIT",
         qids=["qubit_2", "qubit_3"],
@@ -153,7 +147,6 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1]))
 
-    # Form Layer 11
     op_1 = Operation(
         name="SINGLE",
         qids=["qubit_3"],
