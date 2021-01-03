@@ -250,8 +250,9 @@ class ControllerHost(Host):
 
             itr += 1
             op_1 = Operation(
-                name=Constants.SINGLE,
+                name=Constants.CLASSICAL_CTRL_GATE,
                 qids=[control_qubit],
+                cids=[bit_id_2],
                 gate=Operation.Z,
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])

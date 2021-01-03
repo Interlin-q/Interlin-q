@@ -212,7 +212,7 @@ class TestControllerHost(unittest.TestCase):
         self.assertEqual(distributed_circuit.layers[1].operations[2].name, "REC_ENT")
 
         self.assertEqual(distributed_circuit.layers[2].operations[0].name, "TWO_QUBIT")
-        self.assertEqual(distributed_circuit.layers[10].operations[0].name, "SINGLE")
+        self.assertEqual(distributed_circuit.layers[10].operations[0].name, "CLASSICAL_CTRL_GATE")
 
         self.assertEqual(distributed_circuit.layers[11].operations[0].name, "MEASURE")
 
@@ -311,4 +311,4 @@ class TestControllerHost(unittest.TestCase):
         layer_op_names = [i.name for i in layers[13].operations]
         self.assertEqual(layer_op_names, ['SEND_ENT', 'REC_ENT'])
 
-        self.assertEqual(layers[22].operations[0].name, "SINGLE")
+        self.assertEqual(layers[22].operations[0].name, "CLASSICAL_CTRL_GATE")

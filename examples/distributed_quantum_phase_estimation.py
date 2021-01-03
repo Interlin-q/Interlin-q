@@ -17,11 +17,8 @@ import numpy as np
 
 Logger.DISABLED = True
 
-def unitary_gate(theta):
-    unitary = np.array(
-      [[1, 0], [0, (np.cos(theta) + np.sin(theta)*1j)]],
-        dtype=np.csingle)
-    return unitary
+def phase_gate(theta):
+    return np.array([[1, 0], [0, np.exp(1j * theta)]])
 
 def quantum_phase_estimation_circuit():
     """
@@ -31,11 +28,7 @@ def quantum_phase_estimation_circuit():
     layers = []
 
     # We use T gate here
-    theta = np.pi/4
-    unitary = unitary_gate(theta)
-    #unitary = np.array(
-    #    [[1, 0], [0, (0.7071067811865476 + 0.7071067811865475j)]],
-    #    dtype=np.csingle)
+    t_gate = np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]])
 
     q_map = {
         'QPU_1': ['qubit_1', 'qubit_2', 'qubit_3'],
@@ -73,14 +66,20 @@ def quantum_phase_estimation_circuit():
         gate=Operation.H,
         computing_host_ids=["QPU_1"])
 
-    layers.append(Layer([op_1, op_2, op_3]))
+    op_4 = Operation(
+        name="SINGLE",
+        qids=["qubit_4"],
+        gate=Operation.X,
+        computing_host_ids=["QPU_2"])
+
+    layers.append(Layer([op_1, op_2, op_3, op_4]))
 
     # Apply controlled unitaries
     op_1 = Operation(
         name="TWO_QUBIT",
         qids=["qubit_1", "qubit_4"],
         gate=Operation.CUSTOM_CONTROLLED,
-        gate_param=unitary,
+        gate_param=t_gate,
         computing_host_ids=["QPU_1", "QPU_2"])
 
     layers.append(Layer([op_1]))
@@ -90,7 +89,7 @@ def quantum_phase_estimation_circuit():
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_4"],
             gate=Operation.CUSTOM_CONTROLLED,
-            gate_param=unitary,
+            gate_param=t_gate,
             computing_host_ids=["QPU_1", "QPU_2"])
         layers.append(Layer([op]))
 
@@ -99,14 +98,14 @@ def quantum_phase_estimation_circuit():
             name="TWO_QUBIT",
             qids=["qubit_3", "qubit_4"],
             gate=Operation.CUSTOM_CONTROLLED,
-            gate_param=unitary,
+            gate_param=t_gate,
             computing_host_ids=["QPU_1", "QPU_2"])
         layers.append(Layer([op]))
 
     # Inverse Fourier Transform circuit
     op_1 = Operation(
         name="SINGLE",
-        qids=["qubit_1"],
+        qids=["qubit_3"],
         gate=Operation.H,
         computing_host_ids=["QPU_1"])
 
@@ -114,9 +113,9 @@ def quantum_phase_estimation_circuit():
 
     op_1 = Operation(
         name="TWO_QUBIT",
-        qids=["qubit_1", "qubit_2"],
+        qids=["qubit_3", "qubit_2"],
         gate=Operation.CUSTOM_CONTROLLED,
-        gate_param=unitary_gate(np.pi/2),
+        gate_param=phase_gate(-np.pi / 2),
         computing_host_ids=["QPU_1"])
 
     layers.append(Layer([op_1]))
@@ -131,25 +130,25 @@ def quantum_phase_estimation_circuit():
 
     op_1 = Operation(
         name="TWO_QUBIT",
-        qids=["qubit_1", "qubit_3"],
+        qids=["qubit_3", "qubit_1"],
         gate=Operation.CUSTOM_CONTROLLED,
-        gate_param=unitary_gate(np.pi/4),
+        gate_param=phase_gate(-np.pi / 4),
         computing_host_ids=["QPU_1"])
 
     layers.append(Layer([op_1]))
 
     op_1 = Operation(
         name="TWO_QUBIT",
-        qids=["qubit_2", "qubit_3"],
+        qids=["qubit_2", "qubit_1"],
         gate=Operation.CUSTOM_CONTROLLED,
-        gate_param=unitary_gate(np.pi/2),
+        gate_param=phase_gate(-np.pi / 2),
         computing_host_ids=["QPU_1"])
 
     layers.append(Layer([op_1]))
 
     op_1 = Operation(
         name="SINGLE",
-        qids=["qubit_3"],
+        qids=["qubit_1"],
         gate=Operation.H,
         computing_host_ids=["QPU_1"])
 
@@ -250,6 +249,7 @@ def main():
     t2.join()
     t3.join()
     network.stop(True)
+    exit()
 
 if __name__ == '__main__':
     main()
