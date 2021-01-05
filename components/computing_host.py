@@ -136,20 +136,20 @@ class ComputingHost(Host):
         if op['qids']:
             if len(op['qids']) > len_qids:
                 msg = error_msg + "Error Message: 'Number of qubit IDs is " \
-                    "exceeding the permissible number"
+                                  "exceeding the permissible number"
 
         if len(op['computing_host_ids']) > len_computing_host_ids:
             msg = error_msg + "Error Message: 'Number of computing host IDs " \
-                "is exceeding the permissible number"
+                              "is exceeding the permissible number"
 
         if op['cids']:
             if len(op['cids']) > len_cids:
                 msg = error_msg + "Error Message: 'Number of classical bit IDs" \
-                    "is exceeding the permissible number"
+                                  "is exceeding the permissible number"
 
         if op['computing_host_ids'][0] != self._host_id:
             msg = error_msg + "Error Message: 'Wrong input format for computing" \
-                "host ids in the operation'"
+                              "host ids in the operation'"
 
         if msg:
             self._report_error(msg)
@@ -201,12 +201,13 @@ class ComputingHost(Host):
 
         if len(qubits) > self._total_qubits:
             msg = "Number of qubits required for the circuit are more " \
-                "than the total qubits"
+                  "than the total qubits"
             self._report_error(msg)
 
         self._qubits = qubits
 
-    def extract_gate_param(self, op):
+    @staticmethod
+    def extract_gate_param(op):
         """
         Extract gate parameter array as an np array
 
@@ -217,7 +218,7 @@ class ComputingHost(Host):
         param = op['gate_param']
         for i in range(len(param)):
             for j in range(len(param[0])):
-                param[i][j] = (param[i][j][0] + param[i][j][1]*1j)
+                param[i][j] = (param[i][j][0] + param[i][j][1] * 1j)
         return np.asarray(param)
 
     def _prepare_qubits(self, prepare_qubit_op):
@@ -284,7 +285,7 @@ class ComputingHost(Host):
             qubit.rz(operation['gate_param'])
 
         if operation['gate'] == Operation.CUSTOM:
-            gate_param = extract_gate_param(operation)
+            gate_param = self.extract_gate_param(operation)
             qubit.custom_gate(gate_param)
 
     def _process_two_qubit_gates(self, operation):
@@ -311,11 +312,11 @@ class ComputingHost(Host):
             qubit_1.cphase(qubit_2)
 
         if operation['gate'] == Operation.CUSTOM_TWO_QUBIT:
-            gate_param = extract_gate_param(operation)
+            gate_param = self.extract_gate_param(operation)
             qubit_1.custom_two_qubit_gate(qubit_2, gate_param)
 
         if operation['gate'] == Operation.CUSTOM_CONTROLLED:
-            gate_param = extract_gate_param(operation)
+            gate_param = self.extract_gate_param(operation)
             qubit_1.custom_controlled_gate(qubit_2, gate_param)
 
     def _process_classical_ctrl_gates(self, operation):
