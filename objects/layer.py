@@ -15,6 +15,12 @@ class Layer(object):
 
         self._operations = operations
 
+    def __str__(self):
+        layer = ''
+        for o in self._operations:
+            layer += f'-{o}-\n'
+        return layer
+
     @property
     def operations(self):
         """

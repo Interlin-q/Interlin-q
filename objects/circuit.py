@@ -16,6 +16,13 @@ class Circuit(object):
 
         self._q_map = q_map
         self._layers = layers
+        self._width = 0
+
+    def __str__(self):
+        circuit = ''
+        for layer in self._layers:
+            circuit += str(layer) + '\n'
+        return circuit
 
     @property
     def q_map(self):
@@ -81,7 +88,7 @@ class Circuit(object):
         Args:
             layer (Layer): List of operations to be applied to the system
         """
-        
+
         self._layers.append(layer)
 
     def insert_layer(self, index, layer):
@@ -92,7 +99,8 @@ class Circuit(object):
             layer (Layer): new layer object to be inserted
             index (int): Index at which the new layer should be inserted at
         """
-
+        if len(layer.operations) > self._width:
+            self._width = len(layer.operations)
         self._layers.insert(index, layer)
 
     def update_layer(self, index, layer):
@@ -128,11 +136,11 @@ class Circuit(object):
 
                     operations = []
                     if layer_index != 0:
-                        for index, gate in enumerate(control_gate_info[layer_index-1]):
+                        for index, gate in enumerate(control_gate_info[layer_index - 1]):
                             if gate['computing_hosts'] == computing_hosts:
                                 if gate['control_qubit'] == control_qubit:
                                     operations = gate['operations']
-                                    del control_gate_info[layer_index-1][index]
+                                    del control_gate_info[layer_index - 1][index]
                     operations.append(op)
 
                     control_gate = {

@@ -377,10 +377,14 @@ class ControllerHost(Host):
 
         for host_id in self._computing_host_ids:
             result = self.get_classical(host_id, wait=-1, seq_num=1)
-            result = json.loads(result.content)
-            results.update(result)
+            try:
+                result = json.loads(result.content)
+                results.update(result)
+            except json.decoder.JSONDecodeError:
+                pass
 
         self._results = results
+
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):

@@ -35,12 +35,12 @@ class Operation(object):
                 list will be the ID of the computing host where the operation is being performed
             cids (list): List of classical bit IDs associated to the operation
             gate (str): Name of the single or the two-qubit gate
-            gate_param (int): parameter for rotational gates
+            gate_param (obj): parameter for rotational gates
             computing_host_ids (list): List of associated ID/IDS of the computing host where
                 the operation/gate is being performed. The first computing host in the list
                 would be the one where the operation is being performed.
             pre_allocated_qubits (bool): Flag to indicate if this operation is being performed on
-                a sepcific pre-allocated qubit (In case of EPR pair generation)
+                a specific pre-allocated qubit (In case of EPR pair generation)
         """
 
         if name not in Constants.OPERATION_NAMES:
@@ -53,6 +53,9 @@ class Operation(object):
         self._gate_param = gate_param
         self._computing_host_ids = computing_host_ids
         self._pre_allocated_qubits = pre_allocated_qubits
+
+    def __str__(self):
+        return self.name
 
     @property
     def name(self):
