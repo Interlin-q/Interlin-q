@@ -257,34 +257,34 @@ class ComputingHost(Host):
         if operation['gate'] == Operation.I:
             qubit.I()
 
-        if operation['gate'] == Operation.X:
+        elif operation['gate'] == Operation.X:
             qubit.X()
 
-        if operation['gate'] == Operation.Y:
+        elif operation['gate'] == Operation.Y:
             qubit.Y()
 
-        if operation['gate'] == Operation.Z:
+        elif operation['gate'] == Operation.Z:
             qubit.Z()
 
-        if operation['gate'] == Operation.T:
+        elif operation['gate'] == Operation.T:
             qubit.T()
 
-        if operation['gate'] == Operation.H:
+        elif operation['gate'] == Operation.H:
             qubit.H()
 
-        if operation['gate'] == Operation.K:
+        elif operation['gate'] == Operation.K:
             qubit.K()
 
-        if operation['gate'] == Operation.RX:
+        elif operation['gate'] == Operation.RX:
             qubit.rx(operation['gate_param'])
 
-        if operation['gate'] == Operation.RY:
+        elif operation['gate'] == Operation.RY:
             qubit.ry(operation['gate_param'])
 
-        if operation['gate'] == Operation.RZ:
+        elif operation['gate'] == Operation.RZ:
             qubit.rz(operation['gate_param'])
 
-        if operation['gate'] == Operation.CUSTOM:
+        elif operation['gate'] == Operation.CUSTOM:
             gate_param = self.extract_gate_param(operation)
             qubit.custom_gate(gate_param)
 
@@ -308,14 +308,14 @@ class ComputingHost(Host):
         if operation['gate'] == Operation.CNOT:
             qubit_1.cnot(qubit_2)
 
-        if operation['gate'] == Operation.CPHASE:
+        elif operation['gate'] == Operation.CPHASE:
             qubit_1.cphase(qubit_2)
 
-        if operation['gate'] == Operation.CUSTOM_TWO_QUBIT:
+        elif operation['gate'] == Operation.CUSTOM_TWO_QUBIT:
             gate_param = self.extract_gate_param(operation)
             qubit_1.custom_two_qubit_gate(qubit_2, gate_param)
 
-        if operation['gate'] == Operation.CUSTOM_CONTROLLED:
+        elif operation['gate'] == Operation.CUSTOM_CONTROLLED:
             gate_param = self.extract_gate_param(operation)
             qubit_1.custom_controlled_gate(qubit_2, gate_param)
 
