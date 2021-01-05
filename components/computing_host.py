@@ -207,7 +207,7 @@ class ComputingHost(Host):
 
         self._qubits = qubits
 
-    def extract_gate_param(self, op):
+    def _extract_gate_param(self, op):
         """
         Extract gate parameter array as an np array
 
@@ -285,7 +285,7 @@ class ComputingHost(Host):
             qubit.rz(operation['gate_param'])
 
         if operation['gate'] == Operation.CUSTOM:
-            gate_param = extract_gate_param(operation)
+            gate_param = self._extract_gate_param(operation)
             qubit.custom_gate(gate_param)
 
     def _process_two_qubit_gates(self, operation):
@@ -312,11 +312,11 @@ class ComputingHost(Host):
             qubit_1.cphase(qubit_2)
 
         if operation['gate'] == Operation.CUSTOM_TWO_QUBIT:
-            gate_param = extract_gate_param(operation)
+            gate_param = self._extract_gate_param(operation)
             qubit_1.custom_two_qubit_gate(qubit_2, gate_param)
 
         if operation['gate'] == Operation.CUSTOM_CONTROLLED:
-            gate_param = extract_gate_param(operation)
+            gate_param = self._extract_gate_param(operation)
             qubit_1.custom_controlled_gate(qubit_2, gate_param)
 
     def _process_classical_ctrl_gates(self, operation):
