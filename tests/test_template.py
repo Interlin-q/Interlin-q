@@ -1,5 +1,4 @@
 import unittest
-from components.controller_host import ControllerHost
 
 
 class TestControllerHost(unittest.TestCase):

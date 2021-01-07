@@ -1,7 +1,9 @@
 from qunetsim.components import Host
-from utils import DefaultOperationTime
-from utils.constants import Constants
-from objects import Operation, Circuit, Layer
+
+from interlinq.components import ComputingHost
+from interlinq.utils import DefaultOperationTime
+from interlinq.utils.constants import Constants
+from interlinq.objects import Operation, Circuit, Layer
 
 import numpy as np
 import uuid
@@ -28,8 +30,8 @@ class ControllerHost(Host):
         super().__init__(host_id)
 
         self._computing_host_ids = computing_host_ids
-        self._clock = clock
         self.add_c_connections(computing_host_ids)
+        self._clock = clock
         self._circuit_max_execution_time = 0
 
         # TODO: Take gate_time as an input from computing hosts
@@ -59,6 +61,40 @@ class ControllerHost(Host):
             (dict): The final output/error from every computing host
         """
         return self._results
+
+    def create_distributed_network(self, num_computing_hosts, num_qubits_per_host):
+        """
+
+        Args:
+            num_computing_hosts (int):
+            num_qubits_per_host (int):
+        Returns:
+            (dict)
+        """
+        id_prefix = "QPU_"
+        computing_hosts = []
+        q_map = {}
+        self._computing_host_ids = [f'{id_prefix}{str(i)}' for i in range(num_computing_hosts)]
+        for i in range(num_computing_hosts):
+            computing_host = ComputingHost(
+                host_id=id_prefix + str(i),
+                controller_host_id=self.host_id,
+                clock=self._clock,
+                total_qubits=num_qubits_per_host,
+                total_pre_allocated_qubits=num_qubits_per_host
+            )
+            self._gate_time[id_prefix + str(i)] = DefaultOperationTime
+            self.add_c_connection(id_prefix + str(i))
+            computing_hosts.append(computing_host)
+            q_map[computing_host.host_id] = [f'q_{str(i)}_{str(j)}' for j in range(num_qubits_per_host)]
+
+        for outer_computing_host in computing_hosts:
+            for inner_computing_host in computing_hosts:
+                if outer_computing_host.host_id != inner_computing_host.host_id:
+                    outer_computing_host.add_connection(inner_computing_host.host_id)
+            outer_computing_host.start()
+
+        return computing_hosts, q_map
 
     def connect_host(self, computing_host_id, gate_time=None):
         """
@@ -141,7 +177,8 @@ class ControllerHost(Host):
 
         return computing_host_schedules, time_layer_end
 
-    def _replace_control_gates(self, control_gate_info, current_layer):
+    @staticmethod
+    def _replace_control_gates(control_gate_info, current_layer):
         """
         Replace control gates with a distributed version of the control gate
         over the different computing hosts
@@ -299,7 +336,7 @@ class ControllerHost(Host):
         for layer_index, layer in enumerate(layers):
             new_layer = Layer(operations=[])
 
-            for op_index, op in enumerate(layer.operations):
+            for op in layer.operations:
                 if not op.is_control_gate_over_two_hosts():
                     new_layer.add_operation(op)
 
@@ -362,7 +399,7 @@ class ControllerHost(Host):
 
         # Wait for the computing hosts to receive the broadcast
         for host_id in self._computing_host_ids:
-            result = self.get_classical(host_id, wait=-1)
+            self.get_classical(host_id, wait=-1)
 
         # Initialise the clock and start running the algorithm
         self._clock.initialise(max_execution_time)
@@ -377,9 +414,15 @@ class ControllerHost(Host):
 
         for host_id in self._computing_host_ids:
             result = self.get_classical(host_id, wait=-1, seq_num=1)
+
+            # I think this is a bug with QuNetSim... Adding a hack for now
+            # to overcome it...
+            if result.content == 'ACK':
+                result = self.get_classical(host_id, wait=-1, seq_num=1)
+
             try:
-                result = json.loads(result.content)
-                results.update(result)
+                result = result.content
+                results.update(json.loads(result))
             except json.decoder.JSONDecodeError:
                 pass
 

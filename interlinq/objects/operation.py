@@ -1,4 +1,4 @@
-from utils import Constants
+from interlinq.utils import Constants
 
 
 class Operation(object):

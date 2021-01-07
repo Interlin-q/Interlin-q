@@ -1,8 +1,8 @@
-from components.controller_host import ControllerHost
-from components.clock import Clock
-from objects.circuit import Circuit
-from objects.layer import Layer
-from objects.operation import Operation
+from interlinq.components import ControllerHost
+from interlinq.components import Clock
+from interlinq.objects.circuit import Circuit
+from interlinq.objects.layer import Layer
+from interlinq.objects import Operation
 
 from qunetsim.components.network import Network
 from qunetsim.backends import EQSNBackend
