@@ -8,22 +8,29 @@ class Circuit(object):
         Returns the important things for a quantum circuit
 
         Args:
-            q_map (dict): A mapping of the qubits required for the circuit to the
-                computing host ID where the qubit is located
+            q_map (dict): A mapping of the computing hosts IDS to the list of qubits
+                required for the circuit in that host
             layers (list): List of Layer objects, where each layer contains a
                 collection of operations to be applied on the qubits in the system
         """
 
         self._q_map = q_map
         self._layers = layers
+        self._width = 0
+
+    def __str__(self):
+        circuit = ''
+        for layer in self._layers:
+            circuit += str(layer) + '\n'
+        return circuit
 
     @property
     def q_map(self):
         """
         Get the *q_map* of the circuit
         Returns:
-            (dict): A mapping of the qubits required for the circuit to the
-                computing host ID where the qubit is located
+            (dict): A mapping of the computing hosts IDS to the list of qubits
+                required for the circuit in that host
         """
         return self._q_map
 
@@ -44,18 +51,35 @@ class Circuit(object):
             (int): total number of qubits in circuit
         """
 
-        return len(self._q_map)
+        total_qubits = 0
+
+        for computing_host_id in list(self._q_map.keys()):
+            total_qubits += len(self._q_map[computing_host_id])
+
+        return total_qubits
 
     def add_new_qubit(self, qubit_info):
         """
         Add a new qubit to the circuit
         Args:
-            qubit_info (dict): Map of new qubit ID to the computing host ID
+            qubit_info (dict): A mapping of the computing hosts ID to the list of new
+                qubits required for the circuit in that host
         """
 
-        if list(qubit_info.keys())[0] in self._q_map:
-            raise ValueError("Qubit already added")
-        self._q_map.update(qubit_info)
+        computing_host_id = list(qubit_info.keys())[0]
+
+        if type(qubit_info[computing_host_id]) is not list:
+            raise ValueError("Qubits for a computing host should be provided as a list")
+
+        if computing_host_id not in self._q_map:
+            self._q_map.update(qubit_info)
+        else:
+            qubits_list = qubit_info[computing_host_id]
+
+            for qubit in qubits_list:
+                if qubit in self._q_map[computing_host_id]:
+                    raise ValueError("Qubit already added")
+                self._q_map[computing_host_id].append(qubit)
 
     def add_layer_to_circuit(self, layer):
         """
@@ -64,7 +88,7 @@ class Circuit(object):
         Args:
             layer (Layer): List of operations to be applied to the system
         """
-        
+
         self._layers.append(layer)
 
     def insert_layer(self, index, layer):
@@ -75,7 +99,8 @@ class Circuit(object):
             layer (Layer): new layer object to be inserted
             index (int): Index at which the new layer should be inserted at
         """
-
+        if len(layer.operations) > self._width:
+            self._width = len(layer.operations)
         self._layers.insert(index, layer)
 
     def update_layer(self, index, layer):
@@ -88,25 +113,6 @@ class Circuit(object):
         """
 
         self._layers[index] = layer
-
-    def computing_host_map(self):
-        """
-        Return a map of computing hosts to all the qubits required from that
-        computing host for the circuit.
-
-        Returns:
-            (dict): A mapping of the computing host ID to the qubits required
-                from that computing host in the circuit
-        """
-
-        computing_host_map = {}
-        for key, value in self._q_map.items():
-            if value not in computing_host_map:
-                computing_host_map[value] = [key]
-            else:
-                computing_host_map[value].append(key)
-
-        return computing_host_map
 
     def control_gate_info(self):
         """
@@ -130,11 +136,11 @@ class Circuit(object):
 
                     operations = []
                     if layer_index != 0:
-                        for index, gate in enumerate(control_gate_info[layer_index-1]):
+                        for index, gate in enumerate(control_gate_info[layer_index - 1]):
                             if gate['computing_hosts'] == computing_hosts:
                                 if gate['control_qubit'] == control_qubit:
                                     operations = gate['operations']
-                                    del control_gate_info[layer_index-1][index]
+                                    del control_gate_info[layer_index - 1][index]
                     operations.append(op)
 
                     control_gate = {

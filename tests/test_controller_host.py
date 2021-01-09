@@ -1,4 +1,5 @@
 from components.controller_host import ControllerHost
+from components.clock import Clock
 from objects.circuit import Circuit
 from objects.layer import Layer
 from objects.operation import Operation
@@ -25,8 +26,11 @@ class TestControllerHost(unittest.TestCase):
         network = Network.get_instance()
         network.start(["host_1"], EQSNBackend())
 
+        clock = Clock()
+
         self.controller_host = ControllerHost(
             host_id="host_1",
+            clock=clock,
             computing_host_ids=["QPU_1"])
         network.add_host(self.controller_host)
 
@@ -48,26 +52,24 @@ class TestControllerHost(unittest.TestCase):
         self.controller_host.connect_host("QPU_2")
 
         q_map = {
-            'qubit_1': 'QPU_1',
-            'qubit_2': 'QPU_1',
-            'qubit_3': 'QPU_2',
-            'qubit_4': 'QPU_2'}
+            'QPU_1': ['qubit_1', 'qubit_2'],
+            'QPU_2': ['qubit_2', 'qubit_4']}
 
         # Form layer 1
         op_1 = Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_1"])
 
         op_2 = Operation(
             name="SEND_ENT",
-            qids=["qubit_2", "qubit_3"],
+            qids=["qubit_2"],
             computing_host_ids=["QPU_1", "QPU_2"])
 
         op_3 = Operation(
             name="REC_ENT",
-            qids=["qubit_3", "qubit_2"],
+            qids=["qubit_2"],
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_1 = Layer([op_1, op_2, op_3])
@@ -75,8 +77,8 @@ class TestControllerHost(unittest.TestCase):
         # Form layer 2
         op_1 = Operation(
             name="TWO_QUBIT",
-            qids=["qubit_3", "qubit_4"],
-            gate="cnot",
+            qids=["qubit_2", "qubit_4"],
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2"])
 
         layer_2 = Layer([op_1])
@@ -84,7 +86,7 @@ class TestControllerHost(unittest.TestCase):
         # Form layer 3
         op_1 = Operation(
             name="MEASURE",
-            qids=["qubit_3"],
+            qids=["qubit_2"],
             cids=["bit_1"],
             computing_host_ids=["QPU_2"])
 
@@ -108,7 +110,7 @@ class TestControllerHost(unittest.TestCase):
             name="CLASSICAL_CTRL_GATE",
             qids=["qubit_1"],
             cids=["bit_1"],
-            gate="X",
+            gate=Operation.X,
             computing_host_ids=["QPU_1"])
 
         layer_5 = Layer([op_1])
@@ -116,11 +118,13 @@ class TestControllerHost(unittest.TestCase):
         layers = [layer_1, layer_2, layer_3, layer_4, layer_5]
         circuit = Circuit(q_map, layers)
 
-        computing_host_schedules = self.controller_host._create_distributed_schedules(circuit)
+        computing_host_schedules, max_execution_time = self.controller_host._create_distributed_schedules(circuit)
 
         self.assertEqual(len(computing_host_schedules), 2)
         self.assertEqual(len(computing_host_schedules['QPU_1']), 4)
         self.assertEqual(len(computing_host_schedules['QPU_2']), 4)
+
+        self.assertEqual(max_execution_time, 5)
 
         self.assertEqual(computing_host_schedules['QPU_1'][0]['name'], "SINGLE")
         self.assertEqual(computing_host_schedules['QPU_1'][0]['layer_end'], 0)
@@ -144,29 +148,27 @@ class TestControllerHost(unittest.TestCase):
         self.controller_host.connect_host("QPU_2")
 
         q_map = {
-            'qubit_1': 'QPU_1',
-            'qubut_2': 'QPU_1',
-            'qubit_3': 'QPU_2',
-            'qubit_4': 'QPU_2',
-            'qubit_5': 'QPU_3'}
+            'QPU_1': ['qubit_1', 'qubit_2'],
+            'QPU_2': ['qubit_3', 'qubit_4'],
+            'QPU_3': ['qubit_5']}
 
         # Form layer 1
         op_1 = Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_1"])
 
         op_2 = Operation(
             name="SINGLE",
             qids=["qubit_3"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_2"])
 
         op_3 = Operation(
             name="SINGLE",
             qids=["qubit_3"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_3"])
 
         layer_1 = Layer([op_1, op_2, op_3])
@@ -175,13 +177,13 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_3", "qubit_1"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         op_2 = Operation(
             name="SINGLE",
             qids=["qubit_3"],
-            gate="X",
+            gate=Operation.X,
             computing_host_ids=["QPU_3"])
 
         layer_2 = Layer([op_1, op_2])
@@ -199,6 +201,7 @@ class TestControllerHost(unittest.TestCase):
         circuit = Circuit(q_map, layers)
 
         distributed_circuit = self.controller_host._generate_distributed_circuit(circuit)
+
         self.assertEqual(len(distributed_circuit.layers), 12)
 
         self.assertEqual(len(distributed_circuit.layers[0].operations), 3)
@@ -209,7 +212,7 @@ class TestControllerHost(unittest.TestCase):
         self.assertEqual(distributed_circuit.layers[1].operations[2].name, "REC_ENT")
 
         self.assertEqual(distributed_circuit.layers[2].operations[0].name, "TWO_QUBIT")
-        self.assertEqual(distributed_circuit.layers[10].operations[0].name, "SINGLE")
+        self.assertEqual(distributed_circuit.layers[10].operations[0].name, "CLASSICAL_CTRL_GATE")
 
         self.assertEqual(distributed_circuit.layers[11].operations[0].name, "MEASURE")
 
@@ -217,19 +220,17 @@ class TestControllerHost(unittest.TestCase):
         self.controller_host.connect_hosts(["QPU_2", "QPU_3", "QPU_4", "QPU_5"])
 
         q_map = {
-            'qubit_1': 'QPU_1',
-            'qubit_3': 'QPU_1',
-            'qubit_4': 'QPU_1',
-            'qubit_2': 'QPU_2',
-            'qubit_5': 'QPU_3',
-            'qubit_6': 'QPU_4',
-            'qubit_7': 'QPU_5'}
+            'QPU_1': ['qubit_1', 'qubit_3', 'qubit_4'],
+            'QPU_2': ['qubit_2'],
+            'QPU_3': ['qubit_5'],
+            'QPU_4': ['qubit_6'],
+            'QPU_5': ['qubit_7']}
 
         # Form layer 1
         op_1 = Operation(
             name="SINGLE",
             qids=["qubit_1"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_1"])
 
         layer_1 = Layer([op_1])
@@ -238,19 +239,19 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_1"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         op_2 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_5", "qubit_6"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_3", "QPU_4"])
 
         op_3 = Operation(
             name="SINGLE",
             qids=["qubit_7"],
-            gate="H",
+            gate=Operation.H,
             computing_host_ids=["QPU_5"])
 
         layer_2 = Layer([op_1, op_2, op_3])
@@ -259,7 +260,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_3"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_3 = Layer([op_1])
@@ -268,7 +269,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_4"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_2", "QPU_1"])
 
         layer_4 = Layer([op_1])
@@ -277,7 +278,7 @@ class TestControllerHost(unittest.TestCase):
         op_1 = Operation(
             name="TWO_QUBIT",
             qids=["qubit_1", "qubit_6"],
-            gate="cnot",
+            gate=Operation.CNOT,
             computing_host_ids=["QPU_1", "QPU_4"])
 
         layer_5 = Layer([op_1])
@@ -310,4 +311,4 @@ class TestControllerHost(unittest.TestCase):
         layer_op_names = [i.name for i in layers[13].operations]
         self.assertEqual(layer_op_names, ['SEND_ENT', 'REC_ENT'])
 
-        self.assertEqual(layers[22].operations[0].name, "SINGLE")
+        self.assertEqual(layers[22].operations[0].name, "CLASSICAL_CTRL_GATE")

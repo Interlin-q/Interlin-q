@@ -3,6 +3,7 @@ from utils import DefaultOperationTime
 from utils.constants import Constants
 from objects import Operation, Circuit, Layer
 
+import numpy as np
 import uuid
 import json
 
@@ -13,20 +14,23 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id, computing_host_ids=[], gate_time=None):
+    def __init__(self, host_id, clock, computing_host_ids=[], gate_time=None):
         """
         Returns the important things for the controller hosts
 
         Args:
             host_id (str): The ID of the controller host
             computing_host_ids (list): The IDs of computing/slave hosts
-            gate_time (dict): A mapping of gate names to time the gate takes to
-               execute for each computing host
+            clock (Clock): Clock object for synchronising the computing hosts
+            gate_time (dict): A mapping of gate names to time the gate takes
+               to execute for each computing host
         """
         super().__init__(host_id)
 
         self._computing_host_ids = computing_host_ids
+        self._clock = clock
         self.add_c_connections(computing_host_ids)
+        self._circuit_max_execution_time = 0
 
         # TODO: Take gate_time as an input from computing hosts
         if gate_time is None:
@@ -35,6 +39,7 @@ class ControllerHost(Host):
                 gate_time[computing_host_id] = DefaultOperationTime
 
         self._gate_time = gate_time
+        self._results = None
 
     @property
     def computing_host_ids(self):
@@ -45,14 +50,24 @@ class ControllerHost(Host):
         """
         return self._computing_host_ids
 
+    @property
+    def results(self):
+        """
+        Get the final output of the algorithm or the error reported by the
+        computing hosts
+        Returns:
+            (dict): The final output/error from every computing host
+        """
+        return self._results
+
     def connect_host(self, computing_host_id, gate_time=None):
         """
         Adds a computing host to the distributed network
 
         Args:
             computing_host_id (str): The ID of the computing host
-            gate_time (dict): A mapping of gate names to time the gate takes to
-               execute for the computing host to be added
+            gate_time (dict): A mapping of gate names to time the gate
+                takes to execute for the computing host to be added
         """
 
         self._computing_host_ids.append(computing_host_id)
@@ -85,8 +100,8 @@ class ControllerHost(Host):
         Creates a distributed schedule for each of the computing host
 
         Args:
-            circuit (Circuit): The Circuit object which contains information
-                regarding a quantum circuit
+            circuit (Circuit): The Circuit object which contains
+                information regarding a quantum circuit
         """
 
         time_layer_end = 0
@@ -94,8 +109,8 @@ class ControllerHost(Host):
 
         layers = circuit.layers
 
-        # We form an intermediate schedule which is used before splitting the
-        # schedules for each computing host
+        # We form an intermediate schedule which is used before splitting
+        # the schedules for each computing host
         for layer in layers:
             max_execution_time = 0
 
@@ -124,44 +139,46 @@ class ControllerHost(Host):
                     computing_host_schedule.append(op)
             computing_host_schedules[computing_host_id] = computing_host_schedule
 
-        return computing_host_schedules
+        return computing_host_schedules, time_layer_end
 
     def _replace_control_gates(self, control_gate_info, current_layer):
         """
-        Replace control gates with a distributed version of the control gate over the
-        different computing hosts
+        Replace control gates with a distributed version of the control gate
+        over the different computing hosts
 
         Args:
-            control_gate_info (List): List of information regarding control gates present
-                in one layer
-            current_layer (Layer): Layer object in which the control gates are present
+            control_gate_info (List): List of information regarding control
+                gates present in one layer
+            current_layer (Layer): Layer object in which the control gates
+                are present
         """
 
         max_gates = 0
         for gate_info in control_gate_info:
             max_gates = max(len(gate_info['operations']), max_gates)
 
-        operations = [[] for _ in range(Constants.DISTRIBUTED_CONTROL_CIRCUIT_LEN + max_gates)]
+        circuit_len = Constants.DISTRIBUTED_CONTROL_CIRCUIT_LEN + max_gates
+        operations = [[] for _ in range(circuit_len)]
 
         for gate_info in control_gate_info:
             control_qubit = gate_info['control_qubit']
             control_host = gate_info['computing_hosts'][0]
             target_host = gate_info['computing_hosts'][1]
 
-            epr_qubit_id_1, epr_qubit_id_2 = str(uuid.uuid4()), str(uuid.uuid4())
+            epr_qubit_id = str(uuid.uuid4())
             bit_id_1, bit_id_2 = str(uuid.uuid4()), str(uuid.uuid4())
 
             # Generate new EPR pair (counted in the pre-allocated qubits) for the
             # two computing hosts
             op_1 = Operation(
                 name=Constants.SEND_ENT,
-                qids=[epr_qubit_id_1, epr_qubit_id_2],
+                qids=[epr_qubit_id],
                 computing_host_ids=[control_host, target_host],
                 pre_allocated_qubits=True)
 
             op_2 = Operation(
                 name=Constants.REC_ENT,
-                qids=[epr_qubit_id_2, epr_qubit_id_1],
+                qids=[epr_qubit_id],
                 computing_host_ids=[target_host, control_host],
                 pre_allocated_qubits=True)
 
@@ -171,15 +188,15 @@ class ControllerHost(Host):
             itr = 0
             op_1 = Operation(
                 name=Constants.TWO_QUBIT,
-                qids=[control_qubit, epr_qubit_id_1],
-                gate="cnot",
+                qids=[control_qubit, epr_qubit_id],
+                gate=Operation.CNOT,
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])
 
             itr += 1
             op_1 = Operation(
                 name=Constants.MEASURE,
-                qids=[epr_qubit_id_1],
+                qids=[epr_qubit_id],
                 cids=[bit_id_1],
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])
@@ -192,24 +209,25 @@ class ControllerHost(Host):
 
             op_2 = Operation(
                 name=Constants.REC_CLASSICAL,
-                qids=[bit_id_1],
+                cids=[bit_id_1],
                 computing_host_ids=[target_host, control_host])
             operations[itr].extend([op_1, op_2])
 
             itr += 1
             op_1 = Operation(
                 name=Constants.CLASSICAL_CTRL_GATE,
-                qids=[epr_qubit_id_2],
+                qids=[epr_qubit_id],
                 cids=[bit_id_1],
-                gate="X",
+                gate=Operation.X,
                 computing_host_ids=[target_host])
             operations[itr].extend([op_1])
 
+            # The control gate we are trying to implement
             for op in gate_info['operations'][::-1]:
                 itr += 1
                 op_1 = Operation(
                     name=Constants.TWO_QUBIT,
-                    qids=[epr_qubit_id_1, op.get_target_qubit()],
+                    qids=[epr_qubit_id, op.get_target_qubit()],
                     gate=op.gate,
                     gate_param=op.gate_param,
                     computing_host_ids=[target_host])
@@ -218,15 +236,15 @@ class ControllerHost(Host):
             itr += 1
             op_1 = Operation(
                 name=Constants.SINGLE,
-                qids=[epr_qubit_id_2],
-                gate="H",
+                qids=[epr_qubit_id],
+                gate=Operation.H,
                 computing_host_ids=[target_host])
             operations[itr].extend([op_1])
 
             itr += 1
             op_1 = Operation(
                 name=Constants.MEASURE,
-                qids=[epr_qubit_id_2],
+                qids=[epr_qubit_id],
                 cids=[bit_id_2],
                 computing_host_ids=[target_host])
             operations[itr].extend([op_1])
@@ -239,15 +257,16 @@ class ControllerHost(Host):
 
             op_2 = Operation(
                 name=Constants.REC_CLASSICAL,
-                qids=[bit_id_2],
+                cids=[bit_id_2],
                 computing_host_ids=[control_host, target_host])
             operations[itr].extend([op_1, op_2])
 
             itr += 1
             op_1 = Operation(
-                name=Constants.SINGLE,
+                name=Constants.CLASSICAL_CTRL_GATE,
                 qids=[control_qubit],
-                gate="Z",
+                cids=[bit_id_2],
+                gate=Operation.Z,
                 computing_host_ids=[control_host])
             operations[itr].extend([op_1])
 
@@ -262,13 +281,14 @@ class ControllerHost(Host):
 
     def _generate_distributed_circuit(self, circuit):
         """
-        Takes the user input monolithic circuit and converts it to a distributed circuit
-        over the computing hosts connected to the controller host. Here, we replace the
-        normal two qubit control gates to distributed control gates.
+        Takes the user input monolithic circuit and converts it to a
+        distributed circuit over the computing hosts connected to the
+        controller host. Here, we replace the normal two qubit control
+        gates to distributed control gates.
 
         Args:
-            circuit (Circuit): The Circuit object which contains information
-                regarding a quantum circuit
+            circuit (Circuit): The Circuit object which contains
+                information regarding a quantum circuit
         """
 
         distributed_circuit_layers = []
@@ -286,6 +306,7 @@ class ControllerHost(Host):
             new_layer, distributed_layers = self._replace_control_gates(
                 control_gate_info[layer_index],
                 new_layer)
+
             if new_layer.operations:
                 distributed_circuit_layers.append(new_layer)
             distributed_circuit_layers.extend(distributed_layers)
@@ -296,18 +317,26 @@ class ControllerHost(Host):
 
     def _get_operation_execution_time(self, computing_host_id, op_name, gate):
         """
-        Return the execution time for an operation for a specific computing host
+        Return the execution time for an operation for a specific computing
+        host
 
         Args:
-            computing_host_ids (list): The IDs of computing/slave hosts
+            computing_host_id (str): The IDs of computing/slave hosts
             op_name (str): Name of the operation
-            gate (str): Name of the gate being performed in the operation, if any
+            gate (str): Name of the gate being performed in the operation,
+                if any
+
+        Returns:
+            (float): The operation execution time
         """
         operation_time = self._gate_time[computing_host_id]
 
-        GATE_OP_NAMES = [Constants.SINGLE, Constants.TWO_QUBIT, Constants.CLASSICAL_CTRL_GATE]
+        gate_op_names = [
+            Constants.SINGLE,
+            Constants.TWO_QUBIT,
+            Constants.CLASSICAL_CTRL_GATE]
 
-        if op_name in GATE_OP_NAMES:
+        if op_name in gate_op_names:
             execution_time = operation_time[op_name][gate]
         else:
             execution_time = operation_time[op_name]
@@ -316,8 +345,8 @@ class ControllerHost(Host):
 
     def generate_and_send_schedules(self, circuit):
         """
-        Generate and send distributed schedules to all the computing hosts associated
-        to the circuit
+        Generate and send distributed schedules to all the computing hosts
+        associated to the circuit
 
         Args:
             circuit (Circuit): The Circuit object which contains information
@@ -325,8 +354,42 @@ class ControllerHost(Host):
         """
 
         distributed_circuit = self._generate_distributed_circuit(circuit)
-        computing_host_schedules = self._create_distributed_schedules(distributed_circuit)
+        computing_host_schedules, max_execution_time = self._create_distributed_schedules(
+            distributed_circuit)
+        self._circuit_max_execution_time = max_execution_time
 
-        self.send_broadcast(json.dumps(computing_host_schedules))
+        self.send_broadcast(json.dumps(computing_host_schedules, cls=NumpyEncoder))
 
-        return computing_host_schedules
+        # Wait for the computing hosts to receive the broadcast
+        for host_id in self._computing_host_ids:
+            result = self.get_classical(host_id, wait=-1)
+
+        # Initialise the clock and start running the algorithm
+        self._clock.initialise(max_execution_time)
+        self._clock.start()
+
+    def receive_results(self):
+        """
+        Receive the final output results from all the computing hosts
+        """
+
+        results = {}
+
+        for host_id in self._computing_host_ids:
+            result = self.get_classical(host_id, wait=-1, seq_num=1)
+            try:
+                result = json.loads(result.content)
+                results.update(result)
+            except json.decoder.JSONDecodeError:
+                pass
+
+        self._results = results
+
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, complex):
+            return (obj.real, obj.imag)
+        return json.JSONEncoder.default(self, obj)

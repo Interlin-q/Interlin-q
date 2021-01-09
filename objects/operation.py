@@ -7,7 +7,25 @@ class Operation(object):
     quantum gate which is to be applied to a circuit
     """
 
-    def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[], pre_allocated_qubits=False):
+    I = "I"
+    X = "X"
+    Y = "Y"
+    Z = "Z"
+    CNOT = "cnot"
+    CPHASE = "cphase"
+    T = "T"
+    H = "H"
+    K = "K"
+    RX = "rx"
+    RY = "ry"
+    RZ = "rz"
+    CUSTOM = "custom_gate"
+    CUSTOM_TWO_QUBIT = "custom_two_qubit_gate"
+    CUSTOM_CONTROLLED = "custom_controlled_gate"
+    MEASURE = "measure"
+
+    def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[],
+                 pre_allocated_qubits=False):
         """
         Returns the important things for a quantum operation
 
@@ -17,12 +35,12 @@ class Operation(object):
                 list will be the ID of the computing host where the operation is being performed
             cids (list): List of classical bit IDs associated to the operation
             gate (str): Name of the single or the two-qubit gate
-            gate_param (int): parameter for rotational gates
+            gate_param (obj): parameter for rotational gates
             computing_host_ids (list): List of associated ID/IDS of the computing host where
                 the operation/gate is being performed. The first computing host in the list
                 would be the one where the operation is being performed.
             pre_allocated_qubits (bool): Flag to indicate if this operation is being performed on
-                a sepcific pre-allocated qubit (In case of EPR pair generation)
+                a specific pre-allocated qubit (In case of EPR pair generation)
         """
 
         if name not in Constants.OPERATION_NAMES:
@@ -35,6 +53,9 @@ class Operation(object):
         self._gate_param = gate_param
         self._computing_host_ids = computing_host_ids
         self._pre_allocated_qubits = pre_allocated_qubits
+
+    def __str__(self):
+        return self.name
 
     @property
     def name(self):
@@ -164,7 +185,8 @@ class Operation(object):
             'cids': self._cids,
             'gate': self._gate,
             'gate_param': self._gate_param,
-            'computing_host_ids': self._computing_host_ids
+            'computing_host_ids': self._computing_host_ids,
+            'pre_allocated_qubits': self._pre_allocated_qubits
         }
         return operation_info
 
@@ -178,4 +200,4 @@ class InputError(Exception):
     """
 
     def __init__(self, message):
-        self.message = message            
+        self.message = message
