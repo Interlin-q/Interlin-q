@@ -1,24 +1,16 @@
 from qunetsim.components import Network
-from qunetsim.objects import Qubit, Logger
-from qunetsim.backends import EQSNBackend
+from qunetsim.objects import Logger
 
-from components.controller_host import ControllerHost
-from components.clock import Clock
-from components.computing_host import ComputingHost
+from interlinq import ControllerHost, Constants, Clock, Circuit, Layer, ComputingHost, Operation
 
-from objects.circuit import Circuit
-from objects.layer import Layer
-from objects.operation import Operation
-
-from utils.constants import Constants
-
-from eqsn import EQSN
 import numpy as np
 
-Logger.DISABLED = True
+Logger.DISABLED = False
+
 
 def phase_gate(theta):
     return np.array([[1, 0], [0, np.exp(1j * theta)]])
+
 
 def quantum_phase_estimation_circuit():
     """
@@ -84,7 +76,7 @@ def quantum_phase_estimation_circuit():
 
     layers.append(Layer([op_1]))
 
-    for i in range(2):
+    for _ in range(2):
         op = Operation(
             name="TWO_QUBIT",
             qids=["qubit_2", "qubit_4"],
@@ -93,7 +85,7 @@ def quantum_phase_estimation_circuit():
             computing_host_ids=["QPU_1", "QPU_2"])
         layers.append(Layer([op]))
 
-    for i in range(4):
+    for _ in range(4):
         op = Operation(
             name="TWO_QUBIT",
             qids=["qubit_3", "qubit_4"],
@@ -155,27 +147,28 @@ def quantum_phase_estimation_circuit():
     layers.append(Layer([op_1]))
 
     op_1 = Operation(
-            name="MEASURE",
-            qids=["qubit_1"],
-            cids=["qubit_1"],
-            computing_host_ids=["QPU_1"])
+        name="MEASURE",
+        qids=["qubit_1"],
+        cids=["qubit_1"],
+        computing_host_ids=["QPU_1"])
 
     op_2 = Operation(
-            name="MEASURE",
-            qids=["qubit_2"],
-            cids=["qubit_2"],
-            computing_host_ids=["QPU_1"])
+        name="MEASURE",
+        qids=["qubit_2"],
+        cids=["qubit_2"],
+        computing_host_ids=["QPU_1"])
 
     op_3 = Operation(
-            name="MEASURE",
-            qids=["qubit_3"],
-            cids=["qubit_3"],
-            computing_host_ids=["QPU_1"])
+        name="MEASURE",
+        qids=["qubit_3"],
+        cids=["qubit_3"],
+        computing_host_ids=["QPU_1"])
 
     layers.append(Layer([op_1, op_2, op_3]))
 
     circuit = Circuit(q_map, layers)
     return circuit
+
 
 def controller_host_protocol(host):
     """
@@ -186,6 +179,7 @@ def controller_host_protocol(host):
     host.generate_and_send_schedules(circuit)
     host.receive_results()
 
+
 def computing_host_protocol(host):
     """
     Protocol for the computing hosts
@@ -195,17 +189,16 @@ def computing_host_protocol(host):
     host.send_results()
 
     if host.host_id == 'QPU_1':
-        print("qubit_1: ", host._bits['qubit_1'])
-        print("qubit_2: ", host._bits['qubit_2'])
-        print("qubit_3: ", host._bits['qubit_3'])
+        print("qubit_1: ", host.bits['qubit_1'])
+        print("qubit_2: ", host.bits['qubit_2'])
+        print("qubit_3: ", host.bits['qubit_3'])
+
 
 def main():
     # initialize network
     network = Network.get_instance()
-    backend = EQSNBackend()
-
-    nodes = ['Host_1', 'QPU_1', 'QPU_2']
-    network.start(nodes, backend)
+    network.delay = 0
+    network.start()
 
     clock = Clock()
 
@@ -241,6 +234,7 @@ def main():
         computing_host_2,
         controller_host])
 
+    print('starting...')
     t1 = controller_host.run_protocol(controller_host_protocol)
     t2 = computing_host_1.run_protocol(computing_host_protocol)
     t3 = computing_host_2.run_protocol(computing_host_protocol)
@@ -250,6 +244,7 @@ def main():
     t3.join()
     network.stop(True)
     exit()
+
 
 if __name__ == '__main__':
     main()

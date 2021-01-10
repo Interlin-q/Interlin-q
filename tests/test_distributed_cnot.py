@@ -1,9 +1,9 @@
-from components.controller_host import ControllerHost
-from components.clock import Clock
-from components.computing_host import ComputingHost
-from objects.circuit import Circuit
-from objects.layer import Layer
-from objects.operation import Operation
+from interlinq.components import ControllerHost
+from interlinq.components import Clock
+from interlinq.components import ComputingHost
+from interlinq.objects.circuit import Circuit
+from interlinq.objects.layer import Layer
+from interlinq.objects import Operation
 
 from qunetsim.components.network import Network
 from qunetsim.backends import EQSNBackend
@@ -53,14 +53,11 @@ class TestDistributedCnot(unittest.TestCase):
             clock=clock,
             computing_host_ids=["QPU_1", "QPU_2", "QPU_3"])
 
-        self.computing_host_1.add_connections(['QPU_2'])
-        self.computing_host_1.add_connections(['QPU_3'])
+        self.computing_host_1.add_connections(['QPU_2', 'QPU_3'])
         self.computing_host_1.start()
-        self.computing_host_2.add_connections(['QPU_1'])
-        self.computing_host_2.add_connections(['QPU_3'])
+        self.computing_host_2.add_connections(['QPU_1', 'QPU_3'])
         self.computing_host_2.start()
-        self.computing_host_3.add_connections(['QPU_1'])
-        self.computing_host_3.add_connections(['QPU_2'])
+        self.computing_host_3.add_connections(['QPU_1', 'QPU_2'])
         self.computing_host_3.start()
 
         self.controller_host.start()

@@ -1,4 +1,4 @@
-from utils.constants import Constants
+from interlinq.utils.constants import Constants
 
 default_single_gate_time = Constants.DEFAULT_SINGLE_GATE_TIME
 default_single_operation_time = Constants.DEFAULT_SINGLE_OPERATION_TIME

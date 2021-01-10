@@ -1,7 +1,7 @@
 import unittest
-from objects.circuit import Circuit
-from objects.layer import Layer
-from objects.operation import Operation
+from interlinq.objects.circuit import Circuit
+from interlinq.objects.layer import Layer
+from interlinq.objects import Operation
 
 
 class TestCircuit(unittest.TestCase):

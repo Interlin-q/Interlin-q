@@ -1,6 +1,6 @@
 import unittest
-from objects.layer import Layer
-from objects.operation import Operation
+from interlinq.objects.layer import Layer
+from interlinq.objects import Operation
 
 
 class TestLayer(unittest.TestCase):

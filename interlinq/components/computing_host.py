@@ -1,7 +1,7 @@
 from qunetsim.components import Host
-from objects import Operation
-from utils import DefaultOperationTime
-from utils.constants import Constants
+from interlinq.objects import Operation
+from interlinq.utils import DefaultOperationTime
+from interlinq.utils.constants import Constants
 from qunetsim.objects import Qubit
 
 import numpy as np
@@ -68,6 +68,20 @@ class ComputingHost(Host):
             (str): The ID of controller/master host
         """
         return self._controller_host_id
+
+    @property
+    def bits(self):
+        """
+        Get the classical bits measured by this host
+        Returns:
+            (dict): The dictionary of bits
+        """
+        results = []
+        for i in self._bits:
+            # Hack to filter out EPR pairs
+            if len(i) < 15:
+                results.append({i: self._bits[i]})
+        return results
 
     def update_total_qubits(self, total_qubits):
         """
@@ -520,7 +534,7 @@ class ComputingHost(Host):
         else:
             msg = {
                 'type': 'result',
-                'bits': self._bits
+                'bits': self.bits
             }
 
         message = json.dumps({self.host_id: msg})

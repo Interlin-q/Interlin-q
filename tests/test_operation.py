@@ -1,5 +1,5 @@
 import unittest
-from objects.operation import Operation
+from interlinq.objects import Operation
 
 
 class TestOperation(unittest.TestCase):
