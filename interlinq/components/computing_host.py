@@ -232,7 +232,8 @@ class ComputingHost(Host):
         param = op['gate_param']
         for i in range(len(param)):
             for j in range(len(param[0])):
-                param[i][j] = (param[i][j][0] + param[i][j][1] * 1j)
+                if type(param[i][j]) != int:
+                    param[i][j] = (param[i][j][0] + param[i][j][1] * 1j)
         return np.asarray(param)
 
     def _prepare_qubits(self, prepare_qubit_op):
@@ -441,8 +442,8 @@ class ComputingHost(Host):
             len_cids=1)
 
         sender_id = operation['computing_host_ids'][1]
-        msg = self.get_classical(sender_id, wait=-1)
-        bit = msg[0].content
+        msg = self.get_next_classical(sender_id, wait=-1)
+        bit = msg.content
         bit_id = operation['cids'][0]
 
         self._bits[bit_id] = bit
