@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../")
+
 from qunetsim.components import Network
 from qunetsim.objects import Logger
 
@@ -179,6 +182,11 @@ def controller_host_protocol(host):
     host.generate_and_send_schedules(circuit)
     host.receive_results()
 
+    results = host.results
+    print('Final results...\n')
+    for bit_id, bit in results['QPU_1']['bits'].items():
+        print("{0}: {1}".format(bit_id, bit))
+
 
 def computing_host_protocol(host):
     """
@@ -187,11 +195,6 @@ def computing_host_protocol(host):
 
     host.receive_schedule()
     host.send_results()
-
-    if host.host_id == 'QPU_1':
-        print("qubit_1: ", host.bits['qubit_1'])
-        print("qubit_2: ", host.bits['qubit_2'])
-        print("qubit_3: ", host.bits['qubit_3'])
 
 
 def main():

@@ -64,17 +64,25 @@ class ControllerHost(Host):
 
     def create_distributed_network(self, num_computing_hosts, num_qubits_per_host):
         """
+        Automates the creation of a distributed network
 
         Args:
-            num_computing_hosts (int):
-            num_qubits_per_host (int):
+            num_computing_hosts (int): Number of computing hosts in the network
+            num_qubits_per_host (int): Number of qubits per computing host in the
+                network
+
         Returns:
-            (dict)
+            computing_hosts (list): List of ComputingHost objects
+            q_map (dict): Map of qubit IDs to their corresponding computing
+                host ID
         """
+
         id_prefix = "QPU_"
         computing_hosts = []
         q_map = {}
-        self._computing_host_ids = [f'{id_prefix}{str(i)}' for i in range(num_computing_hosts)]
+        self._computing_host_ids = [
+            f'{id_prefix}{str(i)}' for i in range(num_computing_hosts)]
+
         for i in range(num_computing_hosts):
             computing_host = ComputingHost(
                 host_id=id_prefix + str(i),
@@ -86,12 +94,14 @@ class ControllerHost(Host):
             self._gate_time[id_prefix + str(i)] = DefaultOperationTime
             self.add_c_connection(id_prefix + str(i))
             computing_hosts.append(computing_host)
-            q_map[computing_host.host_id] = [f'q_{str(i)}_{str(j)}' for j in range(num_qubits_per_host)]
+            q_map[computing_host.host_id] = [
+                f'q_{str(i)}_{str(j)}' for j in range(num_qubits_per_host)]
 
         for outer_computing_host in computing_hosts:
             for inner_computing_host in computing_hosts:
                 if outer_computing_host.host_id != inner_computing_host.host_id:
-                    outer_computing_host.add_connection(inner_computing_host.host_id)
+                    outer_computing_host.add_connection(
+                        inner_computing_host.host_id)
             outer_computing_host.start()
 
         return computing_hosts, q_map
