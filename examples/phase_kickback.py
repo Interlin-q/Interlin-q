@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../")
+
 from qunetsim.components import Network
 from qunetsim.objects import Logger
 from interlinq import ControllerHost, Clock, Circuit, \

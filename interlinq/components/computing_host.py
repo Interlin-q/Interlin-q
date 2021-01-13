@@ -76,11 +76,11 @@ class ComputingHost(Host):
         Returns:
             (dict): The dictionary of bits
         """
-        results = []
+        results = {}
         for i in self._bits:
             # Hack to filter out EPR pairs
             if len(i) < 15:
-                results.append({i: self._bits[i]})
+                results[i] = self._bits[i]
         return results
 
     def update_total_qubits(self, total_qubits):
