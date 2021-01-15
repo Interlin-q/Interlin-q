@@ -16,6 +16,36 @@ def phase_gate(theta):
     return np.array([[1, 0], [0, np.exp(1j * theta)]])
 
 
+def inverse_quantum_fourier_transform(q_ids, computing_host_ids, layers):
+    """
+    Performs inverse quantum fourier transform
+    """
+
+    q_ids.reverse()
+
+    for i in range(len(q_ids)):
+        target_qubit_id = q_ids[i]
+
+        for j in range(i):
+            control_qubit_id = q_ids[j]
+
+            op = Operation(
+                name=Constants.TWO_QUBIT,
+                qids=[control_qubit_id, target_qubit_id],
+                gate=Operation.CUSTOM_CONTROLLED,
+                gate_param=phase_gate(-np.pi * (2 ** j) / (2 ** i)),
+                computing_host_ids=[computing_host_ids[0]])
+            layers.append(Layer([op]))
+
+        op = Operation(
+            name=Constants.SINGLE,
+            qids=[target_qubit_id],
+            gate=Operation.H,
+            computing_host_ids=[computing_host_ids[0]])
+        layers.append(Layer([op]))
+    return layers
+
+
 def quantum_phase_estimation_circuit(q_map, client_input_gate):
     """
     Returns the monolithic circuit for quantum phase estimation
@@ -24,20 +54,19 @@ def quantum_phase_estimation_circuit(q_map, client_input_gate):
     layers = []
     computing_host_ids = list(q_map.keys())
 
-    # Prepare the qubits
-    op_1 = Operation(
-        name=Constants.PREPARE_QUBITS,
-        qids=q_map[computing_host_ids[0]],
-        computing_host_ids=[computing_host_ids[0]])
+    # Prepare the qubits on both computing hosts
+    ops = []
+    for host_id in computing_host_ids:
+        op = Operation(
+            name=Constants.PREPARE_QUBITS,
+            qids=q_map[host_id],
+            computing_host_ids=[host_id])
+        ops.append(op)
 
-    op_2 = Operation(
-        name=Constants.PREPARE_QUBITS,
-        qids=q_map[computing_host_ids[1]],
-        computing_host_ids=[computing_host_ids[1]])
+    layers.append(Layer(ops))
 
-    layers.append(Layer([op_1, op_2]))
-
-    # Apply Hadamard gates
+    # Setup the qubits by apply Hadamard gates on qubits of QPU_1
+    # and applying X gate to initialise qubit on QPU_2
     ops = []
     for q_id in q_map[computing_host_ids[0]]:
         op = Operation(
@@ -73,31 +102,12 @@ def quantum_phase_estimation_circuit(q_map, client_input_gate):
 
     # Inverse Fourier Transform circuit
     q_ids = q_map[computing_host_ids[0]].copy()
-    q_ids.reverse()
-
-    for i in range(len(q_ids)):
-        target_qubit_id = q_ids[i]
-
-        for j in range(i):
-            control_qubit_id = q_ids[j]
-
-            op = Operation(
-                name=Constants.TWO_QUBIT,
-                qids=[control_qubit_id, target_qubit_id],
-                gate=Operation.CUSTOM_CONTROLLED,
-                gate_param=phase_gate(-np.pi * (2 ** j) / (2 ** i)),
-                computing_host_ids=[computing_host_ids[0]])
-            layers.append(Layer([op]))
-
-        op = Operation(
-            name=Constants.SINGLE,
-            qids=[target_qubit_id],
-            gate=Operation.H,
-            computing_host_ids=[computing_host_ids[0]])
-        layers.append(Layer([op]))
+    layers = inverse_quantum_fourier_transform(
+        q_ids,
+        computing_host_ids,
+        layers)
 
     # Measure the qubits
-    q_ids.reverse()
     ops = []
     for q_id in q_ids:
         op = Operation(
@@ -125,9 +135,18 @@ def controller_host_protocol(host, q_map, client_input_gate):
     computing_host_ids = host.computing_host_ids
 
     print('Final results: \n')
+
+    decimal_value = 0
     for computing_host_id in computing_host_ids:
-        for bit_id, bit in results[computing_host_id]['bits'].items():
+        i = 0
+        bits = results[computing_host_id]['bits']
+        for bit_id, bit in bits.items():
             print("{0}: {1}".format(bit_id, bit))
+            decimal_value += (2 ** i) * bit
+            i += 1
+        if bits:
+            phase = decimal_value/(2 ** len(bits.keys()))
+            print("\nThe estimated value of the phase is {0}".format(phase))
 
 
 def computing_host_protocol(host):
@@ -154,7 +173,7 @@ def main():
 
     computing_hosts, q_map = controller_host.create_distributed_network(
         num_computing_hosts=2,
-        num_qubits_per_host=3)
+        num_qubits_per_host=6)
     controller_host.start()
 
     network.add_hosts([
@@ -163,7 +182,10 @@ def main():
         controller_host])
 
     print('starting...')
-    client_input_gate = np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]])
+    # For phase = 1/8
+    #client_input_gate = np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]])
+    # For phase = 1/3
+    client_input_gate = np.array([[1, 0], [0, np.exp(1j * 2 * np.pi / 3)]])
 
     t1 = controller_host.run_protocol(
         controller_host_protocol,
