@@ -112,10 +112,9 @@ def computing_host_protocol(host):
 def main():
     # initialize network
     network = Network.get_instance()
-    network.delay = 0
     network.start()
-    clock = Clock()
 
+    clock = Clock()
     controller_host = ControllerHost(host_id="host_1", clock=clock)
 
     # Here the number of computing hosts and number of qubits per computing hosts
@@ -147,7 +146,7 @@ if __name__ == '__main__':
 
 In the template, the monolothic circuit can be added in the `create_circuit` function, which will automatically be distributed by the controller host and performed by the computing hosts. The operations needed to perform the monolithic circuit should be added layer by layer. The specific topology required to perform the circuit can be customised by changing the number of computing hosts required to perform the circuit and as well as changing the number of qubits required per computing hosts.
 
-### Tutorial
+### Distributed Quantum Phase Estimation Tutorial
 
 A tutorial of Distributed Quantum Phase Estimation algorithm can be found [here](https://github.com/rheaparekh/Interlin-q/blob/master/examples/distributed_quantum_phase_estimation_notebook.ipynb).
 
