@@ -3,3 +3,4 @@
 *.swo
 venv
 .idea/
+.python-version
