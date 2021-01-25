@@ -92,7 +92,7 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Interlin-q</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../design.html">Design Overview</a><ul>
@@ -467,7 +467,7 @@ div.rendered_html tbody tr:hover {
 <h1>Distributed Quantum Phase Estimation Algorithm<a class="headerlink" href="#Distributed-Quantum-Phase-Estimation-Algorithm" title="Permalink to this headline">¶</a></h1>
 <p>Quantum phase estimation is a quantum algorithm which is used to estimate the phase (or eigenvalue) of an eigenvector of a unitary operator. If we consider a unitary matrix <span class="math notranslate nohighlight">\(U\)</span> and a quantum state <span class="math notranslate nohighlight">\(|\psi \rangle\)</span> such that <span class="math notranslate nohighlight">\(U|\psi \rangle =e^{2\pi i\theta }\)</span>, the algorithm estimates the value of <span class="math notranslate nohighlight">\(\theta\)</span> with high probability within additive error <span class="math notranslate nohighlight">\(\varepsilon\)</span>.</p>
 <p>The below is the circuit diagram for quantum phase estimation with the Unitary <span class="math notranslate nohighlight">\(U\)</span> and eigenstate <span class="math notranslate nohighlight">\(|\psi\rangle\)</span>.</p>
-<p><img alt="alt text" src="images/quantum_phase_estimation_diagram.png" /></p>
+<p><img alt="alt text" src="../_images/quantum_phase_estimation_diagram.png" /></p>
 <p>Here, we will explain the execution of distributed quantum phase estimation algorithm with two computing hosts and one controller host using Interlin-q. We let the first computing host <code class="docutils literal notranslate"><span class="pre">QPU_1</span></code> possess all the qubits which are set in the state <span class="math notranslate nohighlight">\(|0\rangle\)</span> from the above image and the second computing host <code class="docutils literal notranslate"><span class="pre">QPU_2</span></code> would possess the single qubit which is set in the eigenstate <span class="math notranslate nohighlight">\(|\psi\rangle\)</span>.</p>
 </div>
 <div class="section" id="Introduction-of-Interlin-q">
@@ -475,7 +475,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Simulated-Architechture">
 <h2>Simulated Architechture<a class="headerlink" href="#Simulated-Architechture" title="Permalink to this headline">¶</a></h2>
 <p>The simulated architechture of Interlin-q can be seen in the image below:</p>
-<p><img alt="image1" src="images/simulated_architechture.png" /></p>
+<p><img alt="image1" src="../_images/simulated_architechture.png" /></p>
 <p>The controller host gets the monolithic circuit as an input from the client, converts it to a distributed circuit and generates schedules from it for individual computing hosts and broadcasts it to them. The controller host and all the computing hosts share a global clock. When the computing hosts receive the broadcast, they extract their schedule from it and perform the operations in the schedules according to the global clock and the timestamps on the operations. The final results are sent
 over to the controller host from all the computing hosts for further processing.</p>
 </div>
@@ -483,7 +483,7 @@ over to the controller host from all the computing hosts for further processing.
 <h2>Conversion of monolithic to distributed circuit<a class="headerlink" href="#Conversion-of-monolithic-to-distributed-circuit" title="Permalink to this headline">¶</a></h2>
 <p>The monolithic circuit is a circuit which is designed to be implemented by a single quantum computer. To implement this same algorithm using multiple interlinked quantum computers, this monolithic circuit needs to be converted to a distributed circuit over a given topology of the interlinked quantum computers.</p>
 <p>This distribution is performed by the controller host, by analysing the input monolithic circuit and searching for any control gates where the control and target qubits lie in separate computing host. If any such control gate is found, it is replaced by using a Cat-circuit shown in the image below. The controller host generates the distributed circuit by replacing all such control gates.</p>
-<p><img alt="image2" src="images/cat-circuit.png" /></p>
+<p><img alt="image2" src="../_images/cat-circuit.png" /></p>
 <p>Here the quantum state <span class="math notranslate nohighlight">\(|\psi_1\rangle\)</span> lies with the first computing host and the quantum state <span class="math notranslate nohighlight">\(|\psi_2\rangle\)</span> lies with the second computing host. A control gate with <span class="math notranslate nohighlight">\(|\psi_1\rangle\)</span> as control qubit and <span class="math notranslate nohighlight">\(|\psi_2\rangle\)</span> as the target qubit is replaced with the circuit shown, which implement a non-local control gate. It is necessary for both the computing hosts to share an EPR pair.</p>
 </div>
 <div class="section" id="Distributed-Scheduler-and-Broadcasting">
@@ -568,7 +568,7 @@ over to the controller host from all the computing hosts for further processing.
 </div>
 <div class="section" id="Creating-the-circuit-for-Quantum-Phase-Estimation-Algorithm">
 <h3>Creating the circuit for Quantum Phase Estimation Algorithm<a class="headerlink" href="#Creating-the-circuit-for-Quantum-Phase-Estimation-Algorithm" title="Permalink to this headline">¶</a></h3>
-<p><img alt="alt text" src="images/quantum_phase_estimation_diagram.png" /></p>
+<p><img alt="alt text" src="../_images/quantum_phase_estimation_diagram.png" /></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
