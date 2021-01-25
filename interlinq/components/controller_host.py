@@ -1,6 +1,6 @@
 from qunetsim.components import Host
 
-from interlinq.components import ComputingHost
+from interlinq.components import ComputingHost, Clock
 from interlinq.utils import DefaultOperationTime
 from interlinq.utils.constants import Constants
 from interlinq.objects import Operation, Circuit, Layer
@@ -16,7 +16,7 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id, clock, computing_host_ids=[], gate_time=None):
+    def __init__(self, host_id: str, clock: Clock, computing_host_ids: list=[], gate_time: dict=None):
         """
         Returns the important things for the controller hosts
 
@@ -62,19 +62,16 @@ class ControllerHost(Host):
         """
         return self._results
 
-    def create_distributed_network(self, num_computing_hosts, num_qubits_per_host):
+    def create_distributed_network(self, num_computing_hosts: int, num_qubits_per_host: int) -> tuple:
         """
-        Automates the creation of a distributed network
+        Create a network of *num_computing_hosts* completely connected computing nodes with
+        *num_qubits_per_host* each.
 
         Args:
-            num_computing_hosts (int): Number of computing hosts in the network
-            num_qubits_per_host (int): Number of qubits per computing host in the
-                network
-
+            num_computing_hosts (int): The number of computing hosts to initalize
+            num_qubits_per_host (int): The number of qubits on each computing host
         Returns:
-            computing_hosts (list): List of ComputingHost objects
-            q_map (dict): Map of qubit IDs to their corresponding computing
-                host ID
+            (tuple): The list of computing hosts and the qubit map for their qubits
         """
 
         id_prefix = "QPU_"
@@ -106,7 +103,7 @@ class ControllerHost(Host):
 
         return computing_hosts, q_map
 
-    def connect_host(self, computing_host_id, gate_time=None):
+    def connect_host(self, computing_host_id: str, gate_time: dict=None):
         """
         Adds a computing host to the distributed network
 
@@ -124,24 +121,28 @@ class ControllerHost(Host):
 
         self._gate_time[computing_host_id] = gate_time
 
-    def connect_hosts(self, computing_host_ids, gate_time=None):
+    def connect_hosts(self, computing_host_ids: list, gate_times: list=None):
         """
         Adds multiple computing hosts to the distributed network
 
         Args:
-            computing_host_id (List): The ID of the computing host
+            computing_host_id (list): The ID of the computing host
+            gate_times (list): A list of mappings of gate names to time the gate
+                takes to execute for the computing host to be added
         """
 
-        for computing_host_id in computing_host_ids:
+        for i, computing_host_id in enumerate(computing_host_ids):
             self._computing_host_ids.append(computing_host_id)
             self.add_c_connection(computing_host_id)
 
-            if gate_time is None:
+            if gate_times is None or len(gate_times) == 0 or gate_times[i] is None:
                 gate_time = DefaultOperationTime
+            else:
+                gate_time = gate_times[i]
 
             self._gate_time[computing_host_id] = gate_time
 
-    def _create_distributed_schedules(self, circuit):
+    def _create_distributed_schedules(self, circuit: Circuit):
         """
         Creates a distributed schedule for each of the computing host
 
@@ -188,13 +189,13 @@ class ControllerHost(Host):
         return computing_host_schedules, time_layer_end
 
     @staticmethod
-    def _replace_control_gates(control_gate_info, current_layer):
+    def _replace_control_gates(control_gate_info: list, current_layer: Layer):
         """
         Replace control gates with a distributed version of the control gate
         over the different computing hosts
 
         Args:
-            control_gate_info (List): List of information regarding control
+            control_gate_info (list): List of information regarding control
                 gates present in one layer
             current_layer (Layer): Layer object in which the control gates
                 are present
@@ -326,7 +327,7 @@ class ControllerHost(Host):
 
         return current_layer, distributed_layers
 
-    def _generate_distributed_circuit(self, circuit):
+    def _generate_distributed_circuit(self, circuit: Circuit):
         """
         Takes the user input monolithic circuit and converts it to a
         distributed circuit over the computing hosts connected to the
@@ -362,7 +363,7 @@ class ControllerHost(Host):
 
         return distributed_circuit
 
-    def _get_operation_execution_time(self, computing_host_id, op_name, gate):
+    def _get_operation_execution_time(self, computing_host_id: str, op_name: str, gate: str):
         """
         Return the execution time for an operation for a specific computing
         host
@@ -390,7 +391,7 @@ class ControllerHost(Host):
 
         return execution_time
 
-    def generate_and_send_schedules(self, circuit):
+    def generate_and_send_schedules(self, circuit: Circuit):
         """
         Generate and send distributed schedules to all the computing hosts
         associated to the circuit
