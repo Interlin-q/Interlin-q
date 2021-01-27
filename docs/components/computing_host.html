@@ -1,0 +1,333 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Computing Host &mdash; Interlin-q  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Controller Host" href="controller_host.html" />
+    <link rel="prev" title="Design Overview" href="../design.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Interlin-q
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Interlin-q</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../design.html">Design Overview</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Computing Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller_host.html">Controller Host</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/distributed_phase.html">Distributed Quantum Phase Estimation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples/dist_phase.html">Distributed Quantum Phase Estimation Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/dist_phase.html#Introduction-of-Interlin-q">Introduction of Interlin-q</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Simulated-Architechture">Simulated Architechture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Conversion-of-monolithic-to-distributed-circuit">Conversion of monolithic to distributed circuit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Distributed-Scheduler-and-Broadcasting">Distributed Scheduler and Broadcasting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Executing-the-distributed-algorithm">Executing the distributed algorithm</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/dist_phase.html#Code-implementation">Code implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Step-1:-Import-libraries.">Step 1: Import libraries.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Step-2:-Create-monolithic-circuit-of-Quantum-Phase-Estimation">Step 2: Create monolithic circuit of Quantum Phase Estimation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Step-3:-Define-Standard-protocols-for-controller-and-computing-hosts.">Step 3: Define Standard protocols for controller and computing hosts.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Step-4:-Provide-inputs">Step 4: Provide inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/dist_phase.html#Step-5:-Execute-the-distributed-algorithm-and-analyse-the-results">Step 5: Execute the distributed algorithm and analyse the results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Interlin-q</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../design.html">Design Overview</a> &raquo;</li>
+        
+      <li>Computing Host</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/components/computing_host.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-interlinq.components.computing_host">
+<span id="computing-host"></span><h1>Computing Host<a class="headerlink" href="#module-interlinq.components.computing_host" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="interlinq.components.computing_host.ComputingHost">
+<em class="property">class </em><code class="sig-prename descclassname">interlinq.components.computing_host.</code><code class="sig-name descname">ComputingHost</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host_id</span></em>, <em class="sig-param"><span class="n">controller_host_id</span></em>, <em class="sig-param"><span class="n">clock</span></em>, <em class="sig-param"><span class="n">total_qubits</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">total_pre_allocated_qubits</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">gate_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computing host object which acts as a slave node in a centralised
+distributed network system, connected to the controller host.</p>
+<dl class="py method">
+<dt id="interlinq.components.computing_host.ComputingHost.bits">
+<em class="property">property </em><code class="sig-name descname">bits</code><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.bits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the classical bits measured by this host
+:returns: The dictionary of bits
+:rtype: (dict)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.components.computing_host.ComputingHost.controller_host_id">
+<em class="property">property </em><code class="sig-name descname">controller_host_id</code><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.controller_host_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the <em>controller_host_id</em> associated to the computing host
+:returns: The ID of controller/master host
+:rtype: (str)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.components.computing_host.ComputingHost.extract_gate_param">
+<em class="property">static </em><code class="sig-name descname">extract_gate_param</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">op</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.extract_gate_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract gate parameter array as an np array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>op</strong> (<em>Dict</em>) – Dictionary of information regarding the operation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.components.computing_host.ComputingHost.perform_schedule">
+<code class="sig-name descname">perform_schedule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ticks</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.perform_schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the schedule and perform the corresponding operations
+accordingly</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>(</strong><strong>int</strong><strong>)</strong> – Number of times the clock has ticked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.components.computing_host.ComputingHost.receive_schedule">
+<code class="sig-name descname">receive_schedule</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.receive_schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive the broadcasted schedule from the Controller Host and update
+the schedule property</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.components.computing_host.ComputingHost.send_results">
+<code class="sig-name descname">send_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.send_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send results to Controller Host</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.components.computing_host.ComputingHost.update_total_qubits">
+<code class="sig-name descname">update_total_qubits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">total_qubits</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.update_total_qubits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a new value for <em>total_qubits</em> in the computing host
+:param (int): Total number of qubits possessed by the computing host</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Stephen DiAdamo, Rhea Parekh.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

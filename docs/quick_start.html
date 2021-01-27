@@ -1,0 +1,479 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Quick Start &mdash; Interlin-q  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Design Overview" href="design.html" />
+    <link rel="prev" title="Install" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Interlin-q
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Interlin-q</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="components/computing_host.html">Computing Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components/controller_host.html">Controller Host</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/distributed_phase.html">Distributed Quantum Phase Estimation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="examples/dist_phase.html">Distributed Quantum Phase Estimation Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="examples/dist_phase.html#Introduction-of-Interlin-q">Introduction of Interlin-q</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Simulated-Architechture">Simulated Architechture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Conversion-of-monolithic-to-distributed-circuit">Conversion of monolithic to distributed circuit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Distributed-Scheduler-and-Broadcasting">Distributed Scheduler and Broadcasting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Executing-the-distributed-algorithm">Executing the distributed algorithm</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="examples/dist_phase.html#Code-implementation">Code implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Step-1:-Import-libraries.">Step 1: Import libraries.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Step-2:-Create-monolithic-circuit-of-Quantum-Phase-Estimation">Step 2: Create monolithic circuit of Quantum Phase Estimation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Step-3:-Define-Standard-protocols-for-controller-and-computing-hosts.">Step 3: Define Standard protocols for controller and computing hosts.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Step-4:-Provide-inputs">Step 4: Provide inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="examples/dist_phase.html#Step-5:-Execute-the-distributed-algorithm-and-analyse-the-results">Step 5: Execute the distributed algorithm and analyse the results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Interlin-q</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Quick Start</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/quick_start.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<p>A basic template of a distributed CNOT gate between two different computing hosts is shown in the file <cite>examples/template.py</cite>, where the control qubit in first computing host is set in <cite>|1&gt;</cite> state and the target qubit in the second computing host is set in <cite>|0&gt;</cite> state.</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106</pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="k">def</span> <span class="nf">create_circuit</span><span class="p">(</span><span class="n">q_map</span><span class="p">):</span>
+     <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+     <span class="n">computing_host_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">q_map</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+     <span class="c1"># Prepare the qubits on both computing hosts</span>
+     <span class="n">ops</span> <span class="o">=</span> <span class="p">[]</span>
+     <span class="k">for</span> <span class="n">host_id</span> <span class="ow">in</span> <span class="n">computing_host_ids</span><span class="p">:</span>
+         <span class="n">op</span> <span class="o">=</span> <span class="n">Operation</span><span class="p">(</span>
+             <span class="n">name</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">PREPARE_QUBITS</span><span class="p">,</span>
+             <span class="n">qids</span><span class="o">=</span><span class="n">q_map</span><span class="p">[</span><span class="n">host_id</span><span class="p">],</span>
+             <span class="n">computing_host_ids</span><span class="o">=</span><span class="p">[</span><span class="n">host_id</span><span class="p">])</span>
+         <span class="n">ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+     <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Layer</span><span class="p">(</span><span class="n">ops</span><span class="p">))</span>
+
+     <span class="c1"># Circuit input should be added below</span>
+     <span class="c1"># Put qubit &quot;q_0_0&quot; in |1&gt; state</span>
+     <span class="n">op</span> <span class="o">=</span> <span class="n">Operation</span><span class="p">(</span>
+         <span class="n">name</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">,</span>
+         <span class="n">qids</span><span class="o">=</span><span class="p">[</span><span class="n">q_map</span><span class="p">[</span><span class="n">computing_host_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]],</span>
+         <span class="n">gate</span><span class="o">=</span><span class="n">Operation</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+         <span class="n">computing_host_ids</span><span class="o">=</span><span class="p">[</span><span class="n">computing_host_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+     <span class="n">ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+     <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Layer</span><span class="p">(</span><span class="n">ops</span><span class="p">))</span>
+
+     <span class="c1"># Apply cnot gate from &quot;q_0_0&quot; to &quot;q_1_0&quot;</span>
+     <span class="n">control_qubit_id</span> <span class="o">=</span> <span class="n">q_map</span><span class="p">[</span><span class="n">computing_host_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span>
+     <span class="n">target_qubit_id</span> <span class="o">=</span> <span class="n">q_map</span><span class="p">[</span><span class="n">computing_host_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span>
+
+     <span class="n">op</span> <span class="o">=</span> <span class="n">Operation</span><span class="p">(</span>
+         <span class="n">name</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">TWO_QUBIT</span><span class="p">,</span>
+         <span class="n">qids</span><span class="o">=</span><span class="p">[</span><span class="n">control_qubit_id</span><span class="p">,</span> <span class="n">target_qubit_id</span><span class="p">],</span>
+         <span class="n">gate</span><span class="o">=</span><span class="n">Operation</span><span class="o">.</span><span class="n">CNOT</span><span class="p">,</span>
+         <span class="n">computing_host_ids</span><span class="o">=</span><span class="n">computing_host_ids</span><span class="p">)</span>
+     <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Layer</span><span class="p">([</span><span class="n">op</span><span class="p">]))</span>
+
+     <span class="c1"># Measure the qubits</span>
+     <span class="n">ops</span> <span class="o">=</span> <span class="p">[]</span>
+     <span class="k">for</span> <span class="n">host_id</span> <span class="ow">in</span> <span class="n">computing_host_ids</span><span class="p">:</span>
+         <span class="n">op</span> <span class="o">=</span> <span class="n">Operation</span><span class="p">(</span>
+             <span class="n">name</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">MEASURE</span><span class="p">,</span>
+             <span class="n">qids</span><span class="o">=</span><span class="p">[</span><span class="n">q_map</span><span class="p">[</span><span class="n">host_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
+             <span class="n">cids</span><span class="o">=</span><span class="p">[</span><span class="n">q_map</span><span class="p">[</span><span class="n">host_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
+             <span class="n">computing_host_ids</span><span class="o">=</span><span class="p">[</span><span class="n">host_id</span><span class="p">])</span>
+         <span class="n">ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+     <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Layer</span><span class="p">(</span><span class="n">ops</span><span class="p">))</span>
+
+     <span class="n">circuit</span> <span class="o">=</span> <span class="n">Circuit</span><span class="p">(</span><span class="n">q_map</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span>
+     <span class="k">return</span> <span class="n">circuit</span>
+
+ <span class="k">def</span> <span class="nf">controller_host_protocol</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">q_map</span><span class="p">):</span>
+     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Protocol for the controller host</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+     <span class="n">circuit</span> <span class="o">=</span> <span class="n">create_circuit</span><span class="p">(</span><span class="n">q_map</span><span class="p">)</span>
+     <span class="n">host</span><span class="o">.</span><span class="n">generate_and_send_schedules</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
+     <span class="n">host</span><span class="o">.</span><span class="n">receive_results</span><span class="p">()</span>
+
+     <span class="n">results</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">results</span>
+     <span class="n">computing_host_ids</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">computing_host_ids</span>
+
+     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Final results: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+     <span class="k">for</span> <span class="n">computing_host_id</span> <span class="ow">in</span> <span class="n">computing_host_ids</span><span class="p">:</span>
+         <span class="n">bits</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">computing_host_id</span><span class="p">][</span><span class="s1">&#39;bits&#39;</span><span class="p">]</span>
+         <span class="k">for</span> <span class="n">bit_id</span><span class="p">,</span> <span class="n">bit</span> <span class="ow">in</span> <span class="n">bits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bit_id</span><span class="p">,</span> <span class="n">bit</span><span class="p">))</span>
+
+ <span class="k">def</span> <span class="nf">computing_host_protocol</span><span class="p">(</span><span class="n">host</span><span class="p">):</span>
+     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Protocol for the computing hosts</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+     <span class="n">host</span><span class="o">.</span><span class="n">receive_schedule</span><span class="p">()</span>
+     <span class="n">host</span><span class="o">.</span><span class="n">send_results</span><span class="p">()</span>
+
+ <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+     <span class="c1"># initialize network</span>
+     <span class="n">network</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span>
+     <span class="n">network</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+     <span class="n">clock</span> <span class="o">=</span> <span class="n">Clock</span><span class="p">()</span>
+     <span class="n">controller_host</span> <span class="o">=</span> <span class="n">ControllerHost</span><span class="p">(</span><span class="n">host_id</span><span class="o">=</span><span class="s2">&quot;host_1&quot;</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="n">clock</span><span class="p">)</span>
+
+     <span class="c1"># Here the number of computing hosts and number of qubits per computing hosts</span>
+     <span class="c1"># can be customised</span>
+     <span class="n">computing_hosts</span><span class="p">,</span> <span class="n">q_map</span> <span class="o">=</span> <span class="n">controller_host</span><span class="o">.</span><span class="n">create_distributed_network</span><span class="p">(</span>
+         <span class="n">num_computing_hosts</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+         <span class="n">num_qubits_per_host</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+     <span class="n">controller_host</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+     <span class="n">network</span><span class="o">.</span><span class="n">add_host</span><span class="p">(</span><span class="n">controller_host</span><span class="p">)</span>
+     <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">computing_hosts</span><span class="p">:</span>
+         <span class="n">network</span><span class="o">.</span><span class="n">add_host</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+
+     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;starting...&#39;</span><span class="p">)</span>
+     <span class="n">t</span> <span class="o">=</span> <span class="n">controller_host</span><span class="o">.</span><span class="n">run_protocol</span><span class="p">(</span><span class="n">controller_host_protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">q_map</span><span class="p">,))</span>
+     <span class="n">threads</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span>
+     <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">computing_hosts</span><span class="p">:</span>
+         <span class="n">t</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">run_protocol</span><span class="p">(</span><span class="n">computing_host_protocol</span><span class="p">)</span>
+         <span class="n">threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+     <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+         <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+     <span class="n">network</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+     <span class="n">exit</span><span class="p">()</span>
+
+ <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+     <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Stephen DiAdamo, Rhea Parekh.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
