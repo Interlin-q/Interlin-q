@@ -15,9 +15,9 @@ The simulated architecture can be seen in the image below:
 
 ![Simulated Architecture](images/simulated_architechture.png)
 
-## Setup and tests
+## Setup, tests and documentation
 
-To setup Interlin-q, run the below command.
+See https://interlin-q.github.io/Interlin-q for documentation. To setup Interlin-q, run the below command.
 
 ```
 pip install -r requirements.txt
@@ -148,7 +148,7 @@ In the template, the monolothic circuit can be added in the `create_circuit` fun
 
 ### Distributed Quantum Phase Estimation Tutorial
 
-A tutorial of Distributed Quantum Phase Estimation algorithm can be found [here](https://github.com/rheaparekh/Interlin-q/blob/master/examples/distributed_quantum_phase_estimation_notebook.ipynb).
+A tutorial of Distributed Quantum Phase Estimation algorithm can be found [here](examples/distributed_quantum_phase_estimation_notebook.ipynb).
 
 ## Contributing
 
