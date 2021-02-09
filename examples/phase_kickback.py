@@ -4,7 +4,7 @@ sys.path.append("../")
 from qunetsim.components import Network
 from qunetsim.objects import Logger
 from interlinq import ControllerHost, Clock, Circuit, \
-    Layer, Operation
+    Layer, Operation, Qubit
 
 Logger.DISABLED = True
 
@@ -28,46 +28,18 @@ def main():
         computing_hosts[0],
         computing_hosts[1],
         controller_host])
-    layers = []
-    op_1 = Operation(
-        name="PREPARE_QUBITS",
-        qids=["q_0_0"],
-        computing_host_ids=["QPU_0"])
-    op_2 = Operation(
-        name="PREPARE_QUBITS",
-        qids=["q_1_0"],
-        computing_host_ids=["QPU_1"])
 
-    layers.append(Layer([op_1, op_2]))
-    op_1 = Operation(
-        name="SINGLE",
-        qids=["q_0_0"],
-        gate=Operation.I,
-        computing_host_ids=["QPU_0"])
+    q_0_0 = Qubit(computing_host_id="QPU_0", q_id="q_0_0")
+    q_0_1 = Qubit(computing_host_id="QPU_1", q_id="q_0_1")
 
-    layers.append(Layer([op_1]))
+    q_0_0.single(gate=Operation.I)
+    q_0_0.two_qubit(gate=Operation.CNOT, target_qubit=q_0_1)
 
-    op_1 = Operation(
-        name="TWO_QUBIT",
-        qids=["q_0_0", "q_1_0"],
-        gate=Operation.CNOT,
-        computing_host_ids=["QPU_0", "QPU_1"])
-    layers.append(Layer([op_1]))
+    q_0_0.measure(bit_id=q_0_0.q_id)
+    q_0_1.measure(bit_id=q_0_1.q_id)
 
-    op_1 = Operation(
-        name="MEASURE",
-        qids=["q_0_0"],
-        cids=["q_0_0"],
-        computing_host_ids=["QPU_0"])
-
-    op_2 = Operation(
-        name="MEASURE",
-        qids=["q_1_0"],
-        cids=["q_1_0"],
-        computing_host_ids=["QPU_1"])
-    layers.append(Layer([op_1, op_2]))
-
-    circuit = Circuit(q_map, layers)
+    qubits = [q_0_0, q_0_1]
+    circuit = Circuit(q_map, qubits=qubits)
 
     def controller_host_protocol(host):
         host.generate_and_send_schedules(circuit)

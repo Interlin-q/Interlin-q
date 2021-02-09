@@ -1,9 +1,12 @@
+from .layer import Layer
+
+
 class Circuit(object):
     """
     Circuit object which contains information about a quantum circuit.
     """
 
-    def __init__(self, q_map, layers=[]):
+    def __init__(self, q_map, layers=[], qubits=[]):
         """
         Returns the important things for a quantum circuit
 
@@ -16,7 +19,12 @@ class Circuit(object):
 
         self._q_map = q_map
         self._layers = layers
+        self._qubits = qubits
         self._width = 0
+
+        if not self._layers:
+            if self._qubits:
+                self._create_layers()
 
     def __str__(self):
         circuit = ''
@@ -43,6 +51,41 @@ class Circuit(object):
                 of gates to be applied on the qubits in the system
         """
         return self._layers
+
+    @property
+    def qubits(self):
+        """
+        Get the *layers* of the circuit
+        Returns:
+            (list): List of Layer objects, where each layer contains a collection
+                of gates to be applied on the qubits in the system
+        """
+        return self._qubits
+
+    def _create_layers(self):
+        """
+        """
+
+        layers = []
+        qubits = self.qubits
+
+        last_layer = False
+        layer = 0
+
+        while not last_layer:
+            ops = []
+            check = False
+            for qubit in qubits:
+                if layer in list(qubit.operations.keys()):
+                    check = True
+                    ops.append(qubit.operations[layer])
+
+            layer += 1
+            layers.append(Layer(ops))
+            if not check:
+                last_layer = True
+
+        self._layers = layers
 
     def total_qubits(self):
         """
