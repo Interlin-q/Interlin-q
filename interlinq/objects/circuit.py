@@ -15,6 +15,8 @@ class Circuit(object):
                 required for the circuit in that host
             layers (list): List of Layer objects, where each layer contains a
                 collection of operations to be applied on the qubits in the system
+            qubits (list): List of Qubit objects, where each qubit object stores
+                the list of operations applied on it
         """
 
         self._q_map = q_map
@@ -55,51 +57,12 @@ class Circuit(object):
     @property
     def qubits(self):
         """
-        Get the *layers* of the circuit
+        Get the *qubits* of the circuit
         Returns:
-            (list): List of Layer objects, where each layer contains a collection
-                of gates to be applied on the qubits in the system
+            (list): List of Qubit objects, where each qubit object stores the
+                list of operations applied on it
         """
         return self._qubits
-
-    def _create_layers(self):
-        """
-        """
-
-        layers = []
-        qubits = self.qubits
-
-        last_layer = False
-        layer = 0
-
-        while not last_layer:
-            ops = []
-            check = False
-            for qubit in qubits:
-                if layer in list(qubit.operations.keys()):
-                    check = True
-                    ops.append(qubit.operations[layer])
-
-            layer += 1
-            layers.append(Layer(ops))
-            if not check:
-                last_layer = True
-
-        self._layers = layers
-
-    def total_qubits(self):
-        """
-        Get the total number of qubits in the circuit
-        Returns:
-            (int): total number of qubits in circuit
-        """
-
-        total_qubits = 0
-
-        for computing_host_id in list(self._q_map.keys()):
-            total_qubits += len(self._q_map[computing_host_id])
-
-        return total_qubits
 
     def add_new_qubit(self, qubit_info):
         """
@@ -134,6 +97,29 @@ class Circuit(object):
 
         self._layers.append(layer)
 
+    def create_layers(self):
+        """
+        Create layers for the circuit from the qubits provided
+        """
+
+        layers = []
+        qubits = self.qubits
+
+        layer_count = 0
+
+        while not final_layer:
+            ops = []
+            final_layer = True
+            for qubit in qubits:
+                if layer_count in list(qubit.operations.keys()):
+                    final_layer = False
+                    ops.append(qubit.operations[layer])
+
+            layer_count += 1
+            layers.append(Layer(ops))
+
+        self._layers = layers
+
     def insert_layer(self, index, layer):
         """
         Insert a new layer object at a particular index in the circuit
@@ -146,6 +132,20 @@ class Circuit(object):
             self._width = len(layer.operations)
         self._layers.insert(index, layer)
 
+    def total_qubits(self):
+        """
+        Get the total number of qubits in the circuit
+        Returns:
+            (int): total number of qubits in circuit
+        """
+
+        total_qubits = 0
+
+        for computing_host_id in list(self._q_map.keys()):
+            total_qubits += len(self._q_map[computing_host_id])
+
+        return total_qubits
+
     def update_layer(self, index, layer):
         """
         Update a layer object at a particular index with a new value
@@ -156,6 +156,16 @@ class Circuit(object):
         """
 
         self._layers[index] = layer
+
+    def update_qubits(self, qubits):
+        """
+        Update qubits in the circuit
+
+        Args:
+            qubits (list): List of Qubit objects, where each qubit object stores
+                the list of operations applied on it
+        """
+        self._qubits = qubits
 
     def control_gate_info(self):
         """
