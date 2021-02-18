@@ -164,7 +164,7 @@ class Qubit(object):
             cids=[bit_id],
             gate=gate,
             gate_param=gate_param,
-            computing_host_ids=[self._computing_host_id])
+            computing_host_ids=[self.computing_host_id])
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)

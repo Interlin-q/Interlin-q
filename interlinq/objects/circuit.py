@@ -26,7 +26,7 @@ class Circuit(object):
 
         if not self._layers:
             if self._qubits:
-                self._create_layers()
+                self.create_layers()
 
     def __str__(self):
         circuit = ''
@@ -106,6 +106,7 @@ class Circuit(object):
         qubits = self.qubits
 
         layer_count = 0
+        final_layer = False
 
         while not final_layer:
             ops = []
@@ -113,7 +114,7 @@ class Circuit(object):
             for qubit in qubits:
                 if layer_count in list(qubit.operations.keys()):
                     final_layer = False
-                    ops.append(qubit.operations[layer])
+                    ops.append(qubit.operations[layer_count])
 
             layer_count += 1
             layers.append(Layer(ops))
