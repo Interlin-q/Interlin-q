@@ -1,6 +1,7 @@
 import unittest
 from interlinq.objects.circuit import Circuit
 from interlinq.objects.layer import Layer
+from interlinq.objects.qubit import Qubit
 from interlinq.objects import Operation
 
 
@@ -113,3 +114,31 @@ class TestCircuit(unittest.TestCase):
 
         self.assertEqual(control_gate_info[0][0]['control_qubit'], 'qubit_2')
         self.assertEqual(control_gate_info[3][0]['control_qubit'], 'qubit_6')
+
+    def test_creating_layers(self):
+        q_1 = Qubit(computing_host_id='QPU_1', q_id='qubit_1')
+        q_2 = Qubit(computing_host_id='QPU_2', q_id='qubit_2')
+        q_3 = Qubit(computing_host_id='QPU_1', q_id='qubit_3')
+
+        q_1.single(gate=Operation.X)
+        q_2.single(gate=Operation.X)
+
+        q_1.single(gate=Operation.H)
+        q_3.single(gate=Operation.H)
+
+        q_1.two_qubit(gate=Operation.CNOT, target_qubit=q_3)
+
+        self._circuit.create_layers(qubits=[q_1, q_2, q_3])
+        layers = self._circuit.layers
+
+        op_names = [op.name for op in layers[0].operations]
+        self.assertEqual(op_names, ['PREPARE_QUBITS', 'PREPARE_QUBITS', 'PREPARE_QUBITS'])
+
+        op_names = [op.name for op in layers[1].operations]
+        self.assertEqual(op_names, ['SINGLE', 'SINGLE', 'SINGLE'])
+
+        op_names = [op.name for op in layers[2].operations]
+        self.assertEqual(op_names, ['SINGLE'])
+
+        op_names = [op.name for op in layers[3].operations]
+        self.assertEqual(op_names, ['TWO_QUBIT'])
