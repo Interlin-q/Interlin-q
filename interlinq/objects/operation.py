@@ -35,7 +35,7 @@ class Operation(object):
                 list will be the ID of the computing host where the operation is being performed
             cids (list): List of classical bit IDs associated to the operation
             gate (str): Name of the single or the two-qubit gate
-            gate_param (obj): parameter for rotational gates
+            gate_param (list): parameter for rotational gates
             computing_host_ids (list): List of associated ID/IDS of the computing host where
                 the operation/gate is being performed. The first computing host in the list
                 would be the one where the operation is being performed.
@@ -94,7 +94,7 @@ class Operation(object):
         Get the *gate_param* associated to the operation, if any
 
         Returns:
-            (int): parameter for rotational gates
+            (list): parameter for rotational gates
         """
 
         return self._gate_param

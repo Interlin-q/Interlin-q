@@ -1,6 +1,8 @@
 **/__pycache__
+**/*.ipynb_checkpoints/
 *.swp
 *.swo
 venv
 .idea/
 .python-version
+.DS_Store
