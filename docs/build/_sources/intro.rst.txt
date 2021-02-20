@@ -15,4 +15,3 @@ The method used to accomplish this is based on the following paper:
 .. image:: images/simulated_architechture.png
    :width: 600
 
-
