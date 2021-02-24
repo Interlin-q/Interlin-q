@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../")
 
 from qunetsim.components import Network
@@ -20,8 +21,9 @@ def main():
         host_id="host_1",
         clock=clock,
     )
-    computing_hosts, q_map = controller_host.create_distributed_network(num_computing_hosts=2,
-                                                                        num_qubits_per_host=10)
+    computing_hosts, q_map = controller_host \
+        .create_distributed_network(num_computing_hosts=2,
+                                    num_qubits_per_host=3)
 
     controller_host.start()
     network.add_hosts([
@@ -29,16 +31,22 @@ def main():
         computing_hosts[1],
         controller_host])
 
+    print(q_map)
+
     q_0_0 = Qubit(computing_host_id="QPU_0", q_id="q_0_0")
-    q_0_1 = Qubit(computing_host_id="QPU_1", q_id="q_0_1")
+    q_0_1 = Qubit(computing_host_id="QPU_0", q_id="q_0_1")
+    q_1_0 = Qubit(computing_host_id="QPU_1", q_id="q_1_0")
 
-    q_0_0.single(gate=Operation.I)
-    q_0_0.two_qubit(gate=Operation.CNOT, target_qubit=q_0_1)
+    q_0_0.single(gate=Operation.X)
+    q_0_0.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
+    q_0_1.single(gate=Operation.X)
+    q_0_1.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
 
-    q_0_0.measure(bit_id=q_0_0.q_id)
-    q_0_1.measure(bit_id=q_0_1.q_id)
+    q_0_0.measure()
+    q_0_1.measure()
+    q_1_0.measure()
 
-    qubits = [q_0_0, q_0_1]
+    qubits = [q_0_0, q_1_0, q_0_1]
     circuit = Circuit(q_map, qubits=qubits)
 
     def controller_host_protocol(host):
