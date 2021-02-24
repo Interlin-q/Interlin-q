@@ -1,5 +1,6 @@
 from interlinq.utils import Constants
 from . import Operation
+from . import Layer
 
 
 class Qubit(object):
@@ -7,7 +8,7 @@ class Qubit(object):
     Qubit object which stores the operations performed on it
     """
 
-    def __init__(self, computing_host_id, q_id, prepare_qubit=True):
+    def __init__(self, computing_host_id: str, q_id: str, prepare_qubit: bool = True):
         """
         Returns the important things for a qubit object in a quantum circuit
 
@@ -44,6 +45,7 @@ class Qubit(object):
     def computing_host_id(self):
         """
         Get the *computing_host_id* linked to the qubit
+
         Returns:
             (str): ID of the computing host where the qubit is located
         """
@@ -52,24 +54,26 @@ class Qubit(object):
     @property
     def operations(self):
         """
-        Get the *operations* in the layer
+        Get the *operations* in the layer.
+
         Returns:
-            (str): List of Operation objects, which contains information about
+            (list): List of Operation objects, which contains information about
             the operation to be performed on the quantum circuit
-        """    
+        """
         return self._operations
 
     @property
     def current_layer(self):
         """
         Get the *current_layer*, which is the layer of the last operation on the
-        qubit
+        qubit.
+
         Returns:
-            (str): List of Operation objects, which contains information about the
+            (int): The layer number
         """
         return self._current_layer
 
-    def _update_operations(self, op):
+    def _update_operations(self, op: Operation):
         """
         Update the list of operations performed on the qubit with the latest
         operation
@@ -90,16 +94,16 @@ class Qubit(object):
 
         self._update_operations(op)
 
-    def update_layer(self, layer):
+    def update_layer(self, layer: int):
         """
         Update the list of operations performed on the qubit with th
 
         Args:
-            op (Operation): Last operation performed on the qubit
+            layer (int): Last operation performed on the qubit
         """
         self._current_layer = layer
 
-    def single(self, gate, gate_param=None):
+    def single(self, gate: str, gate_param: list = None):
         """
         Operation to apply a single gate to the qubit
 
@@ -125,7 +129,7 @@ class Qubit(object):
             gate (str): Name of the single qubit gate to be applied
             target_qubit (Qubit): The other qubit on which the qubit gate is
                applied on. In case on control gates, this is the target qubit
-            gate_param (list): Parameter for rotational gates
+            gate_param (iterable): Parameter for rotational gates
         """
 
         computing_host_ids = [self.computing_host_id]
@@ -183,7 +187,7 @@ class Qubit(object):
             name=Constants.SEND_ENT,
             qids=[self._q_id],
             computing_host_ids=[self.computing_host_id, receiver_id],
-            pre_allocated=pre_allocated)
+            pre_allocated_qubits=pre_allocated)
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)
@@ -202,56 +206,56 @@ class Qubit(object):
             name=Constants.REC_ENT,
             qids=[self._q_id],
             computing_host_ids=[self.computing_host_id, sender_id],
-            pre_allocated=pre_allocated)
+            pre_allocated_qubits=pre_allocated)
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)
 
-    def send_classical(self, bit_id, receiver):
+    def send_classical(self, bit_id, receiver_qubit):
         """
         Operation to send a classical bit
 
         Args:
             bit_id (str): ID of the bit which has to be sent
-            receiver (Qubit): Qubit which receives the classical bit
+            receiver_qubit (Qubit): Qubit which receives the classical bit
         """
         op = Operation(
             name=Constants.SEND_CLASSICAL,
             cids=[bit_id],
-            computing_host_ids=[self.computing_host_id, receiver.computing_host_id])
+            computing_host_ids=[self.computing_host_id, receiver_qubit.computing_host_id])
 
-        if receiver.current_layer + 1 > self.current_layer + 1:
-            receiver.update_layer(receiver.current_layer + 1)
-            self.update_layer(receiver.current_layer + 1)
+        if receiver_qubit.current_layer + 1 > self.current_layer + 1:
+            receiver_qubit.update_layer(receiver_qubit.current_layer + 1)
+            self.update_layer(receiver_qubit.current_layer + 1)
         else:
             receiver_qubit.update_layer(self.current_layer + 1)
             self.update_layer(self.current_layer + 1)
 
         self._update_operations(op)
 
-    def rec_classical(self, bit_id, sender):
+    def rec_classical(self, bit_id, sender_qubit):
         """
         Operation to receive a classical bit
 
         Args:
             bit_id (str): ID of the bit which has to be sent
-            sender (Qubit): Qubit which sends the classical bit
+            sender_qubit (Qubit): Qubit which sends the classical bit
         """
         op = Operation(
             name=Constants.REC_CLASSICAL,
             cids=[bit_id],
-            computing_host_ids=[self.computing_host_id, sender.computing_host_id])
+            computing_host_ids=[self.computing_host_id, sender_qubit.computing_host_id])
 
         if sender_qubit.current_layer + 1 > self.current_layer + 1:
-            sender.update_layer(sender.current_layer + 1)
+            sender_qubit.update_layer(sender_qubit.current_layer + 1)
             self.update_layer(sender_qubit.current_layer + 1)
         else:
-            sender.update_layer(self.current_layer + 1)
+            sender_qubit.update_layer(self.current_layer + 1)
             self.update_layer(self.current_layer + 1)
 
         self._update_operations(op)
 
-    def measure(self, bit_id):
+    def measure(self, bit_id=None):
         """
         Operation to measure the qubit
 
@@ -259,6 +263,8 @@ class Qubit(object):
             bit_id (str): ID of the bit where the result of the measurement
                 has to be stored
         """
+        if bit_id is None:
+            bit_id = self.q_id
         op = Operation(
             name=Constants.MEASURE,
             qids=[self.q_id],

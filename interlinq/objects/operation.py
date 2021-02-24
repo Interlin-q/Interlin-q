@@ -24,8 +24,14 @@ class Operation(object):
     CUSTOM_CONTROLLED = "custom_controlled_gate"
     MEASURE = "measure"
 
-    def __init__(self, name, qids=None, cids=None, gate=None, gate_param=None, computing_host_ids=[],
-                 pre_allocated_qubits=False):
+    def __init__(self,
+                 name: str,
+                 qids: list = None,
+                 cids: list = None,
+                 gate: str = None,
+                 gate_param: list = None,
+                 computing_host_ids: list = [],
+                 pre_allocated_qubits: bool = False):
         """
         Returns the important things for a quantum operation
 
@@ -194,6 +200,7 @@ class Operation(object):
 class InputError(Exception):
     """
     Exception raised for errors in the input.
+
     Attributes:
         expression -- input expression in which the error occurred
         message -- explanation of the error

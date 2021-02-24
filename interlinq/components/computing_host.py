@@ -1,4 +1,6 @@
 from qunetsim.components import Host
+
+from .clock import Clock
 from interlinq.objects import Operation
 from interlinq.utils import DefaultOperationTime
 from interlinq.utils.constants import Constants
@@ -17,8 +19,8 @@ class ComputingHost(Host):
     distributed network system, connected to the controller host.
     """
 
-    def __init__(self, host_id, controller_host_id, clock, total_qubits=0,
-                 total_pre_allocated_qubits=1, gate_time=None):
+    def __init__(self, host_id: str, controller_host_id: str, clock: Clock, total_qubits: int = 0,
+                 total_pre_allocated_qubits: int = 1, gate_time: dict = None):
 
         """
         Returns the important things for the computing hosts
@@ -64,6 +66,7 @@ class ComputingHost(Host):
     def controller_host_id(self):
         """
         Get the *controller_host_id* associated to the computing host
+
         Returns:
             (str): The ID of controller/master host
         """
@@ -72,24 +75,26 @@ class ComputingHost(Host):
     @property
     def bits(self):
         """
-        Get the classical bits measured by this host
+        Get the classical bits measured by this host.
+
         Returns:
             (dict): The dictionary of bits
         """
         results = {}
         for i in self._bits:
             # Hack to filter out EPR pairs
+            # TODO: Is there a better way to overcome this?
             if len(i) < 15:
                 results[i] = self._bits[i]
         return results
 
-    def update_total_qubits(self, total_qubits):
+    def update_total_qubits(self, total_qubits: int):
         """
-        Set a new value for *total_qubits* in the computing host
+        Set a new value for *total_qubits* in the computing host.
+
         Args:
             (int): Total number of qubits possessed by the computing host
         """
-
         self._total_qubits = total_qubits
 
     def receive_schedule(self):
@@ -127,20 +132,19 @@ class ComputingHost(Host):
         Args:
             (str): Error message in a string
         """
-
         self._clock.stop_clock()
         self._error_message = message
 
-    def _check_errors(self, op, len_qids=0, len_computing_host_ids=1, len_cids=0):
+    def _check_errors(self, op, len_qids: int = 0, len_computing_host_ids: int = 1, len_cids: int = 0):
         """
         Check if there is any error in the operation format
 
         Args:
             op (Dict): Dictionary of information regarding the operation
-            lens_qids (int): Permissible number of qubit IDs in the operation
-            lens_computing_host_ids (int): Permissible number of computing
+            len_qids (int): Permissible number of qubit IDs in the operation
+            len_computing_host_ids (int): Permissible number of computing
                 host IDs in the operation
-            lens_cids (int): Permissible number of classical bit IDs in the
+            len_cids (int): Permissible number of classical bit IDs in the
                 operation
         """
 
@@ -168,10 +172,10 @@ class ComputingHost(Host):
         if msg:
             self._report_error(msg)
 
-    def _add_new_qubit(self, qubit, qubit_id, pre_allocated=False):
+    def _add_new_qubit(self, qubit: Qubit, qubit_id: str, pre_allocated: bool = False):
         """
         Add a new qubit in either 'qubits' property or 'pre_allocated_qubits'
-        property
+        property.
 
         Args:
             qubit (Qubit): The qubit to be added
@@ -192,7 +196,7 @@ class ComputingHost(Host):
             qubits[qubit_id] = qubit
             self._update_stored_qubits(qubits)
 
-    def _get_stored_qubit(self, qubit_id):
+    def _get_stored_qubit(self, qubit_id: str):
         """
         Extract the qubit from the computing host given the qubit id.
 
@@ -204,12 +208,12 @@ class ComputingHost(Host):
         if qubit_id in self._pre_allocated_qubits:
             return self._pre_allocated_qubits[qubit_id]
 
-    def _update_stored_qubits(self, qubits):
+    def _update_stored_qubits(self, qubits: dict):
         """
         Update the stored qubits in the class
 
         Args:
-            qubits (Dict): Map of the qubit ids to the corresponding qubits
+            qubits (dict): Map of the qubit ids to the corresponding qubits
                 stored with the computing host
         """
 
@@ -221,12 +225,15 @@ class ComputingHost(Host):
         self._qubits = qubits
 
     @staticmethod
-    def extract_gate_param(op):
+    def extract_gate_param(op: dict) -> np.ndarray:
         """
         Extract gate parameter array as an np array
 
         Args:
-            op (Dict): Dictionary of information regarding the operation
+            op (dict): Dictionary of information regarding the operation
+
+        Returns:
+            (np.ndarray): The parameter array.
         """
 
         param = op['gate_param']
@@ -236,12 +243,12 @@ class ComputingHost(Host):
                     param[i][j] = (param[i][j][0] + param[i][j][1] * 1j)
         return np.asarray(param)
 
-    def _prepare_qubits(self, prepare_qubit_op):
+    def _prepare_qubits(self, prepare_qubit_op: dict):
         """
         Follows the operation command to prepare the necessary qubits
 
         Args:
-            prepare_qubit_op (Dict): Dictionary of information regarding
+            prepare_qubit_op (dict): Dictionary of information regarding
                 the operation
         """
 
@@ -250,13 +257,13 @@ class ComputingHost(Host):
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
         self._update_stored_qubits(qubits)
 
-    def _process_single_gates(self, operation, classical_ctrl_gate=False):
+    def _process_single_gates(self, operation: dict, classical_ctrl_gate: bool = False):
         """
         Follows the operation command to perform single gates on a qubit
 
         Args:
-            (Dict): Dictionary of information regarding the operation
-            (Bool): If the single gate being performed is part of a
+            operation (dict): Dictionary of information regarding the operation
+            classical_ctrl_gate (bool): If the single gate being performed is part of a
                 classical control single gate
         """
 
@@ -303,12 +310,12 @@ class ComputingHost(Host):
             gate_param = self.extract_gate_param(operation)
             qubit.custom_gate(gate_param)
 
-    def _process_two_qubit_gates(self, operation):
+    def _process_two_qubit_gates(self, operation: dict):
         """
         Follows the operation command to perform two qubit gates on a qubit
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+            operation (dict): Dictionary of information regarding the operation
         """
 
         self._check_errors(
@@ -334,13 +341,13 @@ class ComputingHost(Host):
             gate_param = self.extract_gate_param(operation)
             qubit_1.custom_controlled_gate(qubit_2, gate_param)
 
-    def _process_classical_ctrl_gates(self, operation):
+    def _process_classical_ctrl_gates(self, operation: dict):
         """
         Follows the operation command to perform a classical control gate
-        on a qubit
+        on a qubit.
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+            operation (dict): Dictionary of information regarding the operation
         """
 
         self._check_errors(
@@ -355,12 +362,12 @@ class ComputingHost(Host):
         if bit:
             self._process_single_gates(operation, classical_ctrl_gate=True)
 
-    def _process_send_ent(self, operation):
+    def _process_send_ent(self, operation: dict):
         """
         Follows the operation command to send EPR pair
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+           operation (dict): Dictionary of information regarding the operation
         """
 
         self._check_errors(
@@ -376,12 +383,12 @@ class ComputingHost(Host):
         epr_qubit = self.get_epr(receiver_id, q_id=qubit_id)
         self._add_new_qubit(epr_qubit, qubit_id, operation['pre_allocated_qubits'])
 
-    def _process_rec_ent(self, operation):
+    def _process_rec_ent(self, operation: dict):
         """
         Follows the operation command to receive EPR pair
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+           operation (dict): Dictionary of information regarding the operation
         """
 
         self._check_errors(
@@ -405,12 +412,12 @@ class ComputingHost(Host):
             qubit_id,
             operation['pre_allocated_qubits'])
 
-    def _process_send_classical(self, operation):
+    def _process_send_classical(self, operation: dict):
         """
         Follows the operation command to receive a classical bit
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+            operation (dict): Dictionary of information regarding the operation
         """
 
         self._check_errors(
@@ -428,12 +435,12 @@ class ComputingHost(Host):
 
         self.send_classical(receiver_id, self._bits[bit_id], await_ack=True)
 
-    def _process_rec_classical(self, operation):
+    def _process_rec_classical(self, operation: dict):
         """
         Follows the operation command to receive a classical bit
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+            operation (dict): Dictionary of information regarding the operation
         """
 
         self._check_errors(
@@ -448,12 +455,12 @@ class ComputingHost(Host):
 
         self._bits[bit_id] = bit
 
-    def _process_measurement(self, operation):
+    def _process_measurement(self, operation: dict):
         """
         Follows the operation command to measure a qubit and save the result
 
         Args:
-            (Dict): Dictionary of information regarding the operation
+            operation (dict): Dictionary of information regarding the operation
         """
 
         self._check_errors(
@@ -477,13 +484,13 @@ class ComputingHost(Host):
             del self._qubits[qubit_id]
             self._total_qubits -= 1
 
-    def perform_schedule(self, ticks):
+    def perform_schedule(self, ticks: int):
         """
         Process the schedule and perform the corresponding operations
         accordingly
 
         Args:
-            (int): Number of times the clock has ticked
+           ticks (int): Number of times the clock has ticked
         """
 
         if ticks in self._schedule:
@@ -514,7 +521,6 @@ class ComputingHost(Host):
 
                 if operation['name'] == Constants.MEASURE:
                     self._process_measurement(operation)
-
         self._clock.respond()
 
     def send_results(self):

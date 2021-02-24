@@ -4,7 +4,7 @@ class Layer(object):
     in the system.
     """
 
-    def __init__(self, operations=[]):
+    def __init__(self, operations: list = []):
         """
         Returns the important things for a layer in a quantum circuit
 
@@ -40,7 +40,7 @@ class Layer(object):
 
         self._operations.append(operation)
 
-    def add_operations(self, operations):
+    def add_operations(self, operations: list):
         """
         Add multiple operations to the layer
         Args:
@@ -55,8 +55,6 @@ class Layer(object):
         Check if a control gate is present in the layer between two different
         computing hosts
 
-        Args:
-            operations (list): List of Operation objects
         Returns:
             (bool): True if control gate is present between two different computing
                 hosts
@@ -69,12 +67,12 @@ class Layer(object):
                 control_gate_present = True
         return control_gate_present
 
-    def remove_operation(self, index):
+    def remove_operation(self, index: int):
         """
-        Remove an operation from the layer
+        Remove an operation from the layer.
+
         Args:
             index (int): Index of the operation to be removed
-            operation (Operation): Information about the operation to be removed
         """
 
         self._operations.pop(index)

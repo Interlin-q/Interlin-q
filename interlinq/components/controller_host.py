@@ -16,7 +16,7 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id: str, clock: Clock, computing_host_ids: list=[], gate_time: dict=None):
+    def __init__(self, host_id: str, clock: Clock, computing_host_ids: list = [], gate_time: dict = None):
         """
         Returns the important things for the controller hosts
 
@@ -103,7 +103,7 @@ class ControllerHost(Host):
 
         return computing_hosts, q_map
 
-    def connect_host(self, computing_host_id: str, gate_time: dict=None):
+    def connect_host(self, computing_host_id: str, gate_time: dict = None):
         """
         Adds a computing host to the distributed network
 
@@ -121,12 +121,12 @@ class ControllerHost(Host):
 
         self._gate_time[computing_host_id] = gate_time
 
-    def connect_hosts(self, computing_host_ids: list, gate_times: list=None):
+    def connect_hosts(self, computing_host_ids: list, gate_times: list = None):
         """
         Adds multiple computing hosts to the distributed network
 
         Args:
-            computing_host_id (list): The ID of the computing host
+            computing_host_ids (list): The ID of the computing host
             gate_times (list): A list of mappings of gate names to time the gate
                 takes to execute for the computing host to be added
         """
@@ -445,5 +445,5 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         if isinstance(obj, complex):
-            return (obj.real, obj.imag)
+            return obj.real, obj.imag
         return json.JSONEncoder.default(self, obj)

@@ -6,7 +6,7 @@ class Circuit(object):
     Circuit object which contains information about a quantum circuit.
     """
 
-    def __init__(self, q_map, layers=[], qubits=[]):
+    def __init__(self, q_map: dict, layers: list = [], qubits: list = []):
         """
         Returns the important things for a quantum circuit
 
@@ -37,7 +37,8 @@ class Circuit(object):
     @property
     def q_map(self):
         """
-        Get the *q_map* of the circuit
+        Get the *q_map* of the circuit.
+
         Returns:
             (dict): A mapping of the computing hosts IDS to the list of qubits
                 required for the circuit in that host
@@ -47,7 +48,8 @@ class Circuit(object):
     @property
     def layers(self):
         """
-        Get the *layers* of the circuit
+        Get the *layers* of the circuit.
+
         Returns:
             (list): List of Layer objects, where each layer contains a collection
                 of gates to be applied on the qubits in the system
@@ -57,16 +59,18 @@ class Circuit(object):
     @property
     def qubits(self):
         """
-        Get the *qubits* of the circuit
+        Get the *qubits* of the circuit.
+
         Returns:
             (list): List of Qubit objects, where each qubit object stores the
                 list of operations applied on it
         """
         return self._qubits
 
-    def add_new_qubit(self, qubit_info):
+    def add_new_qubit(self, qubit_info: dict):
         """
-        Add a new qubit to the circuit
+        Add a new qubit to the circuit.
+
         Args:
             qubit_info (dict): A mapping of the computing hosts ID to the list of new
                 qubits required for the circuit in that host
@@ -97,9 +101,12 @@ class Circuit(object):
 
         self._layers.append(layer)
 
-    def create_layers(self, qubits):
+    def create_layers(self, qubits: list):
         """
-        Create layers for the circuit from the qubits provided
+        Create layers for the circuit from the qubits provided.
+
+        Args:
+            qubits (list): The qubits in the layer.
         """
 
         layers = []
@@ -118,13 +125,13 @@ class Circuit(object):
 
         self._layers = layers
 
-    def insert_layer(self, index, layer):
+    def insert_layer(self, index: int, layer: Layer):
         """
-        Insert a new layer object at a particular index in the circuit
+        Insert a new layer object at a particular index in the circuit.
 
         Args:
-            layer (Layer): new layer object to be inserted
             index (int): Index at which the new layer should be inserted at
+            layer (Layer): new layer object to be inserted
         """
         if len(layer.operations) > self._width:
             self._width = len(layer.operations)
@@ -132,7 +139,8 @@ class Circuit(object):
 
     def total_qubits(self):
         """
-        Get the total number of qubits in the circuit
+        Get the total number of qubits in the circuit.
+
         Returns:
             (int): total number of qubits in circuit
         """
@@ -144,20 +152,20 @@ class Circuit(object):
 
         return total_qubits
 
-    def update_layer(self, index, layer):
+    def update_layer(self, index: int, layer: Layer):
         """
-        Update a layer object at a particular index with a new value
+        Update a layer object at a particular index with a new value.
 
         Args:
-            layer (Layer): layer object to be updated
             index (int): Index at which the new layer should be updated
+            layer (Layer): layer object to be updated
         """
 
         self._layers[index] = layer
 
-    def update_qubits(self, qubits):
+    def update_qubits(self, qubits: list):
         """
-        Update qubits in the circuit
+        Update qubits in the circuit.
 
         Args:
             qubits (list): List of Qubit objects, where each qubit object stores
