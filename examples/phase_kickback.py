@@ -26,10 +26,7 @@ def main():
                                     num_qubits_per_host=3)
 
     controller_host.start()
-    network.add_hosts([
-        computing_hosts[0],
-        computing_hosts[1],
-        controller_host])
+    network.add_hosts(computing_hosts + [controller_host])
 
     print(q_map)
 
@@ -40,7 +37,8 @@ def main():
     q_0_0.single(gate=Operation.X)
     q_0_0.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
     q_0_1.single(gate=Operation.X)
-    q_0_1.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
+
+    # q_0_1.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
 
     q_0_0.measure()
     q_0_1.measure()
