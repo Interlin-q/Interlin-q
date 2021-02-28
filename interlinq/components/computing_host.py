@@ -88,6 +88,26 @@ class ComputingHost(Host):
                 results[i] = self._bits[i]
         return results
 
+    @property
+    def qubit_ids(self):
+        """
+        Return the qubit IDs for this computing host.
+
+        Returns:
+            (list): The IDs of the qubits stored by this computing host.
+        """
+        return list(self._qubits.keys()) + list(self._pre_allocated_qubits.keys())
+
+    @property
+    def total_qubits(self):
+        """
+        Return the total number of qubits for computing host.
+
+        Returns:
+            (int): The total number of qubits stored by this computing host.
+        """
+        return self._total_qubits
+
     def update_total_qubits(self, total_qubits: int):
         """
         Set a new value for *total_qubits* in the computing host.
@@ -217,12 +237,12 @@ class ComputingHost(Host):
                 stored with the computing host
         """
 
-        if len(qubits) > self._total_qubits:
+        if len(qubits) + len(self.qubit_ids) > self._total_qubits:
             msg = "Number of qubits required for the circuit are more " \
                   "than the total qubits"
             self._report_error(msg)
 
-        self._qubits = qubits
+        self._qubits.update(qubits)
 
     @staticmethod
     def extract_gate_param(op: dict) -> np.ndarray:
@@ -474,7 +494,7 @@ class ComputingHost(Host):
 
         qubit = self._get_stored_qubit(qubit_id)
 
-        bit = qubit.measure()
+        bit = qubit.measure(non_destructive=True)
         self._bits[bit_id] = bit
 
         if qubit_id in self._pre_allocated_qubits:
