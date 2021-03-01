@@ -41,8 +41,13 @@ def main():
     q_1_0.single(gate=Operation.X)
     q_1_1.single(gate=Operation.X)
 
+    # This works
+    # q_0_0.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
+    # q_0_1.two_qubit(gate=Operation.CNOT, target_qubit=q_1_1)
+
+    # This doesn't work
     q_0_0.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
-    q_0_1.two_qubit(gate=Operation.CNOT, target_qubit=q_1_1)
+    q_0_1.two_qubit(gate=Operation.CNOT, target_qubit=q_1_0)
 
     q_0_0.measure()
     q_0_1.measure()
@@ -55,7 +60,6 @@ def main():
     def controller_host_protocol(host):
         host.generate_and_send_schedules(circuit)
         host.receive_results()
-        print(host.results)
 
     def computing_host_protocol(host):
         host.receive_schedule()

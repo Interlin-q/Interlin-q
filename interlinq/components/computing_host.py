@@ -96,7 +96,7 @@ class ComputingHost(Host):
         Returns:
             (list): The IDs of the qubits stored by this computing host.
         """
-        return list(self._qubits.keys()) + list(self._pre_allocated_qubits.keys())
+        return list(self._qubits.keys())
 
     @property
     def total_qubits(self):
@@ -216,7 +216,7 @@ class ComputingHost(Host):
             qubits[qubit_id] = qubit
             self._update_stored_qubits(qubits)
 
-    def _get_stored_qubit(self, qubit_id: str):
+    def _get_stored_qubit(self, qubit_id: str) -> Qubit:
         """
         Extract the qubit from the computing host given the qubit id.
 
@@ -241,8 +241,10 @@ class ComputingHost(Host):
             msg = "Number of qubits required for the circuit are more " \
                   "than the total qubits"
             self._report_error(msg)
-
         self._qubits.update(qubits)
+
+        # if len(self.qubit_ids) > 1:
+        #     self._merge_qubits(qubits)
 
     @staticmethod
     def extract_gate_param(op: dict) -> np.ndarray:
@@ -276,6 +278,14 @@ class ComputingHost(Host):
         for qubit_id in prepare_qubit_op['qids']:
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
         self._update_stored_qubits(qubits)
+
+    def _merge_qubits(self, qubits: dict):
+        main_qubit = self._get_stored_qubit(self.qubit_ids[0])
+        for q_id in qubits.keys():
+            qubit = self._get_stored_qubit(q_id)
+            main_qubit.cnot(qubit)
+            main_qubit.cnot(qubit)
+            print('did this', self.host_id)
 
     def _process_single_gates(self, operation: dict, classical_ctrl_gate: bool = False):
         """
