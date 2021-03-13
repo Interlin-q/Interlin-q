@@ -1,7 +1,6 @@
 class Layer(object):
     """
-    Layer object which is a collection of operations to be applied on the qubits
-    in the system.
+    Layer object which is a collection of operations to be applied on the qubits in the system.
     """
 
     def __init__(self, operations: list = []):
@@ -17,8 +16,9 @@ class Layer(object):
 
     def __str__(self):
         layer = ''
-        for o in self._operations:
-            layer += f'-{o}-\n'
+        for o in self._operations[:-1]:
+            layer += f'-{o}-|\n'
+        layer += f'-{o}-|'
         return layer
 
     @property
@@ -30,6 +30,14 @@ class Layer(object):
             operation to be performed on the quantum circuit
         """
         return self._operations
+
+    @property
+    def depth(self):
+        # todo
+        return 0
+
+    def __len__(self):
+        return self.depth
 
     def add_operation(self, operation):
         """

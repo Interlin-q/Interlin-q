@@ -41,7 +41,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Examples" href="../examples.html" />
+    <link rel="next" title="Qubits" href="../objects/qubits.html" />
     <link rel="prev" title="Computing Host" href="computing_host.html" /> 
 </head>
 
@@ -93,12 +93,22 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../intro.html#simulated-architecture">Simulated Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intro.html#conversion-of-monolithic-to-distributed-circuit">Conversion of monolithic to distributed circuit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intro.html#distributed-scheduler-and-broadcasting">Distributed Scheduler and Broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intro.html#executing-the-distributed-algorithm">Executing the distributed algorithm</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../design.html">Design Overview</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="computing_host.html">Computing Host</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Controller Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/qubits.html">Qubits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/operation.html">Operation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/layer.html">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/circuits.html">Circuits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
@@ -253,7 +263,7 @@ takes to execute for the computing host to be added</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>computing_host_id</strong> (<em>list</em>) – The ID of the computing host</p></li>
+<li><p><strong>computing_host_ids</strong> (<em>list</em>) – The ID of the computing host</p></li>
 <li><p><strong>gate_times</strong> (<em>list</em>) – A list of mappings of gate names to time the gate
 takes to execute for the computing host to be added</p></li>
 </ul>
@@ -284,12 +294,12 @@ takes to execute for the computing host to be added</p></li>
 
 <dl class="py method">
 <dt id="interlinq.components.controller_host.ControllerHost.generate_and_send_schedules">
-<code class="sig-name descname">generate_and_send_schedules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">circuit</span><span class="p">:</span> <span class="n">interlinq.objects.circuit.Circuit</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.controller_host.ControllerHost.generate_and_send_schedules" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">generate_and_send_schedules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">circuit</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../objects/circuits.html#interlinq.objects.circuit.Circuit" title="interlinq.objects.circuit.Circuit">interlinq.objects.circuit.Circuit</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.controller_host.ControllerHost.generate_and_send_schedules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate and send distributed schedules to all the computing hosts
 associated to the circuit</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>circuit</strong> (<em>Circuit</em>) – The Circuit object which contains information
+<dd class="field-odd"><p><strong>circuit</strong> (<a class="reference internal" href="../objects/circuits.html#interlinq.objects.circuit.Circuit" title="interlinq.objects.circuit.Circuit"><em>Circuit</em></a>) – The Circuit object which contains information
 regarding a quantum circuit</p>
 </dd>
 </dl>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Computing Host &mdash; Interlin-q  documentation</title>
+  <title>Layers &mdash; Interlin-q  documentation</title>
   
 
   
@@ -41,8 +41,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Controller Host" href="controller_host.html" />
-    <link rel="prev" title="Design Overview" href="../design.html" /> 
+    <link rel="next" title="Circuits" href="circuits.html" />
+    <link rel="prev" title="Operation" href="operation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -103,12 +103,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../design.html">Design Overview</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Computing Host</a></li>
-<li class="toctree-l2"><a class="reference internal" href="controller_host.html">Controller Host</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../objects/qubits.html">Qubits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../objects/operation.html">Operation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../objects/layer.html">Layers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../objects/circuits.html">Circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../components/computing_host.html">Computing Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../components/controller_host.html">Controller Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qubits.html">Qubits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operation.html">Operation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuits.html">Circuits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
@@ -183,13 +183,13 @@
         
           <li><a href="../design.html">Design Overview</a> &raquo;</li>
         
-      <li>Computing Host</li>
+      <li>Layers</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/components/computing_host.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/objects/layer.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -226,118 +226,69 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="module-interlinq.components.computing_host">
-<span id="computing-host"></span><h1>Computing Host<a class="headerlink" href="#module-interlinq.components.computing_host" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-interlinq.objects.layer">
+<span id="layers"></span><h1>Layers<a class="headerlink" href="#module-interlinq.objects.layer" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="interlinq.components.computing_host.ComputingHost">
-<em class="property">class </em><code class="sig-prename descclassname">interlinq.components.computing_host.</code><code class="sig-name descname">ComputingHost</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">controller_host_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">clock</span><span class="p">:</span> <span class="n">interlinq.components.clock.Clock</span></em>, <em class="sig-param"><span class="n">total_qubits</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">total_pre_allocated_qubits</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">gate_time</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computing host object which acts as a slave node in a centralised
-distributed network system, connected to the controller host.</p>
+<dt id="interlinq.objects.layer.Layer">
+<em class="property">class </em><code class="sig-prename descclassname">interlinq.objects.layer.</code><code class="sig-name descname">Layer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operations</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.objects.layer.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Layer object which is a collection of operations to be applied on the qubits in the system.</p>
 <dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.bits">
-<em class="property">property </em><code class="sig-name descname">bits</code><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.bits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the classical bits measured by this host.</p>
+<dt id="interlinq.objects.layer.Layer.add_operation">
+<code class="sig-name descname">add_operation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operation</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.objects.layer.Layer.add_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a operation to the layer
+:param operation: Information about the operation to be added in the layer
+:type operation: Operation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.objects.layer.Layer.add_operations">
+<code class="sig-name descname">add_operations</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operations</span><span class="p">:</span> <span class="n">list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.objects.layer.Layer.add_operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add multiple operations to the layer
+:param operations: List of Operation objects
+:type operations: list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="interlinq.objects.layer.Layer.control_gate_present">
+<code class="sig-name descname">control_gate_present</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.objects.layer.Layer.control_gate_present" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a control gate is present in the layer between two different
+computing hosts</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The dictionary of bits</p>
+<dd class="field-odd"><p><dl class="simple">
+<dt>True if control gate is present between two different computing</dt><dd><p>hosts</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>(dict)</p>
+<dd class="field-even"><p>(bool)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.controller_host_id">
-<em class="property">property </em><code class="sig-name descname">controller_host_id</code><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.controller_host_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the <em>controller_host_id</em> associated to the computing host</p>
+<dt id="interlinq.objects.layer.Layer.operations">
+<em class="property">property </em><code class="sig-name descname">operations</code><a class="headerlink" href="#interlinq.objects.layer.Layer.operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the <em>operations</em> in the layer
+:returns: List of Operation objects, which contains information about the</p>
+<blockquote>
+<div><p>operation to be performed on the quantum circuit</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The ID of controller/master host</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>(str)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.extract_gate_param">
-<em class="property">static </em><code class="sig-name descname">extract_gate_param</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">op</span><span class="p">:</span> <span class="n">dict</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.extract_gate_param" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract gate parameter array as an np array</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>op</strong> (<em>dict</em>) – Dictionary of information regarding the operation</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The parameter array.</p>
-</dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(np.ndarray)</p>
+<dd class="field-odd"><p>(list)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.perform_schedule">
-<code class="sig-name descname">perform_schedule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ticks</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.perform_schedule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process the schedule and perform the corresponding operations
-accordingly</p>
+<dt id="interlinq.objects.layer.Layer.remove_operation">
+<code class="sig-name descname">remove_operation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.objects.layer.Layer.remove_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an operation from the layer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ticks</strong> (<em>int</em>) – Number of times the clock has ticked</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.qubit_ids">
-<em class="property">property </em><code class="sig-name descname">qubit_ids</code><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.qubit_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the qubit IDs for this computing host.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The IDs of the qubits stored by this computing host.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>(list)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.receive_schedule">
-<code class="sig-name descname">receive_schedule</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.receive_schedule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive the broadcasted schedule from the Controller Host and update
-the schedule property</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.send_results">
-<code class="sig-name descname">send_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.send_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send results to Controller Host</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.total_qubits">
-<em class="property">property </em><code class="sig-name descname">total_qubits</code><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.total_qubits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the total number of qubits for computing host.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The total number of qubits stored by this computing host.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>(int)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="interlinq.components.computing_host.ComputingHost.update_total_qubits">
-<code class="sig-name descname">update_total_qubits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">total_qubits</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.computing_host.ComputingHost.update_total_qubits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set a new value for <em>total_qubits</em> in the computing host.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>(</strong><strong>int</strong><strong>)</strong> – Total number of qubits possessed by the computing host</p>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – Index of the operation to be removed</p>
 </dd>
 </dl>
 </dd></dl>

@@ -93,12 +93,22 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#simulated-architecture">Simulated Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conversion-of-monolithic-to-distributed-circuit">Conversion of monolithic to distributed circuit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distributed-scheduler-and-broadcasting">Distributed Scheduler and Broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#executing-the-distributed-algorithm">Executing the distributed algorithm</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="components/computing_host.html">Computing Host</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components/controller_host.html">Controller Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/qubits.html">Qubits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/operation.html">Operation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/layer.html">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/circuits.html">Circuits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
@@ -216,13 +226,31 @@
 </style>
 <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>Interlin-q is a distributed quantum-enabled simulator which imitates the master-slave centralised-control distributed quantum computing system with interconnect communication between the nodes. Using this simulator, one can input any monolithic circuit as well as a distributed quantum computing topology and see the execution of the distributed algorithm happening in real time. The simulator maps the monolithic circuit to a distributed quantum computing achitecture and uses a master-slave relation with a centralized controller communicating to computing nodes in the network. Interlin-q can be used for designing and analysing novel distributed quantum algorithms for various distributed quantum computing architectures.</p>
+<p>Interlin-q is a distributed quantum-enabled simulator which imitates the master-slave centralised-control distributed quantum computing system with interconnect communication between the nodes. Using this simulator, one can input any monolithic circuit as well as a distributed quantum computing topology and see the execution of the distributed algorithm happening in real time. The simulator maps the monolithic circuit to a distributed quantum computing architecture and uses a master-slave relation with a centralized controller communicating to computing nodes in the network. Interlin-q can be used for designing and analysing novel distributed quantum algorithms for various distributed quantum computing architectures.</p>
 <p>The method used to accomplish this is based on the following paper:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Distributed</span> <span class="n">Quantum</span> <span class="n">Computing</span> <span class="ow">and</span> <span class="n">Network</span> <span class="n">Control</span> <span class="k">for</span> <span class="n">Accelerated</span> <span class="n">VQE</span>
 <span class="n">Stephen</span> <span class="n">DiAdamo</span><span class="p">,</span> <span class="n">Marco</span> <span class="n">Ghibaudi</span><span class="p">,</span> <span class="n">James</span> <span class="n">Cruise</span> <span class="p">(</span><span class="n">arXiv</span><span class="p">:</span> <span class="mf">2101.02504</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="section" id="simulated-architecture">
+<h2>Simulated Architecture<a class="headerlink" href="#simulated-architecture" title="Permalink to this headline">¶</a></h2>
+<p>The simulated architecture of Interlin-q can be seen in the image below:</p>
 <a class="reference internal image-reference" href="_images/simulated_architechture1.png"><img alt="_images/simulated_architechture1.png" src="_images/simulated_architechture1.png" style="width: 600px;" /></a>
+<p>The controller host gets the monolithic circuit as an input from the client, converts it to a distributed circuit and generates schedules from it for individual computing hosts and broadcasts it to them. The controller host and all the computing hosts share a global clock. When the computing hosts receive the broadcast, they extract their schedule from it and perform the operations in the schedules according to the global clock and the timestamps on the operations. The final results are sent over to the controller host from all the computing hosts for further processing.</p>
+</div>
+<div class="section" id="conversion-of-monolithic-to-distributed-circuit">
+<h2>Conversion of monolithic to distributed circuit<a class="headerlink" href="#conversion-of-monolithic-to-distributed-circuit" title="Permalink to this headline">¶</a></h2>
+<p>The monolithic circuit is a circuit which is designed to be implemented by a single quantum computer. To implement this same algorithm using multiple interlinked quantum computers, this monolithic circuit needs to be converted to a distributed circuit over a given topology of the interlinked quantum computers.</p>
+<p>This distribution is performed by the controller host, by analysing the input monolithic circuit and searching for any control gates where the control and target qubits lie in separate computing host. If any such control gate is found, it is replaced by using a Cat-circuit shown in the image below. The controller host generates the distributed circuit by replacing all such control gates.</p>
+</div>
+<div class="section" id="distributed-scheduler-and-broadcasting">
+<h2>Distributed Scheduler and Broadcasting<a class="headerlink" href="#distributed-scheduler-and-broadcasting" title="Permalink to this headline">¶</a></h2>
+<p>The controller host forms a distributed schedule of operations according to timestamps for individual computing hosts using the distributed circuit. The operations are timestamped after considering the amount of time the operation would take to be performed on the specific computing hosts. These operations are then broadcasted to all the computing hosts.</p>
+</div>
+<div class="section" id="executing-the-distributed-algorithm">
+<h2>Executing the distributed algorithm<a class="headerlink" href="#executing-the-distributed-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>The computing hosts receive the broadcasted schedules and extract their schedule from it. The controller hosts and all the computing hosts share a Clock object, which enable them to perform operations according to the schedule in synchronization. Once the operations are performed, and resulting error or successful measurements are reported back to the controller host, who further processes the output for the client.</p>
+</div>
 </div>
 
 
