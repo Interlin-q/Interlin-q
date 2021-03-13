@@ -34,5 +34,4 @@ class TestOperation(unittest.TestCase):
         self.assertEqual(self.operation.name, "SINGLE")
         self.assertEqual(self.operation.gate, Operation.X)
         self.assertEqual(self.operation.computing_host_ids, ["QPU_1"])
-        
         self.assertEqual(self.operation.get_dict(), self._op_info)
