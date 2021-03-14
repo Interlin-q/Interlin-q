@@ -91,12 +91,22 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#simulated-architecture">Simulated Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#conversion-of-monolithic-to-distributed-circuit">Conversion of monolithic to distributed circuit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#distributed-scheduler-and-broadcasting">Distributed Scheduler and Broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#executing-the-distributed-algorithm">Executing the distributed algorithm</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="components/computing_host.html">Computing Host</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components/controller_host.html">Controller Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/qubits.html">Qubits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/operation.html">Operation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/layer.html">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects/circuits.html">Circuits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
@@ -190,20 +200,41 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#B"><strong>B</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.add_layer_to_circuit">add_layer_to_circuit() (interlinq.objects.circuit.Circuit method)</a>
+</li>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.add_new_qubit">add_new_qubit() (interlinq.objects.circuit.Circuit method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/layer.html#interlinq.objects.layer.Layer.add_operation">add_operation() (interlinq.objects.layer.Layer method)</a>
+</li>
+      <li><a href="objects/layer.html#interlinq.objects.layer.Layer.add_operations">add_operations() (interlinq.objects.layer.Layer method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -215,8 +246,18 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.computing_host_ids">computing_host_ids() (interlinq.components.controller_host.ControllerHost property)</a>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit">Circuit (class in interlinq.objects.circuit)</a>
 </li>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.classical_ctrl_gate">classical_ctrl_gate() (interlinq.objects.qubit.Qubit method)</a>
+</li>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.computing_host_id">computing_host_id() (interlinq.objects.qubit.Qubit property)</a>
+</li>
+      <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.computing_host_ids">computing_host_ids() (interlinq.components.controller_host.ControllerHost property)</a>
+
+      <ul>
+        <li><a href="objects/operation.html#interlinq.objects.operation.Operation.computing_host_ids">(interlinq.objects.operation.Operation property)</a>
+</li>
+      </ul></li>
       <li><a href="components/computing_host.html#interlinq.components.computing_host.ComputingHost">ComputingHost (class in interlinq.components.computing_host)</a>
 </li>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.connect_host">connect_host() (interlinq.components.controller_host.ControllerHost method)</a>
@@ -225,11 +266,19 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.connect_hosts">connect_hosts() (interlinq.components.controller_host.ControllerHost method)</a>
 </li>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.control_gate_info">control_gate_info() (interlinq.objects.circuit.Circuit method)</a>
+</li>
+      <li><a href="objects/layer.html#interlinq.objects.layer.Layer.control_gate_present">control_gate_present() (interlinq.objects.layer.Layer method)</a>
+</li>
       <li><a href="components/computing_host.html#interlinq.components.computing_host.ComputingHost.controller_host_id">controller_host_id() (interlinq.components.computing_host.ComputingHost property)</a>
 </li>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost">ControllerHost (class in interlinq.components.controller_host)</a>
 </li>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.create_distributed_network">create_distributed_network() (interlinq.components.controller_host.ControllerHost method)</a>
+</li>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.create_layers">create_layers() (interlinq.objects.circuit.Circuit method)</a>
+</li>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.current_layer">current_layer() (interlinq.objects.qubit.Qubit property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -253,7 +302,23 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.gate">gate() (interlinq.objects.operation.Operation property)</a>
+</li>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.gate_param">gate_param() (interlinq.objects.operation.Operation property)</a>
+</li>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.generate_and_send_schedules">generate_and_send_schedules() (interlinq.components.controller_host.ControllerHost method)</a>
+</li>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.get_control_host">get_control_host() (interlinq.objects.operation.Operation method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.get_control_qubit">get_control_qubit() (interlinq.objects.operation.Operation method)</a>
+</li>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.get_dict">get_dict() (interlinq.objects.operation.Operation method)</a>
+</li>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.get_target_host">get_target_host() (interlinq.objects.operation.Operation method)</a>
+</li>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.get_target_qubit">get_target_qubit() (interlinq.objects.operation.Operation method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -261,6 +326,10 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/operation.html#interlinq.objects.operation.InputError">InputError</a>
+</li>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.insert_layer">insert_layer() (interlinq.objects.circuit.Circuit method)</a>
+</li>
       <li>
     interlinq.components.computing_host
 
@@ -268,8 +337,6 @@
         <li><a href="components/computing_host.html#module-interlinq.components.computing_host">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     interlinq.components.controller_host
 
@@ -277,12 +344,58 @@
         <li><a href="components/controller_host.html#module-interlinq.components.controller_host">module</a>
 </li>
       </ul></li>
+      <li>
+    interlinq.objects.circuit
+
+      <ul>
+        <li><a href="objects/circuits.html#module-interlinq.objects.circuit">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    interlinq.objects.layer
+
+      <ul>
+        <li><a href="objects/layer.html#module-interlinq.objects.layer">module</a>
+</li>
+      </ul></li>
+      <li>
+    interlinq.objects.operation
+
+      <ul>
+        <li><a href="objects/operation.html#module-interlinq.objects.operation">module</a>
+</li>
+      </ul></li>
+      <li>
+    interlinq.objects.qubit
+
+      <ul>
+        <li><a href="objects/qubits.html#module-interlinq.objects.qubit">module</a>
+</li>
+      </ul></li>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.is_control_gate_over_two_hosts">is_control_gate_over_two_hosts() (interlinq.objects.operation.Operation method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/layer.html#interlinq.objects.layer.Layer">Layer (class in interlinq.objects.layer)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.layers">layers() (interlinq.objects.circuit.Circuit property)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.measure">measure() (interlinq.objects.qubit.Qubit method)</a>
+</li>
       <li>
     module
 
@@ -291,6 +404,14 @@
 </li>
         <li><a href="components/controller_host.html#module-interlinq.components.controller_host">interlinq.components.controller_host</a>
 </li>
+        <li><a href="objects/circuits.html#module-interlinq.objects.circuit">interlinq.objects.circuit</a>
+</li>
+        <li><a href="objects/layer.html#module-interlinq.objects.layer">interlinq.objects.layer</a>
+</li>
+        <li><a href="objects/operation.html#module-interlinq.objects.operation">interlinq.objects.operation</a>
+</li>
+        <li><a href="objects/qubits.html#module-interlinq.objects.qubit">interlinq.objects.qubit</a>
+</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -298,8 +419,28 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.name">name() (interlinq.objects.operation.Operation property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.NumpyEncoder">NumpyEncoder (class in interlinq.components.controller_host)</a>
 </li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation">Operation (class in interlinq.objects.operation)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/layer.html#interlinq.objects.layer.Layer.operations">operations() (interlinq.objects.layer.Layer property)</a>
+
+      <ul>
+        <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.operations">(interlinq.objects.qubit.Qubit property)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -311,14 +452,40 @@
   </ul></td>
 </tr></table>
 
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.q_id">q_id() (interlinq.objects.qubit.Qubit property)</a>
+</li>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.q_map">q_map() (interlinq.objects.circuit.Circuit property)</a>
+</li>
+      <li><a href="objects/operation.html#interlinq.objects.operation.Operation.qids">qids() (interlinq.objects.operation.Operation property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit">Qubit (class in interlinq.objects.qubit)</a>
+</li>
+      <li><a href="components/computing_host.html#interlinq.components.computing_host.ComputingHost.qubit_ids">qubit_ids() (interlinq.components.computing_host.ComputingHost property)</a>
+</li>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.qubits">qubits() (interlinq.objects.circuit.Circuit property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.rec_classical">rec_classical() (interlinq.objects.qubit.Qubit method)</a>
+</li>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.rec_ent">rec_ent() (interlinq.objects.qubit.Qubit method)</a>
+</li>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.receive_results">receive_results() (interlinq.components.controller_host.ControllerHost method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="components/computing_host.html#interlinq.components.computing_host.ComputingHost.receive_schedule">receive_schedule() (interlinq.components.computing_host.ComputingHost method)</a>
+</li>
+      <li><a href="objects/layer.html#interlinq.objects.layer.Layer.remove_operation">remove_operation() (interlinq.objects.layer.Layer method)</a>
 </li>
       <li><a href="components/controller_host.html#interlinq.components.controller_host.ControllerHost.results">results() (interlinq.components.controller_host.ControllerHost property)</a>
 </li>
@@ -328,7 +495,31 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.send_classical">send_classical() (interlinq.objects.qubit.Qubit method)</a>
+</li>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.send_ent">send_ent() (interlinq.objects.qubit.Qubit method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="components/computing_host.html#interlinq.components.computing_host.ComputingHost.send_results">send_results() (interlinq.components.computing_host.ComputingHost method)</a>
+</li>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.single">single() (interlinq.objects.qubit.Qubit method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="components/computing_host.html#interlinq.components.computing_host.ComputingHost.total_qubits">total_qubits() (interlinq.components.computing_host.ComputingHost property)</a>
+
+      <ul>
+        <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.total_qubits">(interlinq.objects.circuit.Circuit method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.two_qubit">two_qubit() (interlinq.objects.qubit.Qubit method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -336,6 +527,16 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.update_layer">update_layer() (interlinq.objects.circuit.Circuit method)</a>
+
+      <ul>
+        <li><a href="objects/qubits.html#interlinq.objects.qubit.Qubit.update_layer">(interlinq.objects.qubit.Qubit method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="objects/circuits.html#interlinq.objects.circuit.Circuit.update_qubits">update_qubits() (interlinq.objects.circuit.Circuit method)</a>
+</li>
       <li><a href="components/computing_host.html#interlinq.components.computing_host.ComputingHost.update_total_qubits">update_total_qubits() (interlinq.components.computing_host.ComputingHost method)</a>
 </li>
   </ul></td>

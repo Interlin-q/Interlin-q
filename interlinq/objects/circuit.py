@@ -30,8 +30,11 @@ class Circuit(object):
 
     def __str__(self):
         circuit = ''
-        for layer in self._layers:
-            circuit += str(layer) + '\n'
+        for i in range(len(self._layers[0])):
+            wire = ''
+            for layer in self._layers:
+                wire += str(layer.operations[i]) + '-'
+            circuit += wire + '\n'
         return circuit
 
     @property
@@ -122,7 +125,6 @@ class Circuit(object):
             layer_count += 1
             if ops:
                 layers.append(Layer(ops))
-
         self._layers = layers
 
     def insert_layer(self, index: int, layer: Layer):

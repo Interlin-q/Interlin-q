@@ -4,8 +4,8 @@ sys.path.append("../")
 
 from qunetsim.components import Network
 from qunetsim.objects import Logger
-from interlinq import ControllerHost, Clock, Circuit, \
-    Layer, Operation, Qubit
+from qunetsim.backends import QuTipBackend
+from interlinq import ControllerHost, Clock, Circuit, Operation, Qubit
 
 Logger.DISABLED = True
 
@@ -13,13 +13,15 @@ Logger.DISABLED = True
 def main():
     network = Network.get_instance()
     network.delay = 0.1
-    network.start()
+    qutip = QuTipBackend()
+    network.start(backend=qutip)
 
     clock = Clock()
 
     controller_host = ControllerHost(
         host_id="host_1",
         clock=clock,
+        backend=qutip
     )
     computing_hosts, q_map = controller_host \
         .create_distributed_network(num_computing_hosts=2,
