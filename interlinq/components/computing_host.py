@@ -504,7 +504,7 @@ class ComputingHost(Host):
 
         qubit = self._get_stored_qubit(qubit_id)
 
-        bit = qubit.measure(non_destructive=True)
+        bit = qubit.measure(non_destructive=False)
         self._bits[bit_id] = bit
 
         if qubit_id in self._pre_allocated_qubits:
