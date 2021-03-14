@@ -1,11 +1,12 @@
 import sys
+
 sys.path.append("../")
 
 from qunetsim.components import Network
 from qunetsim.objects import Logger
 
 from interlinq import (ControllerHost, Constants, Clock,
-Circuit, Layer, ComputingHost, Operation)
+                       Circuit, Layer, ComputingHost, Operation)
 
 import numpy as np
 
@@ -145,7 +146,7 @@ def controller_host_protocol(host, q_map, client_input_gate):
             decimal_value += (2 ** i) * bit
             i += 1
         if bits:
-            phase = decimal_value/(2 ** len(bits.keys()))
+            phase = decimal_value / (2 ** len(bits.keys()))
             print("\nThe estimated value of the phase is {0}".format(phase))
 
 
@@ -161,7 +162,7 @@ def computing_host_protocol(host):
 def main():
     # initialize network
     network = Network.get_instance()
-    network.delay = 0.1
+    network.delay = 0
     network.start()
 
     clock = Clock()
