@@ -148,7 +148,7 @@ In the template, the monolothic circuit can be added in the `create_circuit` fun
 
 ### Distributed Quantum Phase Estimation Tutorial
 
-A tutorial of Distributed Quantum Phase Estimation algorithm can be found [here](examples/distributed_quantum_phase_estimation_notebook.ipynb).
+A tutorial of Distributed Quantum Phase Estimation algorithm can be found [here](examples/QPE/distributed_quantum_phase_estimation_notebook.ipynb).
 
 ## Contributing
 
