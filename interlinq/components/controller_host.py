@@ -16,7 +16,7 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id: str, clock: Clock, computing_host_ids: list = [], gate_time: dict = None):
+    def __init__(self, host_id: str, clock: Clock, computing_host_ids: list = [], gate_time: dict = None, backend=None):
         """
         Returns the important things for the controller hosts
 
@@ -26,8 +26,9 @@ class ControllerHost(Host):
             clock (Clock): Clock object for synchronising the computing hosts
             gate_time (dict): A mapping of gate names to time the gate takes
                to execute for each computing host
+            backend (Backend): Backend for qubits
         """
-        super().__init__(host_id)
+        super().__init__(host_id, backend=backend)
 
         self._computing_host_ids = computing_host_ids
         self.add_c_connections(computing_host_ids)
@@ -42,6 +43,7 @@ class ControllerHost(Host):
 
         self._gate_time = gate_time
         self._results = None
+        self._backend = backend
 
     @property
     def computing_host_ids(self):
@@ -86,7 +88,8 @@ class ControllerHost(Host):
                 controller_host_id=self.host_id,
                 clock=self._clock,
                 total_qubits=num_qubits_per_host,
-                total_pre_allocated_qubits=num_qubits_per_host
+                total_pre_allocated_qubits=num_qubits_per_host,
+                backend=self._backend
             )
             self._gate_time[id_prefix + str(i)] = DefaultOperationTime
             self.add_c_connection(id_prefix + str(i))

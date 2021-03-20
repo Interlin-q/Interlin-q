@@ -20,7 +20,7 @@ class ComputingHost(Host):
     """
 
     def __init__(self, host_id: str, controller_host_id: str, clock: Clock, total_qubits: int = 0,
-                 total_pre_allocated_qubits: int = 1, gate_time: dict = None):
+                 total_pre_allocated_qubits: int = 1, gate_time: dict = None, backend=None):
 
         """
         Returns the important things for the computing hosts
@@ -36,8 +36,9 @@ class ComputingHost(Host):
                (in case of generating an EPR pair) possessed by the computing host
             gate_time (dict): A mapping of gate names to time the gate takes to
                execute for this computing host
+            backend (Backend): Backend for this host
         """
-        super().__init__(host_id)
+        super().__init__(host_id, backend=backend)
 
         self.add_c_connection(controller_host_id)
         self._controller_host_id = controller_host_id
