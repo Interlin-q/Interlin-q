@@ -151,7 +151,7 @@ class ControllerHost(Host):
                 information regarding a quantum circuit
         """
 
-        time_layer_end = 0
+        time_layer_end = self._clock.ticks #if self._clock.ticks == 0 else self._clock.ticks + 1
         operation_schedule = []
 
         layers = circuit.layers
@@ -185,7 +185,7 @@ class ControllerHost(Host):
                 if op['computing_host_ids'][0] == computing_host_id:
                     computing_host_schedule.append(op)
             computing_host_schedules[computing_host_id] = computing_host_schedule
-
+        
         return computing_host_schedules, time_layer_end
 
     @staticmethod
@@ -413,7 +413,7 @@ class ControllerHost(Host):
             self.get_classical(host_id, wait=-1)
 
         # Initialise the clock and start running the algorithm
-        self._clock.initialise(max_execution_time)
+        self._clock.initialise(self._circuit_max_execution_time)
         self._clock.start()
 
     def receive_results(self):
