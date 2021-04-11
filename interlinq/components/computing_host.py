@@ -287,6 +287,7 @@ class ComputingHost(Host):
         qubits = {}
         for qubit_id in prepare_qubit_op['qids']:
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
+            self.add_data_qubit(self.host_id, qubits[qubit_id], qubit_id)
         self._update_stored_qubits(qubits)
 
     def _merge_qubits(self, qubits: dict):
@@ -534,7 +535,7 @@ class ComputingHost(Host):
         """
 
         if ticks in self._schedule:
-            for operation in self._schedule[ticks]:
+            for operation in self._schedule[ticks]:          
                 if operation['name'] == Constants.PREPARE_QUBITS:
                     self._prepare_qubits(operation)
 
