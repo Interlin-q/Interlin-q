@@ -18,4 +18,4 @@ def decompose(name, geometry, charge, multiplicity, basis_set):
         for term in observables
     ]
     
-    return observables, qubit_num
+    return coefficients, observables, qubit_num

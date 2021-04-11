@@ -154,7 +154,7 @@ class ControllerHost(Host):
                 information regarding a quantum circuit
         """
 
-        time_layer_end = self._clock.ticks if self._clock.ticks == 0 else self._clock.ticks - 1
+        time_layer_end = self._clock.ticks
         operation_schedule = []
 
         layers = circuit.layers
