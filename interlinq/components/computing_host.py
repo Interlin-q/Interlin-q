@@ -199,6 +199,9 @@ class ComputingHost(Host):
             msg = error_msg + "Error Message: 'Wrong input format for computing" \
                               "host ids in the operation'"
 
+        if op['name'] == 'REC_HAMILTON' and (op['hamiltonian'] == 0 or op['hamiltonian'] is None):
+            msg = error_msg + "Error Message: 'Received an empty/no list of observables'"
+
         if msg:
             self._report_error(msg)
 
@@ -524,7 +527,24 @@ class ComputingHost(Host):
         else:
             del self._qubits[qubit_id]
             self._total_qubits -= 1
-            
+
+    def _process_rec_hamilton(self, operation: dict):
+        """
+        Receives a list of observables from the controller to calculate their expectation values
+
+        Args:
+            operation (dict): Dictionary of information regarding the operation
+        """
+
+        self._check_errors(
+            op=operation,
+            len_computing_host_ids=1)
+
+        self._hamiltonian = operation['hamiltonian']
+
+        return
+        
+        
     def perform_schedule(self, ticks: int):
         """
         Process the schedule and perform the corresponding operations
@@ -562,6 +582,10 @@ class ComputingHost(Host):
 
                 if operation['name'] == Constants.MEASURE:
                     self._process_measurement(operation)
+
+                if operation['name'] == Constants.REC_HAMILTON:
+                    self._process_rec_hamilton(operation)
+        
         self._clock.respond()
 
     def send_results(self):

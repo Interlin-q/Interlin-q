@@ -1,4 +1,5 @@
 from interlinq.utils import Constants
+import warnings
 
 
 class Operation(object):
@@ -31,7 +32,8 @@ class Operation(object):
                  gate: str = None,
                  gate_param: list = None,
                  computing_host_ids: list = [],
-                 pre_allocated_qubits: bool = False):
+                 pre_allocated_qubits: bool = False, 
+                 hamiltonian: list = None):
         """
         Returns the important things for a quantum operation
 
@@ -59,6 +61,14 @@ class Operation(object):
         self._gate_param = gate_param
         self._computing_host_ids = computing_host_ids
         self._pre_allocated_qubits = pre_allocated_qubits
+
+        if self._name is Constants.REC_HAMILTON:
+            if hamiltonian is None or len(hamiltonian) == 0: 
+                raise Exception('Must send non-empty Hamiltonian terms with this operation!')
+            self._hamiltonian = hamiltonian
+        else:
+            warnings.warn('You sent a list of Hamiltonians with an operation other than REC_HAMILTON')
+            
 
     def __str__(self):
         return self.name
@@ -117,6 +127,17 @@ class Operation(object):
         """
 
         return self._computing_host_ids
+
+    @property
+    def hamiltonian(self):
+        """
+        Get the *hamiltonian* associated to the operation
+
+        Returns:
+            (list): List of the observables to be measured on the computing host
+        """
+
+        return self._hamiltonian
 
     def get_control_qubit(self):
         """
@@ -185,15 +206,15 @@ class Operation(object):
         Return the Operation object in a dictionary format
         """
 
-        operation_info = {
-            'name': self._name,
-            'qids': self._qids,
-            'cids': self._cids,
-            'gate': self._gate,
-            'gate_param': self._gate_param,
-            'computing_host_ids': self._computing_host_ids,
-            'pre_allocated_qubits': self._pre_allocated_qubits
-        }
+        python_dict = vars(self)
+
+        keys = list(python_dict.keys())
+
+        operation_info = dict()
+
+        for key in keys:
+            operation_info[key[1:]] = python_dict[key]
+
         return operation_info
 
 
