@@ -154,7 +154,7 @@ class ControllerHost(Host):
                 information regarding a quantum circuit
         """
 
-        time_layer_end = 0
+        time_layer_end = self._clock.ticks
         operation_schedule = []
 
         layers = circuit.layers
@@ -188,7 +188,7 @@ class ControllerHost(Host):
                 if op['computing_host_ids'][0] == computing_host_id:
                     computing_host_schedule.append(op)
             computing_host_schedules[computing_host_id] = computing_host_schedule
-
+        
         return computing_host_schedules, time_layer_end
 
     @staticmethod
@@ -410,13 +410,13 @@ class ControllerHost(Host):
         self._circuit_max_execution_time = max_execution_time
 
         self.send_broadcast(json.dumps(computing_host_schedules, cls=NumpyEncoder))
-
+ 
         # Wait for the computing hosts to receive the broadcast
         for host_id in self._computing_host_ids:
-            self.get_classical(host_id, wait=-1)
+            self.get_next_classical(host_id, wait=-1)
 
         # Initialise the clock and start running the algorithm
-        self._clock.initialise(max_execution_time)
+        self._clock.initialise(self._circuit_max_execution_time)
         self._clock.start()
 
     def receive_results(self):
@@ -427,12 +427,12 @@ class ControllerHost(Host):
         results = {}
 
         for host_id in self._computing_host_ids:
-            result = self.get_classical(host_id, wait=-1, seq_num=1)
+            result = self.get_next_classical(host_id, wait=-1)#, seq_num=1)
 
             # I think this is a bug with QuNetSim... Adding a hack for now
             # to overcome it...
             if result.content == 'ACK':
-                result = self.get_classical(host_id, wait=-1, seq_num=1)
+                result = self.get_next_classical(host_id, wait=-1)#, seq_num=1)
 
             try:
                 result = result.content

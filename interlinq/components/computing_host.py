@@ -58,6 +58,8 @@ class ComputingHost(Host):
             gate_time = DefaultOperationTime
 
         self._gate_time = gate_time
+        
+        self._last_buffer_size = 0
 
         # Attach computing host to the clock
         clock.attach_host(self)
@@ -125,10 +127,17 @@ class ComputingHost(Host):
         """
 
         messages = []
-        # Await broadcast messages from the controller host
-        while len(messages) < 1:
+        
+        while len(messages) <= self._last_buffer_size:
             messages = self.classical
             messages = [x for x in messages if x.content != 'ACK']
+            
+        self._last_buffer_size = len(messages)
+        
+        # Await broadcast messages from the controller host
+        #while len(messages) < 1:
+        #    messages = self.classical
+        #    messages = [x for x in messages if x.content != 'ACK']
 
         # TODO: Add encryption for this message
         schedules = json.loads(messages[0].content)
@@ -278,6 +287,7 @@ class ComputingHost(Host):
         qubits = {}
         for qubit_id in prepare_qubit_op['qids']:
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
+            self.add_data_qubit(self.host_id, qubits[qubit_id], qubit_id)
         self._update_stored_qubits(qubits)
 
     def _merge_qubits(self, qubits: dict):
@@ -514,7 +524,7 @@ class ComputingHost(Host):
         else:
             del self._qubits[qubit_id]
             self._total_qubits -= 1
-
+            
     def perform_schedule(self, ticks: int):
         """
         Process the schedule and perform the corresponding operations
@@ -525,7 +535,7 @@ class ComputingHost(Host):
         """
 
         if ticks in self._schedule:
-            for operation in self._schedule[ticks]:
+            for operation in self._schedule[ticks]:          
                 if operation['name'] == Constants.PREPARE_QUBITS:
                     self._prepare_qubits(operation)
 
