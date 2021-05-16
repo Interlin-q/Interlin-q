@@ -411,7 +411,7 @@ class ControllerHost(Host):
         self._circuit_max_execution_time = max_execution_time
 
         self.send_broadcast(json.dumps(computing_host_schedules, cls=NumpyEncoder))
- 
+
         # Wait for the computing hosts to receive the broadcast
         for host_id in self._computing_host_ids:
             self.get_next_classical(host_id, wait=-1)
@@ -479,49 +479,16 @@ class ControllerHost(Host):
         number_of_leftover_terms = number_of_terms - minimum_number_of_terms_per_computing_host * number_of_computing_hosts
 
         # Then assign the terms as per the number
-        self._term_assignment = dict()
+        self.term_assignment = dict()
         computing_host_ids = list(q_map.keys())
 
         for i in range(0, number_of_computing_hosts):
-            self._term_assignment[computing_host_ids[i]] = terms[i * minimum_number_of_terms_per_computing_host:(i + 1) * minimum_number_of_terms_per_computing_host]
+            self.term_assignment[computing_host_ids[i]] = terms[i * minimum_number_of_terms_per_computing_host:(i + 1) * minimum_number_of_terms_per_computing_host]
 
         for i in range(number_of_leftover_terms):
-            self._term_assignment[computing_host_ids[i]].append(terms[-i])
+            self.term_assignment[computing_host_ids[i]].append(terms[-i])
 
         return
-
-    def dispatch_hamiltonian_schedules(self, q_map):
-        """
-        Send the assigned schedules to the computing hosts
-        """
-
-        # Create the correct operations
-        ops = []
-        computing_hosts_ids = list(q_map.keys())
-        
-        for computing_host_id in computing_hosts_ids:    
-            op = Operation(
-                name=Constants.REC_HAMILTON,
-                computing_host_ids=[computing_host_id],
-                hamiltonian=self._term_assignment[computing_host_id])
-            ops.append(op)
-
-        layers = [Layer(ops)]
-
-        circuit = Circuit(q_map, layers)
-
-        # Send the schedules
-        self.generate_and_send_schedules(circuit)
-
-        return
-
-
-    def receive_hamiltonian_calculations(self):
-        """
-        Receive the expectation values from the computing hosts
-        """
-        pass
-
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):

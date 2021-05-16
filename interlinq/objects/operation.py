@@ -67,7 +67,8 @@ class Operation(object):
                 raise Exception('Must send non-empty Hamiltonian terms with this operation!')
             self._hamiltonian = hamiltonian
         else:
-            warnings.warn('You sent a list of Hamiltonians with an operation other than REC_HAMILTON')
+            if hamiltonian and len(hamiltonian) > 0:
+                warnings.warn('You sent a list of Hamiltonians with an operation other than REC_HAMILTON')
             
 
     def __str__(self):
