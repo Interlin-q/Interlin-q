@@ -131,6 +131,24 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/single-QPU-VQE.html">Single QPU VQE experiment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples/single-QPU-VQE.html#Step-1:-Import-libraries.">Step 1: Import libraries.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/single-QPU-VQE.html#Step-2:-Decompose-the-Hamiltonian.">Step 2: Decompose the Hamiltonian.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/single-QPU-VQE.html#Step-3:-Prepare-Circuit-for-Given-Parameters">Step 3: Prepare Circuit for Given Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../examples/single-QPU-VQE.html#Main-Blocks">Main Blocks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/single-QPU-VQE.html#Single-step-approach">Single-step approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/single-QPU-VQE.html#Split-steps-approach">Split-steps approach</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/single-QPU-VQE.html#Step-4:-Run-the-circuit-and-get-the-Expectation-Value">Step 4: Run the circuit and get the Expectation Value</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../examples/single-QPU-VQE.html#Running-for-the-single-step-approach">Running for the single-step approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/single-QPU-VQE.html#Running-for-the-multi-step-approach">Running for the multi-step approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../examples/single-QPU-VQE.html#Using-qutip-to-get-the-expectation-value">Using qutip to get the expectation value</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/single-QPU-VQE.html#Optimise">Optimise</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -230,7 +248,7 @@
 <span id="controller-host"></span><h1>Controller Host<a class="headerlink" href="#module-interlinq.components.controller_host" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="interlinq.components.controller_host.ControllerHost">
-<em class="property">class </em><code class="sig-prename descclassname">interlinq.components.controller_host.</code><code class="sig-name descname">ControllerHost</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">clock</span><span class="p">:</span> <span class="n">interlinq.components.clock.Clock</span></em>, <em class="sig-param"><span class="n">computing_host_ids</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">gate_time</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.controller_host.ControllerHost" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">interlinq.components.controller_host.</code><code class="sig-name descname">ControllerHost</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">clock</span><span class="p">:</span> <span class="n">interlinq.components.clock.Clock</span></em>, <em class="sig-param"><span class="n">computing_host_ids</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">gate_time</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">backend</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#interlinq.components.controller_host.ControllerHost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Controller host object which acts as a master node in a centralised
 distributed network system.</p>
 <dl class="py method">

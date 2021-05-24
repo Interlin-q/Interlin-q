@@ -24,10 +24,11 @@ class Layer(object):
     @property
     def operations(self):
         """
-        Get the *operations* in the layer 
+        Get the *operations* in the layer
+
         Returns:
-            (list): List of Operation objects, which contains information about the
-            operation to be performed on the quantum circuit
+            (list): List of Operation objects, which contains information about the operation to
+                    be performed on the quantum circuit.
         """
         return self._operations
 
