@@ -10,6 +10,8 @@ import numpy as np
 import json
 import time
 
+from interlinq.utils.qutip_subroutines import expectation_value
+
 MAX_WAIT = 5
 
 
@@ -111,6 +113,16 @@ class ComputingHost(Host):
         """
         return self._total_qubits
 
+    @property
+    def assigned_hamiltonian(self):
+        """
+        Return the currently assigned Hamiltonians for this host.
+
+        Returns:
+            (list): A list of the assigned terms of this computing host.
+        """
+        return self._hamiltonian
+
     def update_total_qubits(self, total_qubits: int):
         """
         Set a new value for *total_qubits* in the computing host.
@@ -198,6 +210,12 @@ class ComputingHost(Host):
         if op['computing_host_ids'][0] != self._host_id:
             msg = error_msg + "Error Message: 'Wrong input format for computing" \
                               "host ids in the operation'"
+
+        if op['name'] == 'REC_HAMILTON' and (len(op['hamiltonian']) == 0 or op['hamiltonian'] is None):
+            msg = error_msg + "Error Message: 'Received an empty/no list of observables'"
+
+        if op['name'] == 'SEND_EXP' and (len(self._hamiltonian) == 0 or self._hamiltonian is None):
+            msg = error_msg + "Error Message: 'Received an empty/no list of observables'"
 
         if msg:
             self._report_error(msg)
@@ -524,7 +542,50 @@ class ComputingHost(Host):
         else:
             del self._qubits[qubit_id]
             self._total_qubits -= 1
-            
+
+    def _process_rec_hamilton(self, operation: dict):
+        """
+        Receives a list of observables from the controller to calculate their expectation values
+
+        Args:
+            operation (dict): Dictionary of information regarding the operation
+        """
+
+        self._check_errors(
+            op=operation,
+            len_computing_host_ids=1)
+
+        self._hamiltonian = operation['hamiltonian']
+
+        self._calculated_exp = False
+
+        return
+
+    def _process_send_exp(self, operation: dict):
+        """
+        Calculate the expectation value of the qubits and send the results back to the controller
+
+        Args:
+            operation (dict): Dictionary of information regarding the operation
+        """
+
+        self._check_errors(
+            op=operation,
+            len_computing_host_ids=1)
+
+        density_matrices = []
+
+        for qubit_id in self.qubit_ids:
+            qubit = self.get_qubit_by_id(qubit_id)
+            density_matrices.append(self.backend.density_operator(qubit))
+
+        self.exp = expectation_value(self._hamiltonian, density_matrices, self.host_id)
+
+        self._calculated_exp = True
+
+        return
+        
+        
     def perform_schedule(self, ticks: int):
         """
         Process the schedule and perform the corresponding operations
@@ -562,9 +623,16 @@ class ComputingHost(Host):
 
                 if operation['name'] == Constants.MEASURE:
                     self._process_measurement(operation)
+
+                if operation['name'] == Constants.REC_HAMILTON:
+                    self._process_rec_hamilton(operation)
+
+                if operation['name'] == Constants.SEND_EXP:
+                    self._process_send_exp(operation)
+        
         self._clock.respond()
 
-    def send_results(self):
+    def send_results(self, type='bits'):
         """
         Send results to Controller Host
         """
@@ -574,16 +642,26 @@ class ComputingHost(Host):
         while not self._clock.stop:
             time.sleep(1)
 
+        # Wait until the expectation calculation is finished
+        while type == 'expectation' and not self._calculated_exp:
+            time.sleep(0.5)
+
         if self._error_message:
             msg = {
                 'type': 'error',
                 'message': self._error_message
             }
         else:
-            msg = {
-                'type': 'result',
-                'bits': self.bits
-            }
+            if type == 'bits':
+                msg = {
+                    'type': 'measurement_result',
+                    'bits': self.bits
+                }
+            elif type == 'expectation':
+                msg = {
+                    'type': 'expectation_value',
+                    'bits': self.exp
+                }
 
         message = json.dumps({self.host_id: msg})
         self.send_classical(self._controller_host_id, message, await_ack=True)

@@ -405,12 +405,13 @@ class ControllerHost(Host):
         """
 
         distributed_circuit = self._generate_distributed_circuit(circuit)
+
         computing_host_schedules, max_execution_time = self._create_distributed_schedules(
             distributed_circuit)
         self._circuit_max_execution_time = max_execution_time
 
         self.send_broadcast(json.dumps(computing_host_schedules, cls=NumpyEncoder))
- 
+
         # Wait for the computing hosts to receive the broadcast
         for host_id in self._computing_host_ids:
             self.get_next_classical(host_id, wait=-1)
@@ -442,6 +443,52 @@ class ControllerHost(Host):
 
         self._results = results
 
+    def schedule_expectation_terms(self, terms, q_map):
+        """
+        Assign the terms of a Hamiltonian to the different computing hosts in the network
+        """
+
+        # First check the sanity of the list type-wise
+        if len(terms) == 0:
+            raise Exception('Empty list of terms passed')
+
+        for term in terms:
+            if not isinstance(term, tuple):
+                raise Exception('Can only accept a list of tuples')
+
+            try: 
+                coeff, observables = term 
+
+                if not isinstance(observables, list):
+                    raise Exception()
+                
+                for part in observables:
+                    obs_type, idx = part
+
+                    if not (isinstance(obs_type, str) and isinstance(idx, int)):
+                        raise Exception()
+            except:
+                raise Exception('Tuples must of the form (coefficient, [(Observable, qubit_idx)])')
+
+        # Then calculate how many terms to assign to each computing node
+        # We assume that all QPUs have enough qubits for VQE
+        number_of_computing_hosts = len(q_map.keys())
+        number_of_terms = len(terms)
+
+        minimum_number_of_terms_per_computing_host = number_of_terms // number_of_computing_hosts
+        number_of_leftover_terms = number_of_terms - minimum_number_of_terms_per_computing_host * number_of_computing_hosts
+
+        # Then assign the terms as per the number
+        self.term_assignment = dict()
+        computing_host_ids = list(q_map.keys())
+
+        for i in range(0, number_of_computing_hosts):
+            self.term_assignment[computing_host_ids[i]] = terms[i * minimum_number_of_terms_per_computing_host:(i + 1) * minimum_number_of_terms_per_computing_host]
+
+        for i in range(number_of_leftover_terms):
+            self.term_assignment[computing_host_ids[i]].append(terms[-i])
+
+        return
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):

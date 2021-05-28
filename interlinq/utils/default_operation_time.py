@@ -36,5 +36,7 @@ DefaultOperationTime = {
     "SEND_ENT": default_single_operation_time,
     "REC_ENT": default_single_operation_time,
     "SEND_CLASSICAL": default_single_operation_time,
-    "REC_CLASSICAL": default_single_operation_time
+    "REC_CLASSICAL": default_single_operation_time,
+    "REC_HAMILTON": default_single_operation_time,
+    "SEND_EXP": default_single_operation_time
 }
