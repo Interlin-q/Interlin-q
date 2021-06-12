@@ -573,13 +573,14 @@ class ComputingHost(Host):
             op=operation,
             len_computing_host_ids=1)
 
-        density_matrices = []
+        indices = []
 
         for qubit_id in self.qubit_ids:
-            qubit = self.get_qubit_by_id(qubit_id)
-            density_matrices.append(self.backend.density_operator(qubit))
+            indices.append(self.get_qubit_by_id(qubit_id))
 
-        self.exp = expectation_value(self._hamiltonian, density_matrices, self.host_id)
+        statevector = self.backend.statevector(indices[0])[1]
+
+        self.exp = expectation_value(self._hamiltonian, statevector, self._total_qubits)
 
         self._calculated_exp = True
 
@@ -655,12 +656,12 @@ class ComputingHost(Host):
             if type == 'bits':
                 msg = {
                     'type': 'measurement_result',
-                    'bits': self.bits
+                    'val': self.bits
                 }
             elif type == 'expectation':
                 msg = {
                     'type': 'expectation_value',
-                    'bits': self.exp
+                    'val': np.real(self.exp)
                 }
 
         message = json.dumps({self.host_id: msg})
