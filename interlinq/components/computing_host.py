@@ -10,7 +10,7 @@ import numpy as np
 import json
 import time
 
-from interlinq.utils.qutip_subroutines import expectation_value
+from interlinq.utils.vqe_subroutines import expectation_value
 
 MAX_WAIT = 5
 
