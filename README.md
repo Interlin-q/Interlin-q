@@ -153,3 +153,13 @@ A tutorial of Distributed Quantum Phase Estimation algorithm can be found [here]
 ## Contributing
 
 We welcome contributors. Feel free to open an issue on this repository or add a pull request to submit your patch/contribution. Adding test cases for any contributions is a requirement for any pull request to be merged.
+
+## Citing
+```
+@article{parekh2021quantum,
+  title={Quantum Algorithms and Simulation for Parallel and Distributed Quantum Computing},
+  author={Parekh, Rhea and Ricciardi, Andrea and Darwish, Ahmed and DiAdamo, Stephen},
+  journal={arXiv preprint arXiv:2106.06841},
+  year={2021}
+}
+```
