@@ -24,22 +24,22 @@ class Schedule:
     
     """
     
-    def __init__(self, num_likelihoods: int,
+    def __init__(self, num_of_terms: int,
                  hardware_config: HardwareConfig, 
-                 oracle_size: int,
+                 ansatz_size: int,
                  allow_distributed: bool) -> None:
         """
         Parameters
         ----------
-        num_likelihoods : int
+        num_of_terms : int
         hardware_config : HardwareConfig
         allow_distributed : bool
             True if distributed computing is allowed, False otherwise.
             Distributed computing requires CCNOT gates for entanglement,
             Qiskit does not currently (easily) support it.
         """
-        self.num_likelihoods = num_likelihoods
-        self._oracle_size = oracle_size
+        self.num_likelihoods = num_of_terms
+        self._oracle_size = ansatz_size
         self.hardware_config = hardware_config
         self.allow_distributed = allow_distributed
         self._schedule: Dict[int, List[Tuple[int, List]]] = {}
@@ -131,6 +131,7 @@ class GreedySchedule(Schedule):
         Parameters
         ----------
         possible_qpus : List of two-elements list [bits, index]
+        
         Returns
         -------
         List[int]
