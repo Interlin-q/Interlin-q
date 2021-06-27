@@ -470,23 +470,21 @@ class ControllerHost(Host):
             except:
                 raise Exception('Tuples must of the form (coefficient, [(Observable, qubit_idx)])')
 
-        # Then calculate how many terms to assign to each computing node
         # We assume that all QPUs have enough qubits for VQE
         number_of_computing_hosts = len(q_map.keys())
-        number_of_terms = len(terms)
 
-        minimum_number_of_terms_per_computing_host = number_of_terms // number_of_computing_hosts
-        number_of_leftover_terms = number_of_terms - minimum_number_of_terms_per_computing_host * number_of_computing_hosts
+        idx_assignment = np.array_split(np.arange(len(terms)), number_of_computing_hosts)
 
         # Then assign the terms as per the number
         self.term_assignment = dict()
         computing_host_ids = list(q_map.keys())
 
-        for i in range(0, number_of_computing_hosts):
-            self.term_assignment[computing_host_ids[i]] = terms[i * minimum_number_of_terms_per_computing_host:(i + 1) * minimum_number_of_terms_per_computing_host]
+        for i in range(number_of_computing_hosts):
+            self.term_assignment[computing_host_ids[i]] = []
 
-        for i in range(number_of_leftover_terms):
-            self.term_assignment[computing_host_ids[i]].append(terms[-i])
+        for i, arr in enumerate(idx_assignment):
+            for val in arr:
+                self.term_assignment[computing_host_ids[i]].append(terms[val])
 
         return
 
