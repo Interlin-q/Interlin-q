@@ -1,6 +1,8 @@
+from __future__ import annotations
+from typing import Union
+from numpy import ndarray
 from interlinq.utils import Constants
 from . import Operation
-from . import Layer
 
 
 class Qubit(object):
@@ -24,7 +26,7 @@ class Qubit(object):
         self._computing_host_id = computing_host_id
         self._q_id = q_id
         self._operations = {}
-        self._current_layer = 0
+        self._current_layer_idx = 0
 
         if prepare_qubit:
             # Prepare the qubits when initiated
@@ -63,7 +65,7 @@ class Qubit(object):
         return self._operations
 
     @property
-    def current_layer(self):
+    def current_layer_idx(self):
         """
         Get the *current_layer*, which is the layer of the last operation on the
         qubit.
@@ -71,7 +73,7 @@ class Qubit(object):
         Returns:
             (int): The layer number
         """
-        return self._current_layer
+        return self._current_layer_idx
 
     def _update_operations(self, op: Operation):
         """
@@ -81,7 +83,7 @@ class Qubit(object):
         Args:
             op (Operation): Last operation performed on the qubit
         """
-        self._operations[self._current_layer] = op
+        self._operations[self._current_layer_idx] = op
 
     def _prepare(self):
         """
@@ -94,16 +96,16 @@ class Qubit(object):
 
         self._update_operations(op)
 
-    def update_layer(self, layer: int):
+    def update_layer(self, layer_idx: int):
         """
         Update the list of operations performed on the qubit with th
 
         Args:
-            layer (int): Last operation performed on the qubit
+            layer_idx (int): Last operation performed on the qubit
         """
-        self._current_layer = layer
+        self._current_layer_idx = layer_idx
 
-    def single(self, gate: str, gate_param: list = None):
+    def single(self, gate: str, gate_param: Union[list, ndarray] = None):
         """
         Operation to apply a single gate to the qubit
 
@@ -118,10 +120,10 @@ class Qubit(object):
             gate_param=gate_param,
             computing_host_ids=[self.computing_host_id])
 
-        self.update_layer(self.current_layer + 1)
+        self.update_layer(self.current_layer_idx + 1)
         self._update_operations(op)
 
-    def two_qubit(self, gate, target_qubit, gate_param=None):
+    def two_qubit(self, gate, target_qubit, gate_param: Union[list, ndarray] = None):
         """
         Operation to apply a two qubit gate to the qubit
 
@@ -143,16 +145,16 @@ class Qubit(object):
             gate_param=gate_param,
             computing_host_ids=computing_host_ids)
 
-        if target_qubit.current_layer + 1 > self.current_layer + 1:
-            target_qubit.update_layer(target_qubit.current_layer + 1)
-            self.update_layer(target_qubit.current_layer + 1)
+        if target_qubit.current_layer_idx + 1 > self.current_layer_idx + 1:
+            target_qubit.update_layer(target_qubit.current_layer_idx + 1)
+            self.update_layer(target_qubit.current_layer_idx + 1)
         else:
-            target_qubit.update_layer(self.current_layer + 1)
-            self.update_layer(self.current_layer + 1)
+            target_qubit.update_layer(self.current_layer_idx + 1)
+            self.update_layer(self.current_layer_idx + 1)
 
         self._update_operations(op)
 
-    def classical_ctrl_gate(self, gate, bit_id, gate_param=None):
+    def classical_ctrl_gate(self, gate: str, bit_id: str, gate_param: Union[list, ndarray] = None):
         """
         Operation to apply a classical control gate to the qubit
 
@@ -170,10 +172,10 @@ class Qubit(object):
             gate_param=gate_param,
             computing_host_ids=[self.computing_host_id])
 
-        self.update_layer(self.current_layer + 1)
+        self.update_layer(self.current_layer_idx + 1)
         self._update_operations(op)
 
-    def send_ent(self, receiver_id, pre_allocated=True):
+    def send_ent(self, receiver_id: str, pre_allocated: bool = True):
         """
         Operation to send an EPR pair
 
@@ -189,10 +191,10 @@ class Qubit(object):
             computing_host_ids=[self.computing_host_id, receiver_id],
             pre_allocated_qubits=pre_allocated)
 
-        self.update_layer(self.current_layer + 1)
+        self.update_layer(self.current_layer_idx + 1)
         self._update_operations(op)
 
-    def rec_ent(self, sender_id, pre_allocated=True):
+    def rec_ent(self, sender_id: str, pre_allocated: bool = True):
         """
         Operation to receive an EPR pair
 
@@ -208,10 +210,10 @@ class Qubit(object):
             computing_host_ids=[self.computing_host_id, sender_id],
             pre_allocated_qubits=pre_allocated)
 
-        self.update_layer(self.current_layer + 1)
+        self.update_layer(self.current_layer_idx + 1)
         self._update_operations(op)
 
-    def send_classical(self, bit_id, receiver_qubit):
+    def send_classical(self, bit_id, receiver_qubit: Qubit):
         """
         Operation to send a classical bit
 
@@ -224,16 +226,16 @@ class Qubit(object):
             cids=[bit_id],
             computing_host_ids=[self.computing_host_id, receiver_qubit.computing_host_id])
 
-        if receiver_qubit.current_layer + 1 > self.current_layer + 1:
-            receiver_qubit.update_layer(receiver_qubit.current_layer + 1)
-            self.update_layer(receiver_qubit.current_layer + 1)
+        if receiver_qubit.current_layer_idx + 1 > self.current_layer_idx + 1:
+            receiver_qubit.update_layer(receiver_qubit.current_layer_idx + 1)
+            self.update_layer(receiver_qubit.current_layer_idx + 1)
         else:
-            receiver_qubit.update_layer(self.current_layer + 1)
-            self.update_layer(self.current_layer + 1)
+            receiver_qubit.update_layer(self.current_layer_idx + 1)
+            self.update_layer(self.current_layer_idx + 1)
 
         self._update_operations(op)
 
-    def rec_classical(self, bit_id, sender_qubit):
+    def rec_classical(self, bit_id, sender_qubit: Qubit):
         """
         Operation to receive a classical bit
 
@@ -246,12 +248,12 @@ class Qubit(object):
             cids=[bit_id],
             computing_host_ids=[self.computing_host_id, sender_qubit.computing_host_id])
 
-        if sender_qubit.current_layer + 1 > self.current_layer + 1:
-            sender_qubit.update_layer(sender_qubit.current_layer + 1)
-            self.update_layer(sender_qubit.current_layer + 1)
+        if sender_qubit.current_layer_idx + 1 > self.current_layer_idx + 1:
+            sender_qubit.update_layer(sender_qubit.current_layer_idx + 1)
+            self.update_layer(sender_qubit.current_layer_idx + 1)
         else:
-            sender_qubit.update_layer(self.current_layer + 1)
-            self.update_layer(self.current_layer + 1)
+            sender_qubit.update_layer(self.current_layer_idx + 1)
+            self.update_layer(self.current_layer_idx + 1)
 
         self._update_operations(op)
 
@@ -271,5 +273,5 @@ class Qubit(object):
             cids=[bit_id],
             computing_host_ids=[self.computing_host_id])
 
-        self.update_layer(self.current_layer + 1)
+        self.update_layer(self.current_layer_idx + 1)
         self._update_operations(op)

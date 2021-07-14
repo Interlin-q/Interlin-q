@@ -1,4 +1,6 @@
 from qunetsim.objects import DaemonThread
+from computing_host import ComputingHost
+from typing import List
 
 
 class Clock(object):
@@ -12,27 +14,27 @@ class Clock(object):
         Returns the important things for the clock object
         """
 
-        self._ticks = 0
-        self._maximum_ticks = 0
+        self._ticks: int = 0
+        self._maximum_ticks: int = 0
         self._response = 0
-        self._stop = False
-        self._computing_hosts = []
+        self._stop: bool = False
+        self._computing_hosts: List[ComputingHost] = []
 
     @property
-    def ticks(self):
+    def ticks(self) -> int:
         """
         Number of times the clock has ticked
         """
         return self._ticks
 
     @property
-    def stop(self):
+    def stop(self) -> bool:
         """
         Check if the clock has stopped
         """
         return self._stop
 
-    def attach_host(self, computing_host):
+    def attach_host(self, computing_host: ComputingHost):
         """
         Attach the computing host who will listen to the clock object tick
 
@@ -41,7 +43,7 @@ class Clock(object):
         """
         self._computing_hosts.append(computing_host)
 
-    def detach_host(self, computing_host):
+    def detach_host(self, computing_host: ComputingHost):
         """
         Detach the computing host from the clock object
 
@@ -59,7 +61,7 @@ class Clock(object):
         """
         self._response += 1
 
-    def initialise(self, max_execution_time):
+    def initialise(self, max_execution_time: int):
         """
         Initialise the clock with the maximum number of times the clock should tick
 

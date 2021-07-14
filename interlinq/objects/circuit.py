@@ -1,4 +1,6 @@
+from typing import List
 from .layer import Layer
+from .qubit import Qubit
 
 
 class Circuit(object):
@@ -6,7 +8,7 @@ class Circuit(object):
     Circuit object which contains information about a quantum circuit.
     """
 
-    def __init__(self, q_map: dict, layers: list = [], qubits: list = []):
+    def __init__(self, q_map: dict, layers: List[Layer] = None, qubits: List[Qubit] = None):
         """
         Returns the important things for a quantum circuit
 
@@ -20,8 +22,8 @@ class Circuit(object):
         """
 
         self._q_map = q_map
-        self._layers = layers
-        self._qubits = qubits
+        self._layers = layers if layers is not None else []
+        self._qubits = qubits if qubits is not None else []
         self._width = 0
 
         if not self._layers:
@@ -94,7 +96,7 @@ class Circuit(object):
                     raise ValueError("Qubit already added")
                 self._q_map[computing_host_id].append(qubit)
 
-    def add_layer_to_circuit(self, layer):
+    def add_layer_to_circuit(self, layer: Layer):
         """
         Add a new Layer object to the circuit
 
@@ -104,7 +106,7 @@ class Circuit(object):
 
         self._layers.append(layer)
 
-    def create_layers(self, qubits: list):
+    def create_layers(self, qubits: List[Qubit]):
         """
         Create layers for the circuit from the qubits provided.
 
@@ -165,7 +167,7 @@ class Circuit(object):
 
         self._layers[index] = layer
 
-    def update_qubits(self, qubits: list):
+    def update_qubits(self, qubits: List[Qubit]):
         """
         Update qubits in the circuit.
 

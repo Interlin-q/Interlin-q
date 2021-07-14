@@ -31,8 +31,8 @@ class Operation(object):
                  cids: list = None,
                  gate: str = None,
                  gate_param: list = None,
-                 computing_host_ids: list = [],
-                 pre_allocated_qubits: bool = False, 
+                 computing_host_ids: list = None,
+                 pre_allocated_qubits: bool = False,
                  hamiltonian: list = None):
         """
         Returns the important things for a quantum operation
@@ -59,17 +59,16 @@ class Operation(object):
         self._cids = cids
         self._gate = gate
         self._gate_param = gate_param
-        self._computing_host_ids = computing_host_ids
+        self._computing_host_ids = computing_host_ids if computing_host_ids is not None else []
         self._pre_allocated_qubits = pre_allocated_qubits
 
         if self._name is Constants.REC_HAMILTON:
-            if hamiltonian is None or len(hamiltonian) == 0: 
+            if hamiltonian is None or len(hamiltonian) == 0:
                 raise Exception('Must send non-empty Hamiltonian terms with this operation!')
             self._hamiltonian = hamiltonian
         else:
             if hamiltonian and len(hamiltonian) > 0:
                 warnings.warn('You sent a list of Hamiltonians with an operation other than REC_HAMILTON')
-            
 
     def __str__(self):
         return self.name

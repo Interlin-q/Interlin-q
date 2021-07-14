@@ -1,3 +1,5 @@
+from typing import List
+
 from qunetsim.components import Host
 
 from .clock import Clock
@@ -60,7 +62,7 @@ class ComputingHost(Host):
             gate_time = DefaultOperationTime
 
         self._gate_time = gate_time
-        
+
         self._last_buffer_size = 0
 
         # Attach computing host to the clock
@@ -68,7 +70,7 @@ class ComputingHost(Host):
         self._clock = clock
 
     @property
-    def controller_host_id(self):
+    def controller_host_id(self) -> str:
         """
         Get the *controller_host_id* associated to the computing host
 
@@ -78,7 +80,7 @@ class ComputingHost(Host):
         return self._controller_host_id
 
     @property
-    def bits(self):
+    def bits(self) -> dict:
         """
         Get the classical bits measured by this host.
 
@@ -94,7 +96,7 @@ class ComputingHost(Host):
         return results
 
     @property
-    def qubit_ids(self):
+    def qubit_ids(self) -> List[str]:
         """
         Return the qubit IDs for this computing host.
 
@@ -104,7 +106,7 @@ class ComputingHost(Host):
         return list(self._qubits.keys())
 
     @property
-    def total_qubits(self):
+    def total_qubits(self) -> int:
         """
         Return the total number of qubits for computing host.
 
@@ -134,20 +136,20 @@ class ComputingHost(Host):
 
     def receive_schedule(self):
         """
-        Receive the broadcasted schedule from the Controller Host and update
+        Receive the broadcast schedule from the Controller Host and update
         the schedule property
         """
 
         messages = []
-        
+
         while len(messages) <= self._last_buffer_size:
             messages = self.classical
             messages = [x for x in messages if x.content != 'ACK']
-            
+
         self._last_buffer_size = len(messages)
-        
+
         # Await broadcast messages from the controller host
-        #while len(messages) < 1:
+        # while len(messages) < 1:
         #    messages = self.classical
         #    messages = [x for x in messages if x.content != 'ACK']
 
@@ -167,7 +169,7 @@ class ComputingHost(Host):
         msg = 'ACK'
         self.send_classical(self._controller_host_id, msg, await_ack=True)
 
-    def _report_error(self, message):
+    def _report_error(self, message: str):
         """
         Stop the processing and report the error message to the controller host
 
@@ -177,7 +179,7 @@ class ComputingHost(Host):
         self._clock.stop_clock()
         self._error_message = message
 
-    def _check_errors(self, op, len_qids: int = 0, len_computing_host_ids: int = 1, len_cids: int = 0):
+    def _check_errors(self, op: dict, len_qids: int = 0, len_computing_host_ids: int = 1, len_cids: int = 0):
         """
         Check if there is any error in the operation format
 
@@ -543,6 +545,8 @@ class ComputingHost(Host):
             del self._qubits[qubit_id]
             self._total_qubits -= 1
 
+        return
+
     def _process_rec_hamilton(self, operation: dict):
         """
         Receives a list of observables from the controller to calculate their expectation values
@@ -585,8 +589,7 @@ class ComputingHost(Host):
         self._calculated_exp = True
 
         return
-        
-        
+
     def perform_schedule(self, ticks: int):
         """
         Process the schedule and perform the corresponding operations
@@ -597,7 +600,7 @@ class ComputingHost(Host):
         """
 
         if ticks in self._schedule:
-            for operation in self._schedule[ticks]:          
+            for operation in self._schedule[ticks]:
                 if operation['name'] == Constants.PREPARE_QUBITS:
                     self._prepare_qubits(operation)
 
@@ -630,10 +633,10 @@ class ComputingHost(Host):
 
                 if operation['name'] == Constants.SEND_EXP:
                     self._process_send_exp(operation)
-        
+
         self._clock.respond()
 
-    def send_results(self, type='bits'):
+    def send_results(self, result_type='bits'):
         """
         Send results to Controller Host
         """
@@ -644,7 +647,7 @@ class ComputingHost(Host):
             time.sleep(1)
 
         # Wait until the expectation calculation is finished
-        while type == 'expectation' and not self._calculated_exp:
+        while result_type == 'expectation' and not self._calculated_exp:
             time.sleep(0.5)
 
         if self._error_message:
@@ -653,16 +656,18 @@ class ComputingHost(Host):
                 'message': self._error_message
             }
         else:
-            if type == 'bits':
+            if result_type == 'bits':
                 msg = {
                     'type': 'measurement_result',
                     'val': self.bits
                 }
-            elif type == 'expectation':
+            elif result_type == 'expectation':
                 msg = {
                     'type': 'expectation_value',
                     'val': np.real(self.exp)
                 }
+            else:
+                raise Exception('Invalid return message type.')
 
         message = json.dumps({self.host_id: msg})
         self.send_classical(self._controller_host_id, message, await_ack=True)

@@ -1,9 +1,12 @@
+from typing import List, Tuple
+
 from qunetsim.components import Host
 
 from interlinq.components import ComputingHost, Clock
 from interlinq.utils import DefaultOperationTime
 from interlinq.utils.constants import Constants
 from interlinq.objects import Operation, Circuit, Layer
+from interlinq.types import Hamiltonian
 
 import numpy as np
 import uuid
@@ -16,7 +19,8 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id: str, clock: Clock, computing_host_ids: list = [], gate_time: dict = None, backend=None):
+    def __init__(self, host_id: str, clock: Clock, computing_host_ids: List[str] = None,
+                 gate_time: dict = None, backend=None):
         """
         Returns the important things for the controller hosts
 
@@ -30,10 +34,14 @@ class ControllerHost(Host):
         """
         super().__init__(host_id, backend=backend)
 
+        if computing_host_ids is None:
+            computing_host_ids = []
         self._computing_host_ids = computing_host_ids
         self.add_c_connections(computing_host_ids)
         self._clock = clock
         self._circuit_max_execution_time = 0
+
+        self.term_assignment = dict()
 
         # TODO: Take gate_time as an input from computing hosts
         if gate_time is None:
@@ -64,13 +72,14 @@ class ControllerHost(Host):
         """
         return self._results
 
-    def create_distributed_network(self, num_computing_hosts: int, num_qubits_per_host: int) -> tuple:
+    def create_distributed_network(self, num_computing_hosts: int, num_qubits_per_host: int) \
+            -> Tuple[List[ComputingHost], dict]:
         """
         Create a network of *num_computing_hosts* completely connected computing nodes with
         *num_qubits_per_host* each.
 
         Args:
-            num_computing_hosts (int): The number of computing hosts to initalize
+            num_computing_hosts (int): The number of computing hosts to initialize
             num_qubits_per_host (int): The number of qubits on each computing host
         Returns:
             (tuple): The list of computing hosts and the qubit map for their qubits
@@ -124,7 +133,7 @@ class ControllerHost(Host):
 
         self._gate_time[computing_host_id] = gate_time
 
-    def connect_hosts(self, computing_host_ids: list, gate_times: list = None):
+    def connect_hosts(self, computing_host_ids: List[str], gate_times: list = None):
         """
         Adds multiple computing hosts to the distributed network
 
@@ -188,7 +197,7 @@ class ControllerHost(Host):
                 if op['computing_host_ids'][0] == computing_host_id:
                     computing_host_schedule.append(op)
             computing_host_schedules[computing_host_id] = computing_host_schedule
-        
+
         return computing_host_schedules, time_layer_end
 
     @staticmethod
@@ -428,12 +437,12 @@ class ControllerHost(Host):
         results = {}
 
         for host_id in self._computing_host_ids:
-            result = self.get_next_classical(host_id, wait=-1)#, seq_num=1)
+            result = self.get_next_classical(host_id, wait=-1)
 
             # I think this is a bug with QuNetSim... Adding a hack for now
             # to overcome it...
             if result.content == 'ACK':
-                result = self.get_next_classical(host_id, wait=-1)#, seq_num=1)
+                result = self.get_next_classical(host_id, wait=-1)
 
             try:
                 result = result.content
@@ -443,40 +452,28 @@ class ControllerHost(Host):
 
         self._results = results
 
-    def schedule_expectation_terms(self, terms, q_map):
+    def schedule_expectation_terms(self, hamiltonian: Hamiltonian, q_map: dict):
         """
         Assign the terms of a Hamiltonian to the different computing hosts in the network
+
+        Args:
+            hamiltonian (List): The list of terms making up the Hamiltonian.
+                The list should contain tuples of the form (coefficient, List[(Observable, qubit_idx)]).
+                For reference, check the notebooks in vqe-examples.
+            q_map (Dict): The usual qubit-to-ComputingHost mapping
         """
 
-        # First check the sanity of the list type-wise
-        if len(terms) == 0:
-            raise Exception('Empty list of terms passed')
-
-        for term in terms:
-            if not isinstance(term, tuple):
-                raise Exception('Can only accept a list of tuples')
-
-            try: 
-                coeff, observables = term 
-
-                if not isinstance(observables, list):
-                    raise Exception()
-                
-                for part in observables:
-                    obs_type, idx = part
-
-                    if not (isinstance(obs_type, str) and isinstance(idx, int)):
-                        raise Exception()
-            except:
-                raise Exception('Tuples must of the form (coefficient, [(Observable, qubit_idx)])')
+        assert len(hamiltonian) > 0, 'Empty list of terms passed.'
+        assert all(isinstance(coefficient, int) and isinstance(observables, list)
+                   for coefficient, observables in hamiltonian), \
+            'Tuples must of the form (coefficient, [(Observable, qubit_idx)])'
 
         # We assume that all QPUs have enough qubits for VQE
         number_of_computing_hosts = len(q_map.keys())
 
-        idx_assignment = np.array_split(np.arange(len(terms)), number_of_computing_hosts)
+        idx_assignment = np.array_split(np.arange(len(hamiltonian)), number_of_computing_hosts)
 
         # Then assign the terms as per the number
-        self.term_assignment = dict()
         computing_host_ids = list(q_map.keys())
 
         for i in range(number_of_computing_hosts):
@@ -484,9 +481,10 @@ class ControllerHost(Host):
 
         for i, arr in enumerate(idx_assignment):
             for val in arr:
-                self.term_assignment[computing_host_ids[i]].append(terms[val])
+                self.term_assignment[computing_host_ids[i]].append(hamiltonian[val])
 
         return
+
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
