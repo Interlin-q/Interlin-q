@@ -339,10 +339,10 @@ class TestDistributedCnot(unittest.TestCase):
         self.assertEqual(self.computing_host_3._bits['qubit_3'], 1)
 
         results = self.controller_host._results
-        self.assertEqual(results['QPU_1']['type'], 'result')
-        self.assertEqual(results['QPU_1']['bits']['qubit_1'], 1)
-        self.assertEqual(results['QPU_2']['bits']['qubit_2'], 1)
-        self.assertEqual(results['QPU_3']['bits']['qubit_3'], 1)
+        self.assertEqual(results['QPU_1']['type'], 'measurement_result')
+        self.assertEqual(results['QPU_1']['val']['qubit_1'], 1)
+        self.assertEqual(results['QPU_2']['val']['qubit_2'], 1)
+        self.assertEqual(results['QPU_3']['val']['qubit_3'], 1)
 
     def test_cnot_4(self):
         """
@@ -390,6 +390,6 @@ class TestDistributedCnot(unittest.TestCase):
         self.assertEqual(self.computing_host_3._bits['q_3'], 1)
 
         results = self.controller_host._results
-        self.assertEqual(results['QPU_1']['type'], 'result')
-        self.assertEqual(results['QPU_1']['bits']['q_1'], 1)
-        self.assertEqual(results['QPU_2']['bits']['q_2'], 1)
+        self.assertEqual(results['QPU_1']['type'], 'measurement_result')
+        self.assertEqual(results['QPU_1']['val']['q_1'], 1)
+        self.assertEqual(results['QPU_2']['val']['q_2'], 1)

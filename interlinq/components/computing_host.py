@@ -60,7 +60,7 @@ class ComputingHost(Host):
             gate_time = DefaultOperationTime
 
         self._gate_time = gate_time
-        
+
         self._last_buffer_size = 0
 
         # Attach computing host to the clock
@@ -134,20 +134,20 @@ class ComputingHost(Host):
 
     def receive_schedule(self):
         """
-        Receive the broadcasted schedule from the Controller Host and update
+        Receive the broadcast schedule from the Controller Host and update
         the schedule property
         """
 
         messages = []
-        
+
         while len(messages) <= self._last_buffer_size:
             messages = self.classical
             messages = [x for x in messages if x.content != 'ACK']
-            
+
         self._last_buffer_size = len(messages)
-        
+
         # Await broadcast messages from the controller host
-        #while len(messages) < 1:
+        # while len(messages) < 1:
         #    messages = self.classical
         #    messages = [x for x in messages if x.content != 'ACK']
 
@@ -585,8 +585,7 @@ class ComputingHost(Host):
         self._calculated_exp = True
 
         return
-        
-        
+
     def perform_schedule(self, ticks: int):
         """
         Process the schedule and perform the corresponding operations
@@ -597,7 +596,7 @@ class ComputingHost(Host):
         """
 
         if ticks in self._schedule:
-            for operation in self._schedule[ticks]:          
+            for operation in self._schedule[ticks]:
                 if operation['name'] == Constants.PREPARE_QUBITS:
                     self._prepare_qubits(operation)
 
@@ -630,10 +629,10 @@ class ComputingHost(Host):
 
                 if operation['name'] == Constants.SEND_EXP:
                     self._process_send_exp(operation)
-        
+
         self._clock.respond()
 
-    def send_results(self, type='bits'):
+    def send_results(self, result_type='bits'):
         """
         Send results to Controller Host
         """
@@ -644,7 +643,7 @@ class ComputingHost(Host):
             time.sleep(1)
 
         # Wait until the expectation calculation is finished
-        while type == 'expectation' and not self._calculated_exp:
+        while result_type == 'expectation' and not self._calculated_exp:
             time.sleep(0.5)
 
         if self._error_message:
@@ -653,15 +652,20 @@ class ComputingHost(Host):
                 'message': self._error_message
             }
         else:
-            if type == 'bits':
+            if result_type == 'bits':
                 msg = {
                     'type': 'measurement_result',
                     'val': self.bits
                 }
-            elif type == 'expectation':
+            elif result_type == 'expectation':
                 msg = {
                     'type': 'expectation_value',
                     'val': np.real(self.exp)
+                }
+            else:
+                msg = {
+                    'type': 'unsupported_result_type',
+                    'message': 'Supported result types are only \'bits\' and \'expectation\''
                 }
 
         message = json.dumps({self.host_id: msg})
