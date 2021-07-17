@@ -15,7 +15,7 @@ class Clock(object):
         return Clock.__instance
 
     @staticmethod
-    def reset_network():
+    def reset_clock():
         if Clock.__instance is not None:
             Clock.__instance.stop_clock()
             Clock.__instance = None

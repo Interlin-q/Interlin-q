@@ -31,14 +31,14 @@ class ControllerHost(Host):
 
         self.term_assignment = dict()
         self._computing_host_ids = computing_host_ids if computing_host_ids is not None else []
-        self.add_c_connections(computing_host_ids)
+        self.add_c_connections(self._computing_host_ids)
         self._clock = Clock.get_instance()
         self._circuit_max_execution_time = 0
 
         # TODO: Take gate_time as an input from computing hosts
         if gate_time is None:
             gate_time = {}
-            for computing_host_id in computing_host_ids:
+            for computing_host_id in self._computing_host_ids:
                 gate_time[computing_host_id] = DefaultOperationTime
 
         self._gate_time = gate_time
