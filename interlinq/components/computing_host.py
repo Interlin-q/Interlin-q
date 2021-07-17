@@ -21,7 +21,7 @@ class ComputingHost(Host):
     distributed network system, connected to the controller host.
     """
 
-    def __init__(self, host_id: str, controller_host_id: str, clock: Clock, total_qubits: int = 0,
+    def __init__(self, host_id: str, controller_host_id: str, total_qubits: int = 0,
                  total_pre_allocated_qubits: int = 1, gate_time: dict = None, backend=None):
 
         """
@@ -30,8 +30,6 @@ class ComputingHost(Host):
         Args:
             host_id (str): The ID of the computing host
             controller_host_id (str): The IDs of controller/master host
-            clock (Clock): The clock object which ensures clock synchronization
-               amongst the computing hosts
             total_qubits (int): Total number of processing qubits possessed by
                the computing host
             total_pre_allocated_qubits (int): Total number of pre allocated qubits
@@ -64,8 +62,8 @@ class ComputingHost(Host):
         self._last_buffer_size = 0
 
         # Attach computing host to the clock
-        clock.attach_host(self)
-        self._clock = clock
+        self._clock = Clock.get_instance()
+        self._clock.attach_host(self)
 
     @property
     def controller_host_id(self):
@@ -639,7 +637,7 @@ class ComputingHost(Host):
 
         # TODO: Check if there is a better implementation
         # Wait for the clock to stop ticking to send the results
-        while not self._clock.stop:
+        while not self._clock.has_stopped:
             time.sleep(1)
 
         # Wait until the expectation calculation is finished

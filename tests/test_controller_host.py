@@ -1,13 +1,12 @@
+import unittest
+
+from qunetsim.backends import EQSNBackend
+from qunetsim.components.network import Network
+
 from interlinq.components import ControllerHost
-from interlinq.components import Clock
+from interlinq.objects import Operation
 from interlinq.objects.circuit import Circuit
 from interlinq.objects.layer import Layer
-from interlinq.objects import Operation
-
-from qunetsim.components.network import Network
-from qunetsim.backends import EQSNBackend
-
-import unittest
 
 
 class TestControllerHost(unittest.TestCase):
@@ -26,11 +25,8 @@ class TestControllerHost(unittest.TestCase):
         network = Network.get_instance()
         network.start(["host_1"], EQSNBackend())
 
-        clock = Clock()
-
         self.controller_host = ControllerHost(
             host_id="host_1",
-            clock=clock,
             computing_host_ids=["QPU_1"])
         network.add_host(self.controller_host)
 

@@ -29,29 +29,23 @@ class TestDistributedCnot(unittest.TestCase):
         network = Network.get_instance()
         network.start(["host_1", "QPU_1", "QPU_2", "QPU_3"], EQSNBackend())
 
-        clock = Clock()
-
         self.computing_host_1 = ComputingHost(
             host_id="QPU_1",
             controller_host_id="host_1",
-            clock=clock,
             total_qubits=2)
 
         self.computing_host_2 = ComputingHost(
             host_id="QPU_2",
             controller_host_id="host_1",
-            clock=clock,
             total_qubits=2)
 
         self.computing_host_3 = ComputingHost(
             host_id="QPU_3",
             controller_host_id="host_1",
-            clock=clock,
             total_qubits=2)
 
         self.controller_host = ControllerHost(
             host_id="host_1",
-            clock=clock,
             computing_host_ids=["QPU_1", "QPU_2", "QPU_3"])
 
         self.computing_host_1.add_connections(['QPU_2', 'QPU_3'])
@@ -70,7 +64,7 @@ class TestDistributedCnot(unittest.TestCase):
             self.computing_host_3])
 
         self.network = network
-        self.clock = clock
+        self.clock = Clock.get_instance()
 
     def tearDown(self):
         self.network.stop(True)

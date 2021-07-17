@@ -6,17 +6,34 @@ class Clock(object):
     This is a clock simulator which synchronises the scheduled operations in computing
     hosts
     """
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if Clock.__instance is None:
+            Clock()
+        return Clock.__instance
+
+    @staticmethod
+    def reset_network():
+        if Clock.__instance is not None:
+            Clock.__instance.stop_clock()
+            Clock.__instance = None
+        __instance = Clock()
 
     def __init__(self):
         """
         Returns the important things for the clock object
         """
-
-        self._ticks = 0
-        self._maximum_ticks = 0
-        self._response = 0
-        self._stop = False
-        self._computing_hosts = []
+        if Clock.__instance is None:
+            self._ticks = 0
+            self._maximum_ticks = 0
+            self._response = 0
+            self._stop = False
+            self._computing_hosts = []
+            Clock.__instance = self
+        else:
+            raise Exception('This is a singleton class. Use get_instance().')
 
     @property
     def ticks(self):
@@ -26,7 +43,7 @@ class Clock(object):
         return self._ticks
 
     @property
-    def stop(self):
+    def has_stopped(self):
         """
         Check if the clock has stopped
         """
