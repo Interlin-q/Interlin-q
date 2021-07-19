@@ -6,7 +6,7 @@ class Circuit(object):
     Circuit object which contains information about a quantum circuit.
     """
 
-    def __init__(self, q_map: dict, layers: list = [], qubits: list = []):
+    def __init__(self, q_map: dict, layers: list = None, qubits: list = None):
         """
         Returns the important things for a quantum circuit
 
@@ -20,8 +20,8 @@ class Circuit(object):
         """
 
         self._q_map = q_map
-        self._layers = layers
-        self._qubits = qubits
+        self._layers = layers if layers is not None else []
+        self._qubits = qubits if qubits is not None else []
         self._width = 0
 
         if not self._layers:

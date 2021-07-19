@@ -16,11 +16,8 @@ def main():
     qutip = QuTipBackend()
     network.start(backend=qutip)
 
-    clock = Clock()
-
     controller_host = ControllerHost(
         host_id="host_1",
-        clock=clock,
         backend=qutip
     )
     computing_hosts, q_map = controller_host \

@@ -1,13 +1,12 @@
 import sys
+
 sys.path.append("../")
 
 from qunetsim.components import Network
 from qunetsim.objects import Logger
 
 from interlinq import (ControllerHost, Constants, Clock,
-Circuit, Layer, ComputingHost, Operation)
-
-import numpy as np
+                       Circuit, Layer, Operation)
 
 Logger.DISABLED = True
 
@@ -102,11 +101,8 @@ def main():
     network.delay = 0
     network.start()
 
-    clock = Clock()
-
     controller_host = ControllerHost(
         host_id="host_1",
-        clock=clock,
     )
 
     computing_hosts, q_map = controller_host.create_distributed_network(
@@ -125,7 +121,7 @@ def main():
         t = host.run_protocol(computing_host_protocol)
         threads.append(t)
 
-    for thread in threads:    
+    for thread in threads:
         thread.join()
     network.stop(True)
     exit()

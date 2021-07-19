@@ -1,6 +1,5 @@
 from interlinq.utils import Constants
-from . import Operation
-from . import Layer
+from interlinq.objects import Operation
 
 
 class Qubit(object):

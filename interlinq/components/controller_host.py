@@ -16,29 +16,29 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id: str, clock: Clock, computing_host_ids: list = [], gate_time: dict = None, backend=None):
+    def __init__(self, host_id: str, computing_host_ids: list = None, gate_time: dict = None, backend=None):
         """
         Returns the important things for the controller hosts
 
         Args:
             host_id (str): The ID of the controller host
             computing_host_ids (list): The IDs of computing/slave hosts
-            clock (Clock): Clock object for synchronising the computing hosts
             gate_time (dict): A mapping of gate names to time the gate takes
                to execute for each computing host
             backend (Backend): Backend for qubits
         """
         super().__init__(host_id, backend=backend)
 
-        self._computing_host_ids = computing_host_ids
-        self.add_c_connections(computing_host_ids)
-        self._clock = clock
+        self.term_assignment = dict()
+        self._computing_host_ids = computing_host_ids if computing_host_ids is not None else []
+        self.add_c_connections(self._computing_host_ids)
+        self._clock = Clock.get_instance()
         self._circuit_max_execution_time = 0
 
         # TODO: Take gate_time as an input from computing hosts
         if gate_time is None:
             gate_time = {}
-            for computing_host_id in computing_host_ids:
+            for computing_host_id in self._computing_host_ids:
                 gate_time[computing_host_id] = DefaultOperationTime
 
         self._gate_time = gate_time
@@ -70,7 +70,7 @@ class ControllerHost(Host):
         *num_qubits_per_host* each.
 
         Args:
-            num_computing_hosts (int): The number of computing hosts to initalize
+            num_computing_hosts (int): The number of computing hosts to initialize
             num_qubits_per_host (int): The number of qubits on each computing host
         Returns:
             (tuple): The list of computing hosts and the qubit map for their qubits
@@ -86,7 +86,6 @@ class ControllerHost(Host):
             computing_host = ComputingHost(
                 host_id=id_prefix + str(i),
                 controller_host_id=self.host_id,
-                clock=self._clock,
                 total_qubits=num_qubits_per_host,
                 total_pre_allocated_qubits=num_qubits_per_host,
                 backend=self._backend
@@ -188,7 +187,7 @@ class ControllerHost(Host):
                 if op['computing_host_ids'][0] == computing_host_id:
                     computing_host_schedule.append(op)
             computing_host_schedules[computing_host_id] = computing_host_schedule
-        
+
         return computing_host_schedules, time_layer_end
 
     @staticmethod
@@ -428,12 +427,12 @@ class ControllerHost(Host):
         results = {}
 
         for host_id in self._computing_host_ids:
-            result = self.get_next_classical(host_id, wait=-1)#, seq_num=1)
+            result = self.get_next_classical(host_id, wait=-1)
 
             # I think this is a bug with QuNetSim... Adding a hack for now
             # to overcome it...
             if result.content == 'ACK':
-                result = self.get_next_classical(host_id, wait=-1)#, seq_num=1)
+                result = self.get_next_classical(host_id, wait=-1)
 
             try:
                 result = result.content
@@ -443,40 +442,26 @@ class ControllerHost(Host):
 
         self._results = results
 
-    def schedule_expectation_terms(self, terms, q_map):
+    def schedule_expectation_terms(self, hamiltonian, q_map):
         """
         Assign the terms of a Hamiltonian to the different computing hosts in the network
         """
 
         # First check the sanity of the list type-wise
-        if len(terms) == 0:
-            raise Exception('Empty list of terms passed')
-
-        for term in terms:
-            if not isinstance(term, tuple):
-                raise Exception('Can only accept a list of tuples')
-
-            try: 
-                coeff, observables = term 
-
-                if not isinstance(observables, list):
-                    raise Exception()
-                
-                for part in observables:
-                    obs_type, idx = part
-
-                    if not (isinstance(obs_type, str) and isinstance(idx, int)):
-                        raise Exception()
-            except:
-                raise Exception('Tuples must of the form (coefficient, [(Observable, qubit_idx)])')
+        assert len(hamiltonian) > 0, 'Empty list of terms passed'
+        assert all(isinstance(x, tuple) for x in hamiltonian), 'Can only accept a list of tuples'
+        for term in hamiltonian:
+            _, observables = term
+            assert isinstance(observables, list), 'Each term must include a list of observables.'
+            assert all(isinstance(obs_type, str) and isinstance(idx, int) for obs_type, idx in observables),\
+                'The list of observables must be of tuples of types (str, int)'
 
         # We assume that all QPUs have enough qubits for VQE
         number_of_computing_hosts = len(q_map.keys())
 
-        idx_assignment = np.array_split(np.arange(len(terms)), number_of_computing_hosts)
+        idx_assignment = np.array_split(np.arange(len(hamiltonian)), number_of_computing_hosts)
 
         # Then assign the terms as per the number
-        self.term_assignment = dict()
         computing_host_ids = list(q_map.keys())
 
         for i in range(number_of_computing_hosts):
@@ -484,9 +469,10 @@ class ControllerHost(Host):
 
         for i, arr in enumerate(idx_assignment):
             for val in arr:
-                self.term_assignment[computing_host_ids[i]].append(terms[val])
+                self.term_assignment[computing_host_ids[i]].append(hamiltonian[val])
 
         return
+
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
