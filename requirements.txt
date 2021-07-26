@@ -73,4 +73,3 @@ urllib3==1.26.2
 wcwidth==0.2.5
 webencodings==0.5.1
 zipp==3.4.0
-qutip

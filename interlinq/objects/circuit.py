@@ -1,4 +1,7 @@
 from .layer import Layer
+from .qubit import Qubit
+
+from typing import List, Dict, Optional
 
 
 class Circuit(object):
@@ -6,7 +9,12 @@ class Circuit(object):
     Circuit object which contains information about a quantum circuit.
     """
 
-    def __init__(self, q_map: dict, layers: list = None, qubits: list = None):
+    def __init__(
+        self,
+        q_map: Dict[str, List[str]],
+        layers: Optional[List[Layer]] = None,
+        qubits: Optional[List[Qubit]] = None,
+    ):
         """
         Returns the important things for a quantum circuit
 
@@ -29,12 +37,12 @@ class Circuit(object):
                 self.create_layers(self._qubits)
 
     def __str__(self):
-        circuit = ''
+        circuit = ""
         for i in range(len(self._layers[0])):
-            wire = ''
+            wire = ""
             for layer in self._layers:
-                wire += str(layer.operations[i]) + '-'
-            circuit += wire + '\n'
+                wire += str(layer.operations[i]) + "-"
+            circuit += wire + "\n"
         return circuit
 
     @property
@@ -70,7 +78,7 @@ class Circuit(object):
         """
         return self._qubits
 
-    def add_new_qubit(self, qubit_info: dict):
+    def add_new_qubit(self, qubit_info: Dict):
         """
         Add a new qubit to the circuit.
 
@@ -94,7 +102,7 @@ class Circuit(object):
                     raise ValueError("Qubit already added")
                 self._q_map[computing_host_id].append(qubit)
 
-    def add_layer_to_circuit(self, layer):
+    def add_layer_to_circuit(self, layer: Layer):
         """
         Add a new Layer object to the circuit
 
@@ -104,7 +112,7 @@ class Circuit(object):
 
         self._layers.append(layer)
 
-    def create_layers(self, qubits: list):
+    def create_layers(self, qubits: List):
         """
         Create layers for the circuit from the qubits provided.
 
@@ -197,18 +205,20 @@ class Circuit(object):
 
                     operations = []
                     if layer_index != 0:
-                        for index, gate in enumerate(control_gate_info[layer_index - 1]):
-                            if gate['computing_hosts'] == computing_hosts:
-                                if gate['control_qubit'] == control_qubit:
-                                    operations = gate['operations']
+                        for index, gate in enumerate(
+                            control_gate_info[layer_index - 1]
+                        ):
+                            if gate["computing_hosts"] == computing_hosts:
+                                if gate["control_qubit"] == control_qubit:
+                                    operations = gate["operations"]
                                     del control_gate_info[layer_index - 1][index]
                     operations.append(op)
 
                     control_gate = {
-                        'op_index': op_index,
-                        'computing_hosts': computing_hosts,
-                        'control_qubit': control_qubit,
-                        'operations': operations
+                        "op_index": op_index,
+                        "computing_hosts": computing_hosts,
+                        "control_qubit": control_qubit,
+                        "operations": operations,
                     }
                     control_gates.append(control_gate)
             control_gate_info.append(control_gates)

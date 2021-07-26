@@ -1,4 +1,4 @@
-from interlinq.utils.constants import Constants
+from .constants import Constants
 
 default_single_gate_time = Constants.DEFAULT_SINGLE_GATE_TIME
 default_single_operation_time = Constants.DEFAULT_SINGLE_OPERATION_TIME
@@ -14,14 +14,14 @@ DefaultSingleGateTime = {
     "rx": default_single_gate_time,
     "ry": default_single_gate_time,
     "rz": default_single_gate_time,
-    "custom_gate": default_single_gate_time
+    "custom_gate": default_single_gate_time,
 }
 
 DefaultTwoQubitGateTime = {
     "cnot": default_single_gate_time,
     "cphase": default_single_gate_time,
     "custom_two_qubit_gate": default_single_gate_time,
-    "custom_controlled_gate": default_single_gate_time
+    "custom_controlled_gate": default_single_gate_time,
 }
 
 DefaultGateTime = DefaultSingleGateTime.copy()
@@ -38,5 +38,5 @@ DefaultOperationTime = {
     "SEND_CLASSICAL": default_single_operation_time,
     "REC_CLASSICAL": default_single_operation_time,
     "REC_HAMILTON": default_single_operation_time,
-    "SEND_EXP": default_single_operation_time
+    "SEND_EXP": default_single_operation_time,
 }

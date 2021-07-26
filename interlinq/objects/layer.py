@@ -1,9 +1,13 @@
+from typing import List, Optional
+from .operation import Operation
+
+
 class Layer(object):
     """
     Layer object which is a collection of operations to be applied on the qubits in the system.
     """
 
-    def __init__(self, operations: list = None):
+    def __init__(self, operations: Optional[List[Operation]] = None):
         """
         Returns the important things for a layer in a quantum circuit
 
@@ -15,12 +19,12 @@ class Layer(object):
         self._operations = operations if operations is not None else []
 
     def __str__(self):
-        layer = ''
-        
+        layer = ""
+
         for o in self._operations[:-1]:
-            layer += f'-{o}-|\n'
-        
-        layer += f'-{self._operations[:-1]}-|'
+            layer += f"-{o}-|\n"
+
+        layer += f"-{self._operations[:-1]}-|"
         return layer
 
     @property
@@ -42,7 +46,7 @@ class Layer(object):
     def __len__(self):
         return self.depth
 
-    def add_operation(self, operation):
+    def add_operation(self, operation: Operation):
         """
         Add a operation to the layer
         Args:
@@ -51,15 +55,14 @@ class Layer(object):
 
         self._operations.append(operation)
 
-    def add_operations(self, operations: list):
+    def add_operations(self, operations: List[Operation]):
         """
         Add multiple operations to the layer
         Args:
             operations (list): List of Operation objects
         """
 
-        for operation in operations:
-            self._operations.append(operation)
+        self._operations.extend(operations)
 
     def control_gate_present(self):
         """

@@ -1,5 +1,9 @@
-from interlinq.utils import Constants
+from numbers import Complex
+
+from ..utils import Constants
 import warnings
+
+from typing import List, Optional, Tuple
 
 
 class Operation(object):
@@ -25,15 +29,17 @@ class Operation(object):
     CUSTOM_CONTROLLED = "custom_controlled_gate"
     MEASURE = "measure"
 
-    def __init__(self,
-                 name: str,
-                 qids: list = None,
-                 cids: list = None,
-                 gate: str = None,
-                 gate_param: list = None,
-                 computing_host_ids: list = None,
-                 pre_allocated_qubits: bool = False,
-                 hamiltonian: list = None):
+    def __init__(
+        self,
+        name: str,
+        qids: List[str] = None,
+        cids: List[str] = None,
+        gate: str = None,
+        gate_param: Optional[List[Complex]] = None,
+        computing_host_ids: Optional[List[str]] = None,
+        pre_allocated_qubits: bool = False,
+        hamiltonian: List[Tuple[float, List[Tuple[str, int]]]] = None,
+    ):
         """
         Returns the important things for a quantum operation
 
@@ -59,16 +65,22 @@ class Operation(object):
         self._cids = cids
         self._gate = gate
         self._gate_param = gate_param
-        self._computing_host_ids = computing_host_ids if computing_host_ids is not None else []
+        self._computing_host_ids = (
+            computing_host_ids if computing_host_ids is not None else []
+        )
         self._pre_allocated_qubits = pre_allocated_qubits
 
         if self._name is Constants.REC_HAMILTON:
             if hamiltonian is None or len(hamiltonian) == 0:
-                raise Exception('Must send non-empty Hamiltonian terms with this operation!')
+                raise Exception(
+                    "Must send non-empty Hamiltonian terms with this operation!"
+                )
             self._hamiltonian = hamiltonian
         else:
             if hamiltonian and len(hamiltonian) > 0:
-                warnings.warn('You sent a list of Hamiltonians with an operation other than REC_HAMILTON')
+                warnings.warn(
+                    "You sent a list of Hamiltonians with an operation other than REC_HAMILTON"
+                )
 
     def __str__(self):
         return self.name
@@ -149,7 +161,9 @@ class Operation(object):
 
         if self._name == Constants.TWO_QUBIT:
             return self._qids[0]
-        raise ValueError("The operation name has to be TWO_QUBIT to get the control qubit ID")
+        raise ValueError(
+            "The operation name has to be TWO_QUBIT to get the control qubit ID"
+        )
 
     def get_control_host(self):
         """
@@ -161,7 +175,9 @@ class Operation(object):
 
         if self._name == Constants.TWO_QUBIT:
             return self._computing_host_ids[0]
-        raise ValueError("The operation name has to be TWO_QUBIT to get the control host")
+        raise ValueError(
+            "The operation name has to be TWO_QUBIT to get the control host"
+        )
 
     def get_target_qubit(self):
         """
@@ -173,7 +189,9 @@ class Operation(object):
 
         if self._name == Constants.TWO_QUBIT:
             return self._qids[1]
-        raise ValueError("The operation name has to be TWO_QUBIT to get the target qubit ID")
+        raise ValueError(
+            "The operation name has to be TWO_QUBIT to get the target qubit ID"
+        )
 
     def get_target_host(self):
         """
@@ -187,7 +205,9 @@ class Operation(object):
             if len(self._computing_host_ids) == 2:
                 return self._computing_host_ids[1]
             return self._computing_host_ids[0]
-        raise ValueError("The operation name has to be TWO_QUBIT to get the target host")
+        raise ValueError(
+            "The operation name has to be TWO_QUBIT to get the target host"
+        )
 
     def is_control_gate_over_two_hosts(self):
         """
