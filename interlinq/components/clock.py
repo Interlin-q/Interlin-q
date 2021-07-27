@@ -6,6 +6,7 @@ class Clock(object):
     This is a clock simulator which synchronises the scheduled operations in computing
     hosts
     """
+
     __instance = None
 
     @staticmethod
@@ -33,7 +34,7 @@ class Clock(object):
             self._computing_hosts = []
             Clock.__instance = self
         else:
-            raise Exception('This is a singleton class. Use get_instance().')
+            raise Exception("This is a singleton class. Use get_instance().")
 
     @property
     def ticks(self):
@@ -49,7 +50,7 @@ class Clock(object):
         """
         return self._stop
 
-    def attach_host(self, computing_host):
+    def attach_host(self, computing_host: "ComputingHost"):
         """
         Attach the computing host who will listen to the clock object tick
 
@@ -58,7 +59,7 @@ class Clock(object):
         """
         self._computing_hosts.append(computing_host)
 
-    def detach_host(self, computing_host):
+    def detach_host(self, computing_host: "ComputingHost"):
         """
         Detach the computing host from the clock object
 
@@ -76,7 +77,7 @@ class Clock(object):
         """
         self._response += 1
 
-    def initialise(self, max_execution_time):
+    def initialise(self, max_execution_time: int):
         """
         Initialise the clock with the maximum number of times the clock should tick
 

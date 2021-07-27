@@ -1,13 +1,16 @@
 from qunetsim.components import Host
 
-from interlinq.components import ComputingHost, Clock
-from interlinq.utils import DefaultOperationTime
-from interlinq.utils.constants import Constants
-from interlinq.objects import Operation, Circuit, Layer
+from .computing_host import ComputingHost
+from .clock import Clock
+from ..utils import DefaultOperationTime
+from ..utils.constants import Constants
+from ..objects import Operation, Circuit, Layer
 
 import numpy as np
 import uuid
 import json
+
+from typing import List, Optional, Dict, Tuple
 
 
 class ControllerHost(Host):
@@ -16,7 +19,13 @@ class ControllerHost(Host):
     distributed network system.
     """
 
-    def __init__(self, host_id: str, computing_host_ids: list = None, gate_time: dict = None, backend=None):
+    def __init__(
+        self,
+        host_id: str,
+        computing_host_ids: Optional[List[str]] = None,
+        gate_time: Optional[Dict[str, int]] = None,
+        backend: Optional = None,
+    ):
         """
         Returns the important things for the controller hosts
 
@@ -30,7 +39,9 @@ class ControllerHost(Host):
         super().__init__(host_id, backend=backend)
 
         self.term_assignment = dict()
-        self._computing_host_ids = computing_host_ids if computing_host_ids is not None else []
+        self._computing_host_ids = (
+            computing_host_ids if computing_host_ids is not None else []
+        )
         self.add_c_connections(self._computing_host_ids)
         self._clock = Clock.get_instance()
         self._circuit_max_execution_time = 0
@@ -64,7 +75,9 @@ class ControllerHost(Host):
         """
         return self._results
 
-    def create_distributed_network(self, num_computing_hosts: int, num_qubits_per_host: int) -> tuple:
+    def create_distributed_network(
+        self, num_computing_hosts: int, num_qubits_per_host: int
+    ) -> Tuple[List[ComputingHost], Dict[str, List[str]]]:
         """
         Create a network of *num_computing_hosts* completely connected computing nodes with
         *num_qubits_per_host* each.
@@ -80,7 +93,8 @@ class ControllerHost(Host):
         computing_hosts = []
         q_map = {}
         self._computing_host_ids = [
-            f'{id_prefix}{str(i)}' for i in range(num_computing_hosts)]
+            f"{id_prefix}{str(i)}" for i in range(num_computing_hosts)
+        ]
 
         for i in range(num_computing_hosts):
             computing_host = ComputingHost(
@@ -88,24 +102,24 @@ class ControllerHost(Host):
                 controller_host_id=self.host_id,
                 total_qubits=num_qubits_per_host,
                 total_pre_allocated_qubits=num_qubits_per_host,
-                backend=self._backend
+                backend=self._backend,
             )
             self._gate_time[id_prefix + str(i)] = DefaultOperationTime
             self.add_c_connection(id_prefix + str(i))
             computing_hosts.append(computing_host)
             q_map[computing_host.host_id] = [
-                f'q_{str(i)}_{str(j)}' for j in range(num_qubits_per_host)]
+                f"q_{str(i)}_{str(j)}" for j in range(num_qubits_per_host)
+            ]
 
         for outer_computing_host in computing_hosts:
             for inner_computing_host in computing_hosts:
                 if outer_computing_host.host_id != inner_computing_host.host_id:
-                    outer_computing_host.add_connection(
-                        inner_computing_host.host_id)
+                    outer_computing_host.add_connection(inner_computing_host.host_id)
             outer_computing_host.start()
 
         return computing_hosts, q_map
 
-    def connect_host(self, computing_host_id: str, gate_time: dict = None):
+    def connect_host(self, computing_host_id: str, gate_time: Dict[str, int] = None):
         """
         Adds a computing host to the distributed network
 
@@ -115,15 +129,11 @@ class ControllerHost(Host):
                 takes to execute for the computing host to be added
         """
 
-        self._computing_host_ids.append(computing_host_id)
-        self.add_c_connection(computing_host_id)
+        self.connect_hosts([computing_host_id], [gate_time])
 
-        if gate_time is None:
-            gate_time = DefaultOperationTime
-
-        self._gate_time[computing_host_id] = gate_time
-
-    def connect_hosts(self, computing_host_ids: list, gate_times: list = None):
+    def connect_hosts(
+        self, computing_host_ids: List[str], gate_times: List[Dict[str, int]] = None
+    ):
         """
         Adds multiple computing hosts to the distributed network
 
@@ -165,15 +175,14 @@ class ControllerHost(Host):
 
             for operation in layer.operations:
                 op = operation.get_dict()
-                op['layer_end'] = time_layer_end
+                op["layer_end"] = time_layer_end
 
                 operation_schedule.append(op)
 
                 # Find the maximum time taken to execute this layer
                 execution_time = self._get_operation_execution_time(
-                    op['computing_host_ids'][0],
-                    operation.name,
-                    operation.gate)
+                    op["computing_host_ids"][0], operation.name, operation.gate
+                )
                 max_execution_time = max(max_execution_time, execution_time)
 
             time_layer_end += max_execution_time
@@ -184,7 +193,7 @@ class ControllerHost(Host):
             computing_host_schedule = []
 
             for op in operation_schedule:
-                if op['computing_host_ids'][0] == computing_host_id:
+                if op["computing_host_ids"][0] == computing_host_id:
                     computing_host_schedule.append(op)
             computing_host_schedules[computing_host_id] = computing_host_schedule
 
@@ -205,15 +214,15 @@ class ControllerHost(Host):
 
         max_gates = 0
         for gate_info in control_gate_info:
-            max_gates = max(len(gate_info['operations']), max_gates)
+            max_gates = max(len(gate_info["operations"]), max_gates)
 
         circuit_len = Constants.DISTRIBUTED_CONTROL_CIRCUIT_LEN + max_gates
         operations = [[] for _ in range(circuit_len)]
 
         for gate_info in control_gate_info:
-            control_qubit = gate_info['control_qubit']
-            control_host = gate_info['computing_hosts'][0]
-            target_host = gate_info['computing_hosts'][1]
+            control_qubit = gate_info["control_qubit"]
+            control_host = gate_info["computing_hosts"][0]
+            target_host = gate_info["computing_hosts"][1]
 
             epr_qubit_id = str(uuid.uuid4())
             bit_id_1, bit_id_2 = str(uuid.uuid4()), str(uuid.uuid4())
@@ -224,13 +233,15 @@ class ControllerHost(Host):
                 name=Constants.SEND_ENT,
                 qids=[epr_qubit_id],
                 computing_host_ids=[control_host, target_host],
-                pre_allocated_qubits=True)
+                pre_allocated_qubits=True,
+            )
 
             op_2 = Operation(
                 name=Constants.REC_ENT,
                 qids=[epr_qubit_id],
                 computing_host_ids=[target_host, control_host],
-                pre_allocated_qubits=True)
+                pre_allocated_qubits=True,
+            )
 
             current_layer.add_operations([op_1, op_2])
 
@@ -240,7 +251,8 @@ class ControllerHost(Host):
                 name=Constants.TWO_QUBIT,
                 qids=[control_qubit, epr_qubit_id],
                 gate=Operation.CNOT,
-                computing_host_ids=[control_host])
+                computing_host_ids=[control_host],
+            )
             operations[itr].extend([op_1])
 
             itr += 1
@@ -248,19 +260,22 @@ class ControllerHost(Host):
                 name=Constants.MEASURE,
                 qids=[epr_qubit_id],
                 cids=[bit_id_1],
-                computing_host_ids=[control_host])
+                computing_host_ids=[control_host],
+            )
             operations[itr].extend([op_1])
 
             itr += 1
             op_1 = Operation(
                 name=Constants.SEND_CLASSICAL,
                 cids=[bit_id_1],
-                computing_host_ids=[control_host, target_host])
+                computing_host_ids=[control_host, target_host],
+            )
 
             op_2 = Operation(
                 name=Constants.REC_CLASSICAL,
                 cids=[bit_id_1],
-                computing_host_ids=[target_host, control_host])
+                computing_host_ids=[target_host, control_host],
+            )
             operations[itr].extend([op_1, op_2])
 
             itr += 1
@@ -269,18 +284,20 @@ class ControllerHost(Host):
                 qids=[epr_qubit_id],
                 cids=[bit_id_1],
                 gate=Operation.X,
-                computing_host_ids=[target_host])
+                computing_host_ids=[target_host],
+            )
             operations[itr].extend([op_1])
 
             # The control gate we are trying to implement
-            for op in gate_info['operations'][::-1]:
+            for op in gate_info["operations"][::-1]:
                 itr += 1
                 op_1 = Operation(
                     name=Constants.TWO_QUBIT,
                     qids=[epr_qubit_id, op.get_target_qubit()],
                     gate=op.gate,
                     gate_param=op.gate_param,
-                    computing_host_ids=[target_host])
+                    computing_host_ids=[target_host],
+                )
                 operations[itr].extend([op_1])
 
             itr += 1
@@ -288,7 +305,8 @@ class ControllerHost(Host):
                 name=Constants.SINGLE,
                 qids=[epr_qubit_id],
                 gate=Operation.H,
-                computing_host_ids=[target_host])
+                computing_host_ids=[target_host],
+            )
             operations[itr].extend([op_1])
 
             itr += 1
@@ -296,19 +314,22 @@ class ControllerHost(Host):
                 name=Constants.MEASURE,
                 qids=[epr_qubit_id],
                 cids=[bit_id_2],
-                computing_host_ids=[target_host])
+                computing_host_ids=[target_host],
+            )
             operations[itr].extend([op_1])
 
             itr += 1
             op_1 = Operation(
                 name=Constants.SEND_CLASSICAL,
                 cids=[bit_id_2],
-                computing_host_ids=[target_host, control_host])
+                computing_host_ids=[target_host, control_host],
+            )
 
             op_2 = Operation(
                 name=Constants.REC_CLASSICAL,
                 cids=[bit_id_2],
-                computing_host_ids=[control_host, target_host])
+                computing_host_ids=[control_host, target_host],
+            )
             operations[itr].extend([op_1, op_2])
 
             itr += 1
@@ -317,7 +338,8 @@ class ControllerHost(Host):
                 qids=[control_qubit],
                 cids=[bit_id_2],
                 gate=Operation.Z,
-                computing_host_ids=[control_host])
+                computing_host_ids=[control_host],
+            )
             operations[itr].extend([op_1])
 
         # Make the new layers from the operations
@@ -329,7 +351,7 @@ class ControllerHost(Host):
 
         return current_layer, distributed_layers
 
-    def _generate_distributed_circuit(self, circuit: Circuit):
+    def _generate_distributed_circuit(self, circuit: Circuit) -> Circuit:
         """
         Takes the user input monolithic circuit and converts it to a
         distributed circuit over the computing hosts connected to the
@@ -354,8 +376,8 @@ class ControllerHost(Host):
                     new_layer.add_operation(op)
 
             new_layer, distributed_layers = self._replace_control_gates(
-                control_gate_info[layer_index],
-                new_layer)
+                control_gate_info[layer_index], new_layer
+            )
 
             if new_layer.operations:
                 distributed_circuit_layers.append(new_layer)
@@ -365,7 +387,9 @@ class ControllerHost(Host):
 
         return distributed_circuit
 
-    def _get_operation_execution_time(self, computing_host_id: str, op_name: str, gate: str):
+    def _get_operation_execution_time(
+        self, computing_host_id: str, op_name: str, gate: str
+    ) -> float:
         """
         Return the execution time for an operation for a specific computing
         host
@@ -384,7 +408,8 @@ class ControllerHost(Host):
         gate_op_names = [
             Constants.SINGLE,
             Constants.TWO_QUBIT,
-            Constants.CLASSICAL_CTRL_GATE]
+            Constants.CLASSICAL_CTRL_GATE,
+        ]
 
         if op_name in gate_op_names:
             execution_time = operation_time[op_name][gate]
@@ -405,8 +430,10 @@ class ControllerHost(Host):
 
         distributed_circuit = self._generate_distributed_circuit(circuit)
 
-        computing_host_schedules, max_execution_time = self._create_distributed_schedules(
-            distributed_circuit)
+        (
+            computing_host_schedules,
+            max_execution_time,
+        ) = self._create_distributed_schedules(distributed_circuit)
         self._circuit_max_execution_time = max_execution_time
 
         self.send_broadcast(json.dumps(computing_host_schedules, cls=NumpyEncoder))
@@ -431,7 +458,7 @@ class ControllerHost(Host):
 
             # I think this is a bug with QuNetSim... Adding a hack for now
             # to overcome it...
-            if result.content == 'ACK':
+            if result.content == "ACK":
                 result = self.get_next_classical(host_id, wait=-1)
 
             try:
@@ -442,24 +469,36 @@ class ControllerHost(Host):
 
         self._results = results
 
-    def schedule_expectation_terms(self, hamiltonian, q_map):
+    def schedule_expectation_terms(
+        self,
+        hamiltonian: List[Tuple[float, List[Tuple[str, int]]]],
+        q_map: Dict[str, List[str]],
+    ):
         """
         Assign the terms of a Hamiltonian to the different computing hosts in the network
         """
 
         # First check the sanity of the list type-wise
-        assert len(hamiltonian) > 0, 'Empty list of terms passed'
-        assert all(isinstance(x, tuple) for x in hamiltonian), 'Can only accept a list of tuples'
+        assert len(hamiltonian) > 0, "Empty list of terms passed"
+        assert all(
+            isinstance(x, tuple) for x in hamiltonian
+        ), "Can only accept a list of tuples"
         for term in hamiltonian:
             _, observables = term
-            assert isinstance(observables, list), 'Each term must include a list of observables.'
-            assert all(isinstance(obs_type, str) and isinstance(idx, int) for obs_type, idx in observables),\
-                'The list of observables must be of tuples of types (str, int)'
+            assert isinstance(
+                observables, list
+            ), "Each term must include a list of observables."
+            assert all(
+                isinstance(obs_type, str) and isinstance(idx, int)
+                for obs_type, idx in observables
+            ), "The list of observables must be of tuples of types (str, int)"
 
         # We assume that all QPUs have enough qubits for VQE
         number_of_computing_hosts = len(q_map.keys())
 
-        idx_assignment = np.array_split(np.arange(len(hamiltonian)), number_of_computing_hosts)
+        idx_assignment = np.array_split(
+            np.arange(len(hamiltonian)), number_of_computing_hosts
+        )
 
         # Then assign the terms as per the number
         computing_host_ids = list(q_map.keys())

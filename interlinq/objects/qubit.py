@@ -1,5 +1,5 @@
 from interlinq.utils import Constants
-from interlinq.objects import Operation
+from .operation import Operation
 
 
 class Qubit(object):
@@ -89,7 +89,8 @@ class Qubit(object):
         op = Operation(
             name=Constants.PREPARE_QUBITS,
             qids=[self._q_id],
-            computing_host_ids=[self.computing_host_id])
+            computing_host_ids=[self.computing_host_id],
+        )
 
         self._update_operations(op)
 
@@ -115,7 +116,8 @@ class Qubit(object):
             qids=[self.q_id],
             gate=gate,
             gate_param=gate_param,
-            computing_host_ids=[self.computing_host_id])
+            computing_host_ids=[self.computing_host_id],
+        )
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)
@@ -140,7 +142,8 @@ class Qubit(object):
             qids=[self.q_id, target_qubit.q_id],
             gate=gate,
             gate_param=gate_param,
-            computing_host_ids=computing_host_ids)
+            computing_host_ids=computing_host_ids,
+        )
 
         if target_qubit.current_layer + 1 > self.current_layer + 1:
             target_qubit.update_layer(target_qubit.current_layer + 1)
@@ -167,7 +170,8 @@ class Qubit(object):
             cids=[bit_id],
             gate=gate,
             gate_param=gate_param,
-            computing_host_ids=[self.computing_host_id])
+            computing_host_ids=[self.computing_host_id],
+        )
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)
@@ -186,7 +190,8 @@ class Qubit(object):
             name=Constants.SEND_ENT,
             qids=[self._q_id],
             computing_host_ids=[self.computing_host_id, receiver_id],
-            pre_allocated_qubits=pre_allocated)
+            pre_allocated_qubits=pre_allocated,
+        )
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)
@@ -205,7 +210,8 @@ class Qubit(object):
             name=Constants.REC_ENT,
             qids=[self._q_id],
             computing_host_ids=[self.computing_host_id, sender_id],
-            pre_allocated_qubits=pre_allocated)
+            pre_allocated_qubits=pre_allocated,
+        )
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)
@@ -221,7 +227,11 @@ class Qubit(object):
         op = Operation(
             name=Constants.SEND_CLASSICAL,
             cids=[bit_id],
-            computing_host_ids=[self.computing_host_id, receiver_qubit.computing_host_id])
+            computing_host_ids=[
+                self.computing_host_id,
+                receiver_qubit.computing_host_id,
+            ],
+        )
 
         if receiver_qubit.current_layer + 1 > self.current_layer + 1:
             receiver_qubit.update_layer(receiver_qubit.current_layer + 1)
@@ -243,7 +253,8 @@ class Qubit(object):
         op = Operation(
             name=Constants.REC_CLASSICAL,
             cids=[bit_id],
-            computing_host_ids=[self.computing_host_id, sender_qubit.computing_host_id])
+            computing_host_ids=[self.computing_host_id, sender_qubit.computing_host_id],
+        )
 
         if sender_qubit.current_layer + 1 > self.current_layer + 1:
             sender_qubit.update_layer(sender_qubit.current_layer + 1)
@@ -268,7 +279,8 @@ class Qubit(object):
             name=Constants.MEASURE,
             qids=[self.q_id],
             cids=[bit_id],
-            computing_host_ids=[self.computing_host_id])
+            computing_host_ids=[self.computing_host_id],
+        )
 
         self.update_layer(self.current_layer + 1)
         self._update_operations(op)

@@ -1,16 +1,16 @@
-from qunetsim.components import Host
-
-from .clock import Clock
-from interlinq.objects import Operation
-from interlinq.utils import DefaultOperationTime
-from interlinq.utils.constants import Constants
-from qunetsim.objects import Qubit
-
-import numpy as np
 import json
 import time
+from typing import Optional, Dict
 
-from interlinq.utils.vqe_subroutines import expectation_value
+import numpy as np
+from qunetsim.components import Host
+from qunetsim.objects import Qubit
+
+from .clock import Clock
+from ..objects.operation import Operation
+from ..utils import DefaultOperationTime
+from ..utils.constants import Constants
+from ..utils.vqe_subroutines import expectation_value
 
 MAX_WAIT = 5
 
@@ -21,8 +21,15 @@ class ComputingHost(Host):
     distributed network system, connected to the controller host.
     """
 
-    def __init__(self, host_id: str, controller_host_id: str, total_qubits: int = 0,
-                 total_pre_allocated_qubits: int = 1, gate_time: dict = None, backend=None):
+    def __init__(
+        self,
+        host_id: str,
+        controller_host_id: str,
+        total_qubits: int = 0,
+        total_pre_allocated_qubits: int = 1,
+        gate_time: Optional[Dict[str, int]] = None,
+        backend: Optional = None,
+    ):
 
         """
         Returns the important things for the computing hosts
@@ -140,7 +147,7 @@ class ComputingHost(Host):
 
         while len(messages) <= self._last_buffer_size:
             messages = self.classical
-            messages = [x for x in messages if x.content != 'ACK']
+            messages = [x for x in messages if x.content != "ACK"]
 
         self._last_buffer_size = len(messages)
 
@@ -155,17 +162,17 @@ class ComputingHost(Host):
 
         if self._host_id in schedules:
             for op in schedules[self._host_id]:
-                if op['layer_end'] in schedule.keys():
-                    schedule[op['layer_end']].append(op)
+                if op["layer_end"] in schedule.keys():
+                    schedule[op["layer_end"]].append(op)
                 else:
-                    schedule[op['layer_end']] = [op]
+                    schedule[op["layer_end"]] = [op]
         self._schedule = schedule
 
         # Send Acknowledgement of receiving broadcast to the ControllerHost
-        msg = 'ACK'
+        msg = "ACK"
         self.send_classical(self._controller_host_id, msg, await_ack=True)
 
-    def _report_error(self, message):
+    def _report_error(self, message: str):
         """
         Stop the processing and report the error message to the controller host
 
@@ -175,7 +182,9 @@ class ComputingHost(Host):
         self._clock.stop_clock()
         self._error_message = message
 
-    def _check_errors(self, op, len_qids: int = 0, len_computing_host_ids: int = 1, len_cids: int = 0):
+    def _check_errors(
+        self, op, len_qids: int = 0, len_computing_host_ids: int = 1, len_cids: int = 0
+    ):
         """
         Check if there is any error in the operation format
 
@@ -189,31 +198,47 @@ class ComputingHost(Host):
         """
 
         msg = None
-        error_msg = "Error in the operation name: {0}. ".format(op['name'])
+        error_msg = "Error in the operation name: {0}. ".format(op["name"])
 
-        if op['qids']:
-            if len(op['qids']) > len_qids:
-                msg = error_msg + "Error Message: 'Number of qubit IDs is " \
-                                  "exceeding the permissible number"
+        if op["qids"]:
+            if len(op["qids"]) > len_qids:
+                msg = (
+                    error_msg + "Error Message: 'Number of qubit IDs is "
+                    "exceeding the permissible number"
+                )
 
-        if len(op['computing_host_ids']) > len_computing_host_ids:
-            msg = error_msg + "Error Message: 'Number of computing host IDs " \
-                              "is exceeding the permissible number"
+        if len(op["computing_host_ids"]) > len_computing_host_ids:
+            msg = (
+                error_msg + "Error Message: 'Number of computing host IDs "
+                "is exceeding the permissible number"
+            )
 
-        if op['cids']:
-            if len(op['cids']) > len_cids:
-                msg = error_msg + "Error Message: 'Number of classical bit IDs" \
-                                  "is exceeding the permissible number"
+        if op["cids"]:
+            if len(op["cids"]) > len_cids:
+                msg = (
+                    error_msg + "Error Message: 'Number of classical bit IDs"
+                    "is exceeding the permissible number"
+                )
 
-        if op['computing_host_ids'][0] != self._host_id:
-            msg = error_msg + "Error Message: 'Wrong input format for computing" \
-                              "host ids in the operation'"
+        if op["computing_host_ids"][0] != self._host_id:
+            msg = (
+                error_msg + "Error Message: 'Wrong input format for computing"
+                "host ids in the operation'"
+            )
 
-        if op['name'] == 'REC_HAMILTON' and (len(op['hamiltonian']) == 0 or op['hamiltonian'] is None):
-            msg = error_msg + "Error Message: 'Received an empty/no list of observables'"
+        if op["name"] == "REC_HAMILTON" and (
+            len(op["hamiltonian"]) == 0 or op["hamiltonian"] is None
+        ):
+            msg = (
+                error_msg + "Error Message: 'Received an empty/no list of observables'"
+            )
 
-        if op['name'] == 'SEND_EXP' and (len(self._hamiltonian) == 0 or self._hamiltonian is None):
-            msg = error_msg + "Error Message: 'Received an empty/no list of observables'"
+        if op["name"] == "SEND_EXP" and (
+            len(self._hamiltonian) == 0 or self._hamiltonian is None
+        ):
+            msg = (
+                error_msg + "Error Message: 'Received an empty/no list of observables'"
+            )
 
         if msg:
             self._report_error(msg)
@@ -254,7 +279,7 @@ class ComputingHost(Host):
         if qubit_id in self._pre_allocated_qubits:
             return self._pre_allocated_qubits[qubit_id]
 
-    def _update_stored_qubits(self, qubits: dict):
+    def _update_stored_qubits(self, qubits: Dict[str, Qubit]):
         """
         Update the stored qubits in the class
 
@@ -264,8 +289,10 @@ class ComputingHost(Host):
         """
 
         if len(qubits) + len(self.qubit_ids) > self._total_qubits:
-            msg = "Number of qubits required for the circuit are more " \
-                  "than the total qubits"
+            msg = (
+                "Number of qubits required for the circuit are more "
+                "than the total qubits"
+            )
             self._report_error(msg)
         self._qubits.update(qubits)
 
@@ -284,11 +311,11 @@ class ComputingHost(Host):
             (np.ndarray): The parameter array.
         """
 
-        param = op['gate_param']
+        param = op["gate_param"]
         for i in range(len(param)):
             for j in range(len(param[0])):
                 if type(param[i][j]) != int:
-                    param[i][j] = (param[i][j][0] + param[i][j][1] * 1j)
+                    param[i][j] = param[i][j][0] + param[i][j][1] * 1j
         return np.asarray(param)
 
     def _prepare_qubits(self, prepare_qubit_op: dict):
@@ -301,7 +328,7 @@ class ComputingHost(Host):
         """
 
         qubits = {}
-        for qubit_id in prepare_qubit_op['qids']:
+        for qubit_id in prepare_qubit_op["qids"]:
             qubits[qubit_id] = Qubit(host=self, q_id=qubit_id)
             self.add_data_qubit(self.host_id, qubits[qubit_id], qubit_id)
         self._update_stored_qubits(qubits)
@@ -312,7 +339,7 @@ class ComputingHost(Host):
             qubit = self._get_stored_qubit(q_id)
             main_qubit.cnot(qubit)
             main_qubit.cnot(qubit)
-            print('did this', self.host_id)
+            print("did this", self.host_id)
 
     def _process_single_gates(self, operation: dict, classical_ctrl_gate: bool = False):
         """
@@ -325,45 +352,42 @@ class ComputingHost(Host):
         """
 
         if not classical_ctrl_gate:
-            self._check_errors(
-                op=operation,
-                len_qids=1,
-                len_computing_host_ids=1)
+            self._check_errors(op=operation, len_qids=1, len_computing_host_ids=1)
 
-        q_id = operation['qids'][0]
+        q_id = operation["qids"][0]
         qubit = self._get_stored_qubit(q_id)
 
-        if operation['gate'] == Operation.I:
+        if operation["gate"] == Operation.I:
             qubit.I()
 
-        elif operation['gate'] == Operation.X:
+        elif operation["gate"] == Operation.X:
             qubit.X()
 
-        elif operation['gate'] == Operation.Y:
+        elif operation["gate"] == Operation.Y:
             qubit.Y()
 
-        elif operation['gate'] == Operation.Z:
+        elif operation["gate"] == Operation.Z:
             qubit.Z()
 
-        elif operation['gate'] == Operation.T:
+        elif operation["gate"] == Operation.T:
             qubit.T()
 
-        elif operation['gate'] == Operation.H:
+        elif operation["gate"] == Operation.H:
             qubit.H()
 
-        elif operation['gate'] == Operation.K:
+        elif operation["gate"] == Operation.K:
             qubit.K()
 
-        elif operation['gate'] == Operation.RX:
-            qubit.rx(operation['gate_param'])
+        elif operation["gate"] == Operation.RX:
+            qubit.rx(operation["gate_param"])
 
-        elif operation['gate'] == Operation.RY:
-            qubit.ry(operation['gate_param'])
+        elif operation["gate"] == Operation.RY:
+            qubit.ry(operation["gate_param"])
 
-        elif operation['gate'] == Operation.RZ:
-            qubit.rz(operation['gate_param'])
+        elif operation["gate"] == Operation.RZ:
+            qubit.rz(operation["gate_param"])
 
-        elif operation['gate'] == Operation.CUSTOM:
+        elif operation["gate"] == Operation.CUSTOM:
             gate_param = self.extract_gate_param(operation)
             qubit.custom_gate(gate_param)
 
@@ -375,26 +399,23 @@ class ComputingHost(Host):
             operation (dict): Dictionary of information regarding the operation
         """
 
-        self._check_errors(
-            op=operation,
-            len_qids=2,
-            len_computing_host_ids=1)
+        self._check_errors(op=operation, len_qids=2, len_computing_host_ids=1)
 
-        q_ids = operation['qids']
+        q_ids = operation["qids"]
         qubit_1 = self._get_stored_qubit(q_ids[0])
         qubit_2 = self._get_stored_qubit(q_ids[1])
 
-        if operation['gate'] == Operation.CNOT:
+        if operation["gate"] == Operation.CNOT:
             qubit_1.cnot(qubit_2)
 
-        elif operation['gate'] == Operation.CPHASE:
+        elif operation["gate"] == Operation.CPHASE:
             qubit_1.cphase(qubit_2)
 
-        elif operation['gate'] == Operation.CUSTOM_TWO_QUBIT:
+        elif operation["gate"] == Operation.CUSTOM_TWO_QUBIT:
             gate_param = self.extract_gate_param(operation)
             qubit_1.custom_two_qubit_gate(qubit_2, gate_param)
 
-        elif operation['gate'] == Operation.CUSTOM_CONTROLLED:
+        elif operation["gate"] == Operation.CUSTOM_CONTROLLED:
             gate_param = self.extract_gate_param(operation)
             qubit_1.custom_controlled_gate(qubit_2, gate_param)
 
@@ -408,12 +429,10 @@ class ComputingHost(Host):
         """
 
         self._check_errors(
-            op=operation,
-            len_qids=1,
-            len_computing_host_ids=1,
-            len_cids=1)
+            op=operation, len_qids=1, len_computing_host_ids=1, len_cids=1
+        )
 
-        control_bit_id = operation['cids'][0]
+        control_bit_id = operation["cids"][0]
         bit = int(self._bits[control_bit_id])
 
         if bit:
@@ -427,18 +446,15 @@ class ComputingHost(Host):
            operation (dict): Dictionary of information regarding the operation
         """
 
-        self._check_errors(
-            op=operation,
-            len_qids=1,
-            len_computing_host_ids=2)
+        self._check_errors(op=operation, len_qids=1, len_computing_host_ids=2)
 
-        qubit_id = operation['qids'][0]
-        receiver_id = operation['computing_host_ids'][1]
+        qubit_id = operation["qids"][0]
+        receiver_id = operation["computing_host_ids"][1]
 
         self.send_epr(receiver_id, q_id=qubit_id, await_ack=True)
 
         epr_qubit = self.get_epr(receiver_id, q_id=qubit_id)
-        self._add_new_qubit(epr_qubit, qubit_id, operation['pre_allocated_qubits'])
+        self._add_new_qubit(epr_qubit, qubit_id, operation["pre_allocated_qubits"])
 
     def _process_rec_ent(self, operation: dict):
         """
@@ -448,13 +464,10 @@ class ComputingHost(Host):
            operation (dict): Dictionary of information regarding the operation
         """
 
-        self._check_errors(
-            op=operation,
-            len_qids=1,
-            len_computing_host_ids=2)
+        self._check_errors(op=operation, len_qids=1, len_computing_host_ids=2)
 
-        qubit_id = operation['qids'][0]
-        receiver_id = operation['computing_host_ids'][1]
+        qubit_id = operation["qids"][0]
+        receiver_id = operation["computing_host_ids"][1]
 
         i = 0
         epr_qubit = None
@@ -464,10 +477,7 @@ class ComputingHost(Host):
             i += 1
             time.sleep(0.5)
 
-        self._add_new_qubit(
-            epr_qubit,
-            qubit_id,
-            operation['pre_allocated_qubits'])
+        self._add_new_qubit(epr_qubit, qubit_id, operation["pre_allocated_qubits"])
 
     def _process_send_classical(self, operation: dict):
         """
@@ -477,18 +487,15 @@ class ComputingHost(Host):
             operation (dict): Dictionary of information regarding the operation
         """
 
-        self._check_errors(
-            op=operation,
-            len_computing_host_ids=2,
-            len_cids=1)
+        self._check_errors(op=operation, len_computing_host_ids=2, len_cids=1)
 
-        bit_id = operation['cids'][0]
+        bit_id = operation["cids"][0]
 
         if bit_id not in self._bits.keys():
             msg = "Bit not present in the computing host"
             self._report_error(msg)
 
-        receiver_id = operation['computing_host_ids'][1]
+        receiver_id = operation["computing_host_ids"][1]
 
         self.send_classical(receiver_id, self._bits[bit_id], await_ack=True)
 
@@ -500,15 +507,12 @@ class ComputingHost(Host):
             operation (dict): Dictionary of information regarding the operation
         """
 
-        self._check_errors(
-            op=operation,
-            len_computing_host_ids=2,
-            len_cids=1)
+        self._check_errors(op=operation, len_computing_host_ids=2, len_cids=1)
 
-        sender_id = operation['computing_host_ids'][1]
+        sender_id = operation["computing_host_ids"][1]
         msg = self.get_next_classical(sender_id, wait=-1)
         bit = msg.content
-        bit_id = operation['cids'][0]
+        bit_id = operation["cids"][0]
 
         self._bits[bit_id] = bit
 
@@ -521,13 +525,11 @@ class ComputingHost(Host):
         """
 
         self._check_errors(
-            op=operation,
-            len_qids=1,
-            len_computing_host_ids=1,
-            len_cids=1)
+            op=operation, len_qids=1, len_computing_host_ids=1, len_cids=1
+        )
 
-        qubit_id = operation['qids'][0]
-        bit_id = operation['cids'][0]
+        qubit_id = operation["qids"][0]
+        bit_id = operation["cids"][0]
 
         qubit = self._get_stored_qubit(qubit_id)
 
@@ -549,11 +551,9 @@ class ComputingHost(Host):
             operation (dict): Dictionary of information regarding the operation
         """
 
-        self._check_errors(
-            op=operation,
-            len_computing_host_ids=1)
+        self._check_errors(op=operation, len_computing_host_ids=1)
 
-        self._hamiltonian = operation['hamiltonian']
+        self._hamiltonian = operation["hamiltonian"]
 
         self._calculated_exp = False
 
@@ -567,9 +567,7 @@ class ComputingHost(Host):
             operation (dict): Dictionary of information regarding the operation
         """
 
-        self._check_errors(
-            op=operation,
-            len_computing_host_ids=1)
+        self._check_errors(op=operation, len_computing_host_ids=1)
 
         indices = []
 
@@ -593,44 +591,47 @@ class ComputingHost(Host):
            ticks (int): Number of times the clock has ticked
         """
 
-        if ticks in self._schedule:
-            for operation in self._schedule[ticks]:
-                if operation['name'] == Constants.PREPARE_QUBITS:
-                    self._prepare_qubits(operation)
+        if ticks not in self._schedule:
+            self._clock.respond()
+            return
 
-                if operation['name'] == Constants.SINGLE:
-                    self._process_single_gates(operation)
+        for operation in self._schedule[ticks]:
+            if operation["name"] == Constants.PREPARE_QUBITS:
+                self._prepare_qubits(operation)
 
-                if operation['name'] == Constants.TWO_QUBIT:
-                    self._process_two_qubit_gates(operation)
+            if operation["name"] == Constants.SINGLE:
+                self._process_single_gates(operation)
 
-                if operation['name'] == Constants.CLASSICAL_CTRL_GATE:
-                    self._process_classical_ctrl_gates(operation)
+            if operation["name"] == Constants.TWO_QUBIT:
+                self._process_two_qubit_gates(operation)
 
-                if operation['name'] == Constants.SEND_ENT:
-                    self._process_send_ent(operation)
+            if operation["name"] == Constants.CLASSICAL_CTRL_GATE:
+                self._process_classical_ctrl_gates(operation)
 
-                if operation['name'] == Constants.REC_ENT:
-                    self._process_rec_ent(operation)
+            if operation["name"] == Constants.SEND_ENT:
+                self._process_send_ent(operation)
 
-                if operation['name'] == Constants.SEND_CLASSICAL:
-                    self._process_send_classical(operation)
+            if operation["name"] == Constants.REC_ENT:
+                self._process_rec_ent(operation)
 
-                if operation['name'] == Constants.REC_CLASSICAL:
-                    self._process_rec_classical(operation)
+            if operation["name"] == Constants.SEND_CLASSICAL:
+                self._process_send_classical(operation)
 
-                if operation['name'] == Constants.MEASURE:
-                    self._process_measurement(operation)
+            if operation["name"] == Constants.REC_CLASSICAL:
+                self._process_rec_classical(operation)
 
-                if operation['name'] == Constants.REC_HAMILTON:
-                    self._process_rec_hamilton(operation)
+            if operation["name"] == Constants.MEASURE:
+                self._process_measurement(operation)
 
-                if operation['name'] == Constants.SEND_EXP:
-                    self._process_send_exp(operation)
+            if operation["name"] == Constants.REC_HAMILTON:
+                self._process_rec_hamilton(operation)
+
+            if operation["name"] == Constants.SEND_EXP:
+                self._process_send_exp(operation)
 
         self._clock.respond()
 
-    def send_results(self, result_type='bits'):
+    def send_results(self, result_type: str = "bits"):
         """
         Send results to Controller Host
         """
@@ -641,29 +642,20 @@ class ComputingHost(Host):
             time.sleep(1)
 
         # Wait until the expectation calculation is finished
-        while result_type == 'expectation' and not self._calculated_exp:
+        while result_type == "expectation" and not self._calculated_exp:
             time.sleep(0.5)
 
         if self._error_message:
-            msg = {
-                'type': 'error',
-                'message': self._error_message
-            }
+            msg = {"type": "error", "message": self._error_message}
         else:
-            if result_type == 'bits':
-                msg = {
-                    'type': 'measurement_result',
-                    'val': self.bits
-                }
-            elif result_type == 'expectation':
-                msg = {
-                    'type': 'expectation_value',
-                    'val': np.real(self.exp)
-                }
+            if result_type == "bits":
+                msg = {"type": "measurement_result", "val": self.bits}
+            elif result_type == "expectation":
+                msg = {"type": "expectation_value", "val": np.real(self.exp)}
             else:
                 msg = {
-                    'type': 'unsupported_result_type',
-                    'message': 'Supported result types are only \'bits\' and \'expectation\''
+                    "type": "unsupported_result_type",
+                    "message": "Supported result types are only 'bits' and 'expectation'",
                 }
 
         message = json.dumps({self.host_id: msg})
