@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: DiAdamo
+    given-names: Stephen
+  - family-names: Parekh
+    given-names: Rhea
+  - family-names: Darwish
+    given-names: Ahmed
+title: "Interlin-q"
+version: 0.0.1
+date-released: 2021-06-01
+url: "https://github.com/Interlin-q/Interlin-q"
