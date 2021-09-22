@@ -1,10 +1,9 @@
 class Constants:
-
     OPERATION_NAMES = [
         "PREPARE_QUBITS",
         "SINGLE",
         "TWO_QUBIT",
-        "THREE_QUBIT"
+        "THREE_QUBIT",
         "CLASSICAL_CTRL_GATE",
         "REC_ENT",
         "SEND_ENT",
@@ -24,7 +23,7 @@ class Constants:
     # Entanglement Operations
     REC_ENT = "REC_ENT"
     SEND_ENT = "SEND_ENT"
-    
+
     # Classical Communication
     SEND_CLASSICAL = "SEND_CLASSICAL"
     REC_CLASSICAL = "REC_CLASSICAL"
@@ -32,7 +31,7 @@ class Constants:
     # VQE-related Operations
     REC_HAMILTON = "REC_HAMILTON"
     SEND_EXP = "SEND_EXP"
-    
+
     MEASURE = "MEASURE"
 
     DISTRIBUTED_CONTROL_CIRCUIT_LEN = 8

@@ -31,15 +31,15 @@ class Operation(object):
     MEASURE = "measure"
 
     def __init__(
-        self,
-        name: str,
-        qids: List[str] = None,
-        cids: List[str] = None,
-        gate: str = None,
-        gate_param: Optional[List[Complex]] = None,
-        computing_host_ids: Optional[List[str]] = None,
-        pre_allocated_qubits: bool = False,
-        hamiltonian: List[Tuple[float, List[Tuple[str, int]]]] = None,
+            self,
+            name: str,
+            qids: List[str] = None,
+            cids: List[str] = None,
+            gate: str = None,
+            gate_param: Optional[List[Complex]] = None,
+            computing_host_ids: Optional[List[str]] = None,
+            pre_allocated_qubits: bool = False,
+            hamiltonian: List[Tuple[float, List[Tuple[str, int]]]] = None,
     ):
         """
         Returns the important things for a quantum operation
@@ -61,7 +61,6 @@ class Operation(object):
         if name not in Constants.OPERATION_NAMES:
             raise (InputError("Operation is invalid"))
         self._name = name
-
         self._qids = qids
         self._cids = cids
         self._gate = gate
