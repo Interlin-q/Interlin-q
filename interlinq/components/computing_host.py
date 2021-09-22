@@ -22,13 +22,13 @@ class ComputingHost(Host):
     """
 
     def __init__(
-        self,
-        host_id: str,
-        controller_host_id: str,
-        total_qubits: int = 0,
-        total_pre_allocated_qubits: int = 1,
-        gate_time: Optional[Dict[str, int]] = None,
-        backend: Optional = None,
+            self,
+            host_id: str,
+            controller_host_id: str,
+            total_qubits: int = 0,
+            total_pre_allocated_qubits: int = 1,
+            gate_time: Optional[Dict[str, int]] = None,
+            backend: Optional = None,
     ):
 
         """
@@ -183,7 +183,7 @@ class ComputingHost(Host):
         self._error_message = message
 
     def _check_errors(
-        self, op, len_qids: int = 0, len_computing_host_ids: int = 1, len_cids: int = 0
+            self, op, len_qids: int = 0, len_computing_host_ids: int = 1, len_cids: int = 0
     ):
         """
         Check if there is any error in the operation format
@@ -203,41 +203,41 @@ class ComputingHost(Host):
         if op["qids"]:
             if len(op["qids"]) > len_qids:
                 msg = (
-                    error_msg + "Error Message: 'Number of qubit IDs is "
-                    "exceeding the permissible number"
+                        error_msg + "Error Message: 'Number of qubit IDs is "
+                                    "exceeding the permissible number"
                 )
 
         if len(op["computing_host_ids"]) > len_computing_host_ids:
             msg = (
-                error_msg + "Error Message: 'Number of computing host IDs "
-                "is exceeding the permissible number"
+                    error_msg + "Error Message: 'Number of computing host IDs "
+                                "is exceeding the permissible number"
             )
 
         if op["cids"]:
             if len(op["cids"]) > len_cids:
                 msg = (
-                    error_msg + "Error Message: 'Number of classical bit IDs"
-                    "is exceeding the permissible number"
+                        error_msg + "Error Message: 'Number of classical bit IDs"
+                                    "is exceeding the permissible number"
                 )
 
         if op["computing_host_ids"][0] != self._host_id:
             msg = (
-                error_msg + "Error Message: 'Wrong input format for computing"
-                "host ids in the operation'"
+                    error_msg + "Error Message: 'Wrong input format for computing"
+                                "host ids in the operation'"
             )
 
         if op["name"] == "REC_HAMILTON" and (
-            len(op["hamiltonian"]) == 0 or op["hamiltonian"] is None
+                len(op["hamiltonian"]) == 0 or op["hamiltonian"] is None
         ):
             msg = (
-                error_msg + "Error Message: 'Received an empty/no list of observables'"
+                    error_msg + "Error Message: 'Received an empty/no list of observables'"
             )
 
         if op["name"] == "SEND_EXP" and (
-            len(self._hamiltonian) == 0 or self._hamiltonian is None
+                len(self._hamiltonian) == 0 or self._hamiltonian is None
         ):
             msg = (
-                error_msg + "Error Message: 'Received an empty/no list of observables'"
+                    error_msg + "Error Message: 'Received an empty/no list of observables'"
             )
 
         if msg:
@@ -418,6 +418,16 @@ class ComputingHost(Host):
         elif operation["gate"] == Operation.CUSTOM_CONTROLLED:
             gate_param = self.extract_gate_param(operation)
             qubit_1.custom_controlled_gate(qubit_2, gate_param)
+
+    def _process_three_qubit_gate(self, operation: dict):
+        self._check_errors(op=operation, len_qids=3, len_computing_host_ids=1)
+        q_ids = operation["qids"]
+        qubit_1 = self._get_stored_qubit(q_ids[0])
+        qubit_2 = self._get_stored_qubit(q_ids[1])
+        qubit_3 = self._get_stored_qubit(q_ids[2])
+        if operation["gate"] == Operation.CUSTOM_TWO_QUBIT_CONTROLLED:
+            gate_param = self.extract_gate_param(operation)
+            qubit_1.custom_two_qubit_control_gate(qubit_2, qubit_3, gate_param)
 
     def _process_classical_ctrl_gates(self, operation: dict):
         """
@@ -604,6 +614,9 @@ class ComputingHost(Host):
 
             if operation["name"] == Constants.TWO_QUBIT:
                 self._process_two_qubit_gates(operation)
+
+            if operation['name'] == Constants.THREE_QUBIT:
+                self._process_three_qubit_gate(operation)
 
             if operation["name"] == Constants.CLASSICAL_CTRL_GATE:
                 self._process_classical_ctrl_gates(operation)

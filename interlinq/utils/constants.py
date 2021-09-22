@@ -4,6 +4,7 @@ class Constants:
         "PREPARE_QUBITS",
         "SINGLE",
         "TWO_QUBIT",
+        "THREE_QUBIT"
         "CLASSICAL_CTRL_GATE",
         "REC_ENT",
         "SEND_ENT",
@@ -17,6 +18,7 @@ class Constants:
     PREPARE_QUBITS = "PREPARE_QUBITS"
     SINGLE = "SINGLE"
     TWO_QUBIT = "TWO_QUBIT"
+    THREE_QUBIT = "THREE_QUBIT"
     CLASSICAL_CTRL_GATE = "CLASSICAL_CTRL_GATE"
 
     # Entanglement Operations

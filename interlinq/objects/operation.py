@@ -27,6 +27,7 @@ class Operation(object):
     CUSTOM = "custom_gate"
     CUSTOM_TWO_QUBIT = "custom_two_qubit_gate"
     CUSTOM_CONTROLLED = "custom_controlled_gate"
+    CUSTOM_TWO_QUBIT_CONTROLLED = "custom_two_controlled_gate"
     MEASURE = "measure"
 
     def __init__(

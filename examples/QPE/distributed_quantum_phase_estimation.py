@@ -57,7 +57,6 @@ def quantum_phase_estimation_circuit(q_map, client_input_gate):
 
     measure_qubits = []
     for q_id in q_map['QPU_1']:
-        print(q_id)
         q = Qubit(computing_host_id='QPU_1', q_id=q_id)
         q.measure()
         measure_qubits.append(q)

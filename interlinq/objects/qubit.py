@@ -130,7 +130,7 @@ class Qubit(object):
             gate (str): Name of the single qubit gate to be applied
             target_qubit (Qubit): The other qubit on which the qubit gate is
                applied on. In case on control gates, this is the target qubit
-            gate_param (iterable): Parameter for rotational gates
+            gate_param (iterable): Parameter for custom gates
         """
 
         computing_host_ids = [self.computing_host_id]
@@ -152,6 +152,41 @@ class Qubit(object):
             target_qubit.update_layer(self.current_layer + 1)
             self.update_layer(self.current_layer + 1)
 
+        self._update_operations(op)
+
+    def three_qubit(self, gate, target_qubit_1, target_qubit_2, gate_param=None):
+        """
+        Operation to apply a two qubit gate to the qubit
+
+        Args:
+            gate (str): Name of the single qubit gate to be applied
+            target_qubit_1 (Qubit): The other qubit on which the qubit gate is
+               applied on. In case on control gates, this is the target qubit
+            target_qubit_2 (Qubit): The other qubit on which the qubit gate is
+               applied on. In case on control gates, this is the target qubit
+            gate_param (iterable): Parameter for custom gates
+        """
+        computing_host_ids = [self.computing_host_id]
+        if target_qubit_1.computing_host_id != self.computing_host_id:
+            computing_host_ids.append(target_qubit_1.computing_host_id)
+
+        if target_qubit_2.computing_host_id != self.computing_host_id:
+            computing_host_ids.append(target_qubit_2.computing_host_id)
+
+        op = Operation(
+            name=Constants.THREE_QUBIT,
+            qids=[self.q_id, target_qubit_1.q_id, target_qubit_2.q_id],
+            gate=gate,
+            gate_param=gate_param,
+            computing_host_ids=computing_host_ids,
+        )
+        for target in [target_qubit_1, target_qubit_2]:
+            if target.current_layer + 1 > self.current_layer + 1:
+                target_qubit_1.update_layer(target.current_layer + 1)
+                self.update_layer(target.current_layer + 1)
+            else:
+                target.update_layer(self.current_layer + 1)
+                self.update_layer(self.current_layer + 1)
         self._update_operations(op)
 
     def classical_ctrl_gate(self, gate, bit_id, gate_param=None):
