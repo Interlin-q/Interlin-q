@@ -1,5 +1,7 @@
 import sys
 
+from qunetsim.backends import EQSNBackend
+
 sys.path.append("../")
 
 from qunetsim.components import Network
@@ -29,7 +31,7 @@ def inverse_quantum_fourier_transform(q_ids, computing_host_ids, layers):
 
         for j in range(i):
             control_qubit_id = q_ids[j]
-
+            print(control_qubit_id, target_qubit_id)
             op = Operation(
                 name=Constants.TWO_QUBIT,
                 qids=[control_qubit_id, target_qubit_id],
@@ -133,21 +135,18 @@ def controller_host_protocol(host, q_map, client_input_gate):
     host.receive_results()
 
     results = host.results
-    computing_host_ids = host.computing_host_ids
 
-    print('Final results: \n')
-
+    meas_results = results['QPU_0']['val']
+    output = [0] * 3
+    for qubit in meas_results.keys():
+        output[int(qubit[-1])] = meas_results[qubit]
     decimal_value = 0
-    for computing_host_id in computing_host_ids:
-        i = 0
-        bits = results[computing_host_id]['bits']
-        for bit_id, bit in bits.items():
-            print("{0}: {1}".format(bit_id, bit))
-            decimal_value += (2 ** i) * bit
-            i += 1
-        if bits:
-            phase = decimal_value / (2 ** len(bits.keys()))
-            print("\nThe estimated value of the phase is {0}".format(phase))
+    output.reverse()
+    for i, bit in enumerate(output):
+        decimal_value += ((2 ** i) * bit)
+
+    phase = decimal_value / 8
+    print("The estimated value of the phase is {0}".format(phase))
 
 
 def computing_host_protocol(host):
@@ -162,19 +161,17 @@ def computing_host_protocol(host):
 def main():
     # initialize network
     network = Network.get_instance()
-    network.delay = 0
+    network.delay = 0.1
     network.start()
-
-    clock = Clock()
 
     controller_host = ControllerHost(
         host_id="host_1",
-        clock=clock,
+        backend=EQSNBackend()
     )
 
     computing_hosts, q_map = controller_host.create_distributed_network(
         num_computing_hosts=2,
-        num_qubits_per_host=4)
+        num_qubits_per_host=3)
     controller_host.start()
 
     network.add_hosts([
@@ -184,18 +181,16 @@ def main():
 
     print('starting...')
     # For phase = 1/8
-    client_input_gate = np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]])
+    # client_input_gate = np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]])
     # For phase = 1/3
-    # client_input_gate = np.array([[1, 0], [0, np.exp(1j * 2 * np.pi / 3)]])
+    client_input_gate = np.array([[1, 0], [0, np.exp(1j * 2 * np.pi / 3)]])
 
     t1 = controller_host.run_protocol(
         controller_host_protocol,
         (q_map, client_input_gate))
-    t2 = computing_hosts[0].run_protocol(computing_host_protocol)
-    t3 = computing_hosts[1].run_protocol(computing_host_protocol)
+    computing_hosts[0].run_protocol(computing_host_protocol)
+    computing_hosts[1].run_protocol(computing_host_protocol, blocking=True)
 
-    t2.join()
-    t3.join()
     t1.join()
 
     network.stop(True)

@@ -356,6 +356,7 @@ class ComputingHost(Host):
 
         q_id = operation["qids"][0]
         qubit = self._get_stored_qubit(q_id)
+        assert qubit is not None
 
         if operation["gate"] == Operation.I:
             qubit.I()
@@ -404,6 +405,9 @@ class ComputingHost(Host):
         q_ids = operation["qids"]
         qubit_1 = self._get_stored_qubit(q_ids[0])
         qubit_2 = self._get_stored_qubit(q_ids[1])
+
+        assert qubit_1 is not None
+        assert qubit_2 is not None
 
         if operation["gate"] == Operation.CNOT:
             qubit_1.cnot(qubit_2)

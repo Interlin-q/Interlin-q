@@ -40,7 +40,7 @@ class Layer(object):
 
     @property
     def depth(self):
-        # todo
+        # todo: why does a layer have a depth?
         return 0
 
     def __len__(self):
