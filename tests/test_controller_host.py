@@ -196,7 +196,7 @@ class TestControllerHost(unittest.TestCase):
         layers = [layer_1, layer_2, layer_3]
         circuit = Circuit(q_map, layers)
 
-        distributed_circuit = self.controller_host._generate_distributed_circuit(circuit)
+        distributed_circuit = self.controller_host.generate_distributed_circuit(circuit)
 
         self.assertEqual(len(distributed_circuit.layers), 12)
 
@@ -282,7 +282,7 @@ class TestControllerHost(unittest.TestCase):
         layers = [layer_1, layer_2, layer_3, layer_4, layer_5]
         circuit = Circuit(q_map, layers)
 
-        distributed_circuit = self.controller_host._generate_distributed_circuit(circuit)
+        distributed_circuit = self.controller_host.generate_distributed_circuit(circuit)
 
         layers = distributed_circuit.layers
         self.assertEqual(len(layers), 23)
