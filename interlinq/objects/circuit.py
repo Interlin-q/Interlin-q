@@ -10,10 +10,10 @@ class Circuit(object):
     """
 
     def __init__(
-        self,
-        q_map: Dict[str, List[str]],
-        layers: Optional[List[Layer]] = None,
-        qubits: Optional[List[Qubit]] = None,
+            self,
+            q_map: Dict[str, List[str]],
+            layers: Optional[List[Layer]] = None,
+            qubits: Optional[List[Qubit]] = None,
     ):
         """
         Returns the important things for a quantum circuit
@@ -31,6 +31,7 @@ class Circuit(object):
         self._layers = layers if layers is not None else []
         self._qubits = qubits if qubits is not None else []
         self._width = 0
+        self._counts = None
 
         if not self._layers and self._qubits:
             self.create_layers(self._qubits)
@@ -65,6 +66,20 @@ class Circuit(object):
                 of gates to be applied on the qubits in the system
         """
         return self._layers
+
+    @property
+    def counts(self):
+        if self._counts is None:
+            counts = {}
+            for layer in self._layers:
+                for op in layer.operations:
+                    if op.name in counts:
+                        counts[op.name] += 1
+                    else:
+                        counts[op.name] = 1
+            self._counts = counts
+        self._counts['TOTAL'] = sum(self._counts.values())
+        return self._counts
 
     @property
     def qubits(self):
@@ -205,7 +220,7 @@ class Circuit(object):
                     operations = []
                     if layer_index != 0:
                         for index, gate in enumerate(
-                            control_gate_info[layer_index - 1]
+                                control_gate_info[layer_index - 1]
                         ):
                             if gate["computing_hosts"] == computing_hosts:
                                 if gate["control_qubit"] == control_qubit:

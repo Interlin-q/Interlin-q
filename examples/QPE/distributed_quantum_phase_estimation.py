@@ -19,36 +19,6 @@ def phase_gate(theta):
     return np.array([[1, 0], [0, np.exp(1j * theta)]])
 
 
-def inverse_quantum_fourier_transform(q_ids, computing_host_ids, layers):
-    """
-    Performs inverse quantum fourier transform
-    """
-
-    q_ids.reverse()
-
-    for i in range(len(q_ids)):
-        target_qubit_id = q_ids[i]
-
-        for j in range(i):
-            control_qubit_id = q_ids[j]
-
-            op = Operation(
-                name=Constants.TWO_QUBIT,
-                qids=[control_qubit_id, target_qubit_id],
-                gate=Operation.CUSTOM_CONTROLLED,
-                gate_param=phase_gate(-np.pi * (2 ** j) / (2 ** i)),
-                computing_host_ids=[computing_host_ids[0]])
-            layers.append(Layer([op]))
-
-        op = Operation(
-            name=Constants.SINGLE,
-            qids=[target_qubit_id],
-            gate=Operation.H,
-            computing_host_ids=[computing_host_ids[0]])
-        layers.append(Layer([op]))
-    return layers
-
-
 def quantum_phase_estimation_circuit(q_map, client_input_gate):
     """
     Returns the monolithic circuit for quantum phase estimation
@@ -79,7 +49,6 @@ def quantum_phase_estimation_circuit(q_map, client_input_gate):
         q.measure()
 
     circuit = Circuit(q_map, qubits=measure_qubits + [phase_qubit])
-
     return circuit
 
 
@@ -89,11 +58,12 @@ def controller_host_protocol(host, q_map, client_input_gate):
     """
 
     circuit = quantum_phase_estimation_circuit(q_map, client_input_gate)
-
-    print(circuit)
-
+    print(circuit.counts)
+    circuit = host.generate_distributed_circuit(circuit)
+    print(circuit.counts)
     host.generate_and_send_schedules(circuit)
     host.receive_results()
+
 
     results = host.results
     meas_results = results['QPU_1']['val']
@@ -139,7 +109,6 @@ def main():
     # client_input_gate = np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]])
     # For phase = 1/3
     client_input_gate = np.array([[1, 0], [0, np.exp(1j * 2 * np.pi / 3)]])
-
     t1 = controller_host.run_protocol(
         controller_host_protocol,
         (q_map, client_input_gate))

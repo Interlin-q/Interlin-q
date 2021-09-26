@@ -20,11 +20,11 @@ class ControllerHost(Host):
     """
 
     def __init__(
-        self,
-        host_id: str,
-        computing_host_ids: Optional[List[str]] = None,
-        gate_time: Optional[Dict[str, int]] = None,
-        backend: Optional = None,
+            self,
+            host_id: str,
+            computing_host_ids: Optional[List[str]] = None,
+            gate_time: Optional[Dict[str, int]] = None,
+            backend: Optional = None,
     ):
         """
         Returns the important things for the controller hosts
@@ -76,7 +76,7 @@ class ControllerHost(Host):
         return self._results
 
     def create_distributed_network(
-        self, num_computing_hosts: int, num_qubits_per_host: int
+            self, num_computing_hosts: int, num_qubits_per_host: int
     ) -> Tuple[List[ComputingHost], Dict[str, List[str]]]:
         """
         Create a network of *num_computing_hosts* completely connected computing nodes with
@@ -132,7 +132,7 @@ class ControllerHost(Host):
         self.connect_hosts([computing_host_id], [gate_time])
 
     def connect_hosts(
-        self, computing_host_ids: List[str], gate_times: List[Dict[str, int]] = None
+            self, computing_host_ids: List[str], gate_times: List[Dict[str, int]] = None
     ):
         """
         Adds multiple computing hosts to the distributed network
@@ -351,7 +351,7 @@ class ControllerHost(Host):
 
         return current_layer, distributed_layers
 
-    def _generate_distributed_circuit(self, circuit: Circuit) -> Circuit:
+    def generate_distributed_circuit(self, circuit: Circuit) -> Circuit:
         """
         Takes the user input monolithic circuit and converts it to a
         distributed circuit over the computing hosts connected to the
@@ -388,7 +388,7 @@ class ControllerHost(Host):
         return distributed_circuit
 
     def _get_operation_execution_time(
-        self, computing_host_id: str, op_name: str, gate: str
+            self, computing_host_id: str, op_name: str, gate: str
     ) -> float:
         """
         Return the execution time for an operation for a specific computing
@@ -428,14 +428,9 @@ class ControllerHost(Host):
                 regarding a quantum circuit
         """
 
-        distributed_circuit = self._generate_distributed_circuit(circuit)
-
-        (
-            computing_host_schedules,
-            max_execution_time,
-        ) = self._create_distributed_schedules(distributed_circuit)
+        distributed_circuit = self.generate_distributed_circuit(circuit)
+        computing_host_schedules, max_execution_time = self._create_distributed_schedules(distributed_circuit)
         self._circuit_max_execution_time = max_execution_time
-
         self.send_broadcast(json.dumps(computing_host_schedules, cls=NumpyEncoder))
 
         # Wait for the computing hosts to receive the broadcast
@@ -470,9 +465,9 @@ class ControllerHost(Host):
         self._results = results
 
     def schedule_expectation_terms(
-        self,
-        hamiltonian: List[Tuple[float, List[Tuple[str, int]]]],
-        q_map: Dict[str, List[str]],
+            self,
+            hamiltonian: List[Tuple[float, List[Tuple[str, int]]]],
+            q_map: Dict[str, List[str]],
     ):
         """
         Assign the terms of a Hamiltonian to the different computing hosts in the network
